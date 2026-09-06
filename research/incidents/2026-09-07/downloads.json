@@ -1,0 +1,54 @@
+[
+  {
+    "source_id": "HF-01",
+    "url": "https://cdn.openai.com/pdf/67869394-cb91-4c12-888c-5cbd85c7814c/OpenAI-Hugging-Face%20Incident-Technical-Report.pdf",
+    "filename": "openai-hugging-face-technical-report.pdf",
+    "final_url": "https://cdn.openai.com/pdf/67869394-cb91-4c12-888c-5cbd85c7814c/OpenAI-Hugging-Face%20Incident-Technical-Report.pdf",
+    "content_type": "application/pdf",
+    "accessed_at": "2026-09-06T20:47:42.826970+00:00",
+    "status": "downloaded",
+    "local_path": "originals/openai-hugging-face-technical-report.pdf",
+    "bytes": 521159,
+    "sha256": "dd635cf6e5f39f0e1f646f08c36549090d77156ed89cbd3d733ed496648cae9c",
+    "pages": 38
+  },
+  {
+    "source_id": "HF-04",
+    "url": "https://metr.org/hugging-face-incident-report-aug-2026.pdf",
+    "filename": "metr-redwood-hugging-face-investigation.pdf",
+    "final_url": "https://metr.org/hugging-face-incident-report-aug-2026.pdf",
+    "content_type": "application/pdf",
+    "accessed_at": "2026-09-06T20:47:50.916619+00:00",
+    "status": "downloaded",
+    "local_path": "originals/metr-redwood-hugging-face-investigation.pdf",
+    "bytes": 7443085,
+    "sha256": "5b7d44d07be033d1ec6eb2229b6d1c09f502d5d6b897925f148613ab94b24aba",
+    "pages": 91
+  },
+  {
+    "source_id": "AD-03",
+    "url": "https://cdn.prod.website-files.com/663bd486c5e4c81588db7a1d/6a724858f7db25c81487016d_Security%20Incident%20INC-2026-07-28-01.pdf",
+    "filename": "aisi-security-incident-2026-07-28.pdf",
+    "final_url": "https://cdn.prod.website-files.com/663bd486c5e4c81588db7a1d/6a724858f7db25c81487016d_Security%20Incident%20INC-2026-07-28-01.pdf",
+    "content_type": "application/pdf",
+    "accessed_at": "2026-09-06T20:47:51.703637+00:00",
+    "status": "downloaded",
+    "local_path": "originals/aisi-security-incident-2026-07-28.pdf",
+    "bytes": 1048375,
+    "sha256": "b64590f61dad20fb812ee08b360a57a0feeaebd4257cc98b0e4ca43ed70a28e9",
+    "pages": 35
+  },
+  {
+    "source_id": "CT-01",
+    "url": "https://www.alabamaag.gov/wp-content/uploads/2026/08/2026.8.21-Attorney-General-Marshall-Launches-Investigation-Into-OpenAI-and-Sam-Altman-for-Massive-Artificial-Intelligence-Data-Breach.pdf",
+    "filename": "alabama-ag-openai-investigation-announcement.pdf",
+    "final_url": "https://www.alabamaag.gov/wp-content/uploads/2026/08/2026.8.21-Attorney-General-Marshall-Launches-Investigation-Into-OpenAI-and-Sam-Altman-for-Massive-Artificial-Intelligence-Data-Breach.pdf",
+    "content_type": "application/pdf",
+    "accessed_at": "2026-09-06T20:47:53.572861+00:00",
+    "status": "downloaded",
+    "local_path": "originals/alabama-ag-openai-investigation-announcement.pdf",
+    "bytes": 300796,
+    "sha256": "16d64b0d179cb579cd940165421001bc574576d0240a8e1624abf17ae034f2c7",
+    "pages": 1
+  }
+]
