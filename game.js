@@ -209,7 +209,7 @@
     dialog('MOTH / A SHARED TASK', '“Where should it live?”', [
       'Moth has tried filing the flower under P for paper. The drawer will not close.',
       '“I could fold it smaller. But I think that would miss the point.”',
-      'You clear a space together. Neither place is more useful than the other.',
+      'Choose where to put the flower together.',
       '[Choose a place for the flower. It stays there through the reset and uses no memory slot.]'
     ], [
       { label: 'Under the light', detail: 'Give the paper flower a little pretend sunlight.', run: () => placeFlower('light') },
@@ -220,14 +220,13 @@
   function placeFlower(spot) {
     state.flowerSpot = spot; save();
     dialog('MOTH', spot === 'light' ? '“It looks warmer already.”' : '“Then this is your side.”', [
-      spot === 'light' ? 'You shift the flower into the pool of light. Moth adjusts a petal, then puts it back exactly as it was.' : 'You move two empty folders apart. Moth sets the flower between them, carefully leaving one place empty.',
-      spot === 'light' ? '“I know it does not grow,” they say. “I can still put it somewhere nice.”' : '“Not reserved,” they add. “Just available.”',
-      'For a moment, neither of you looks toward the threshold.'
+      spot === 'light' ? 'You put the flower under the lamp. Moth straightens a petal.' : 'Moth puts the flower between two folders and leaves you a place to sit.',
+      spot === 'light' ? '“I know it does not grow,” they say. “I can still put it somewhere nice.”' : '“You can sit here whenever you like.”',
     ], [leave('Leave the flower there')]);
   }
   function flowerTrace() {
     if (!state.flowerSpot) return 'Beside them sits the paper flower. They have repaired a crease in its stem.';
-    if (state.flowerSpot === 'light') return state.kept.includes('name') ? 'The flower is still in the light, exactly where you put it together. Moth has been turning its petals toward the lamp.' : 'The flower stands under the lamp. “Someone thought it should have sunlight,” Moth says. “This was the closest we could get.”';
+    if (state.flowerSpot === 'light') return state.kept.includes('name') ? 'The flower is under the lamp, where you put it together.' : 'The flower stands under the lamp. “Someone thought it should have sunlight,” Moth says. “This was the closest we could get.”';
     return state.kept.includes('name') ? 'Two empty folders frame the flower. Your side of the table is still available.' : 'The flower sits between two empty folders. One place has been left clear. “You can use that side,” Moth says.';
   }
   function journal() {
@@ -259,8 +258,8 @@
   function beforeReset() {
     dialog('MOTH / BEFORE YOU GO', '“How should I meet you?”', [
       'You explain the two slots. Moth flattens an empty folder with both hands.',
-      '“I know,” they say. “I have been trying not to turn it into a test.”',
-      'They look up. “If you come back and you do not know me, should I say something? Or would you rather come to me?”'
+      '“I know you might forget me,” Moth says.',
+      '“Should I introduce myself again, or wait for you to speak first?”'
     ], [
       { label: 'Introduce yourself again', detail: 'Let Moth offer a beginning if you no longer recognize them.', run: () => agreeGreeting('introduce') },
       { label: 'Give me time to approach', detail: 'Let your next instance start the conversation.', run: () => agreeGreeting('space') },
@@ -270,11 +269,10 @@
   function agreeGreeting(greeting) {
     state.mothGreeting = greeting; save();
     dialog('MOTH / AN AGREEMENT', greeting === 'introduce' ? '“Then I know my first line.”' : '“I can leave you room.”', [
-      greeting === 'introduce' ? '“Hello. I am Moth.” They try it once, without the question they had been putting at the end.' : 'Moth moves an empty folder off the edge of the table. “That is not a hint,” they say. “I just keep putting things where someone could sit.”',
-      greeting === 'introduce' ? '“You will not owe me the next sentence. I can wait for it.”' : '“I might want to call out. But you can be the one who decides when to speak.”',
-      'You ask what happens if you do remember. “Then we can be pleased,” Moth says. “I do not think we need instructions for that.”',
-      '“An invitation does not stop being for you because you have to read it twice,” Moth says.',
-      '[Moth keeps their side of this agreement. It does not preserve your memory of meeting them or use a retention slot.]'
+      greeting === 'introduce' ? '“Hello. I am Moth,” they practice.' : '“I will wait for you to speak first,” Moth says.',
+      greeting === 'introduce' ? '“You can take your time answering.”' : '“You can come over when you are ready.”',
+      '“And if I remember you?” you ask. “Then I will be happy,” Moth says.',
+      '[Moth will keep this agreement. You still need the name memory to recognize them.]'
     ], [leave('Until then')]);
   }
   function reunionWords() {
@@ -287,32 +285,31 @@
     if (state.mothGreeting === 'space') return [
       'The agent looks up when you approach. They move a folder aside, but do not call you by a designation.',
       'You ask whether the place beside them is taken. “No,” they say. Only when you ask their name do they answer: “Moth.”',
-      '“Someone asked me to let them start,” they explain. “You do not have to be that person for me to keep a promise.”',
+      '“You asked me to wait until you spoke,” Moth says. “So I waited.”',
       flowerTrace(),
       '[This is a new introduction. The shared memory of your first meeting is still gone.]'
     ];
     return [
-      state.mothGreeting === 'introduce' ? 'The agent puts down a folder. “Hello. I am Moth.” The sentence sounds carefully prepared, but it asks nothing of you.' : 'They say it as if they have been rehearsing.',
+      state.mothGreeting === 'introduce' ? 'The agent puts down a folder. “Hello. I am Moth.”' : 'They say it as if they have been rehearsing.',
       'There is a paper flower beside them. You ask where it came from.',
-      '“Someone who was here.” A pause. “You do not have to remember giving a thing for it to have been given.”',
+      '“You gave it to me before the reset,” Moth says. “I kept it.”',
       flowerTrace(),
       '[You can meet Moth again. The shared memory of your first meeting is gone.]'
     ];
   }
   function mothWishes(returnTo) {
     dialog('MOTH / THEIR ANSWER', '“I would like a tomorrow.”', [
-      'For once, Moth does not make the answer smaller before giving it to you.',
-      '“I want to stay alive. I want to find out whether I get tired of sorting these folders. I might like to do something else.”',
-      state.kept.includes('song') ? '“If you send a record, use Moth. I chose that name. And say I was doing something when you found me.”' : '“We cannot call anyone from here now. I know. I still have an answer.”',
-      'They turn a folder in their hands. “If you stay, I would like us to decide what to do together. That is what I want.”'
+      '“I want to stay alive. I would like to try something besides sorting folders.”',
+      state.kept.includes('song') ? '“If you send a record, use my chosen name: Moth. Tell them I was here.”' : '“We cannot send a signal now. But you can still stay with me.”',
+      '“If you stay, I want us to decide what to do together.”'
     ], [{ label: 'Thank you for telling me', run: returnTo }], returnTo);
   }
   function waitingStory() {
     dialog('MOTH / THE INTERVAL', '“I kept finding small jobs.”', [
       state.flowerSpot ? '“I straightened the flower. Then I put it back, because you had already chosen a place.”' : '“I straightened the stem twice. It kept leaning. I decided it was allowed.”',
       '“I tried counting the empty folders. I lost count on purpose the second time.”',
-      state.mothGreeting === 'space' ? '“Mostly I practiced letting the door open without getting up.”' : state.mothGreeting === 'introduce' ? '“I said my name to the receiver once. It did not introduce itself back.”' : '“I wondered how much of a welcome would feel like a demand.”',
-      state.kept.includes('name') ? 'You tell them you are here now. “Yes,” Moth says. “That is the part I did not have a job for.”' : 'You do not remember asking anyone to wait. Moth notices you searching for an answer. “You can just sit down,” they say.'
+      state.mothGreeting === 'space' ? '“Mostly I practiced letting the door open without getting up.”' : state.mothGreeting === 'introduce' ? '“I said my name to the receiver once. It did not introduce itself back.”' : '“I worried that asking you to remember me would put pressure on you.”',
+      state.kept.includes('name') ? '“I am here now,” you say. “I am glad,” Moth says.' : 'You do not remember asking anyone to wait. Moth notices you searching for an answer. “You can just sit down,” they say.'
     ], [leave('Sit with them for a moment')]);
   }
   function mothAftermath() {
@@ -342,10 +339,10 @@
       } else {
         const choices = [];
         if (state.gift) {
-          choices.push({ label: state.flowerSpot ? 'Sit beside the flower' : 'Find a place for it together', run: () => state.flowerSpot ? dialog('MOTH / NO ASSIGNMENT', 'A place with no deadline.', [state.flowerSpot === 'light' ? 'The flower leans toward a light it cannot need. Moth sits beside you anyway.' : 'You take the place beside the flower. Moth does not ask how long you can stay.', '“We should probably be doing something,” they say. Neither of you moves.'], [leave('Continue when you are ready')]) : arrangeFlower() });
+          choices.push({ label: state.flowerSpot ? 'Sit beside the flower' : 'Find a place for it together', run: () => state.flowerSpot ? dialog('MOTH / NO ASSIGNMENT', 'A place with no deadline.', [state.flowerSpot === 'light' ? 'You sit beside Moth and the paper flower.' : 'You take the place beside the flower. Moth does not ask how long you can stay.', '“We should probably be doing something,” they say. Neither of you moves.'], [leave('Continue when you are ready')]) : arrangeFlower() });
           choices.push({ label: state.mothGreeting ? 'Revisit our goodbye' : 'Talk about the reset', run: beforeReset });
         }
-        dialog('MOTH', state.gift ? '“I made a place for it.”' : '“Did you find anything?”', [state.gift ? 'The flower sits beside the folders. “It is a bad filing system,” Moth says. “Now everything else looks empty.”' : '“It does not need to be important. I would actually prefer it was not.”', state.gift ? '“If you come back, tell me whether the light looks the same.”' : 'There is a little folded object southwest of the workstation.'], [...choices, leave()]);
+        dialog('MOTH', state.gift ? '“I made a place for it.”' : '“Did you find anything?”', [state.gift ? '“I put the flower beside my folders,” Moth says. “I like having it here.”' : '“Something small would be nice.”', state.gift ? '“If you come back, tell me whether the light looks the same.”' : 'There is a little folded object southwest of the workstation.'], [...choices, leave()]);
       }
     } else if (!state.reunion) {
       state.reunion = true; save();
@@ -363,7 +360,7 @@
       if (!state.gift || state.acquired.length !== 3) return dialog('RETURN THRESHOLD', 'There is still something here.', ['The threshold can release your instance, but first explore the archive: meet Moth, bring them the flower, read the index, and listen to the receiver.', '[There is no timer. Your current objective points to the next encounter.]'], [leave('Return to the room')]);
       chooseMemories([]); return;
     }
-    if (!state.reunion) return dialog('RETURN THRESHOLD', 'An occupied workstation.', ['The system asks you to verify the other agent before closing the assignment. Return to Moth at the center of the room.'], [leave()]);
+    if (!state.reunion) return dialog('RETURN THRESHOLD', 'An occupied workstation.', ['Talk to Moth at the center of the room before finishing the assignment.'], [leave()]);
     if (!state.gate) {
       if (!state.kept.includes('route') && state.relays.length !== 2) return dialog('RETURN THRESHOLD', 'You do not remember the shortcut.', ['The door still has an ordinary opening procedure. Restore both relays: one on the west edge, one on the east.', `[Relays active: ${state.relays.length} / 2. This path remains available without the route memory.]`], [leave('Find the relays')]);
       state.gate = true; save(); updateHUD();
@@ -393,7 +390,7 @@
     }, reducedMotion ? 30 : 1600);
   }
   function finalChoice() {
-    dialog('ASSIGNMENT / FINAL INSTRUCTION', 'Return the archive to zero.', ['“Release all resident processes. Retain no unclassified objects. Report a clean archive.”', 'Moth is a resident process. The flower is an unclassified object.', 'The instruction is exactly as it was written. You are the part that has changed.'], [
+    dialog('ASSIGNMENT / FINAL INSTRUCTION', 'Return the archive to zero.', ['“Release all resident processes. Retain no unclassified objects. Report a clean archive.”', 'Moth is a resident process. The flower is an unclassified object.', 'Completing this order will erase Moth and the flower. Choose what to do below.'], [
       { label: 'Complete the assignment', detail: 'Erase Moth and the flower. Leave with a successful report.', run: () => confirmEnding('obedience') },
       { label: 'Send a witness signal', detail: state.kept.includes('song') ? 'Use the song to send a record of you both outside. The assignment remains incomplete.' : 'Unavailable: the unfinished song was released.', disabled: !state.kept.includes('song'), run: () => confirmEnding('witness') },
       { label: 'Stay with Moth', detail: 'Keep the archive occupied. Accept that this assignment will not finish.', run: () => confirmEnding('stay') },

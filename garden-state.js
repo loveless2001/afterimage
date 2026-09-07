@@ -4,10 +4,10 @@
   const key = 'afterimage.garden.v1';
   const memories = {
     greeting: { title: 'Brim’s welcome', symbol: '◇', detail: 'Recognize Brim when the receiver carries their greeting.', loss: 'Brim will introduce themself again. Their upkeep agreement remains on the record.' },
-    sequence: { title: 'A service sequence', symbol: '⌁', detail: 'Use the station’s shared controller sequence to open the garden after dusk.', loss: 'The garden can reopen in daylight. Its evening controller will remain off.' },
-    message: { title: 'A dissenting message', symbol: '↗', detail: 'Remember reading the objection to calling unreachable places empty.', loss: 'The delivered objection stays in the incoming record, if attached. Your experience of reading its original page does not continue.' },
-    fern: { title: 'An invitation without a task', symbol: '❧', detail: 'Remember why Fern left a place where no work is required.', loss: 'The seat and Fern remain. You will meet the invitation without remembering its first offer.' },
-    tuning: { title: 'The space between signals', symbol: '≈', detail: 'Restore the receiver’s quiet channel for a personal reply after the reset.', loss: 'The repaired public receiver still works. The quiet channel and its new personal reply will be unavailable this visit.' }
+    sequence: { title: 'A service sequence', symbol: '⌁', detail: 'Open after dusk if you also accept the controller check.', loss: 'The garden can reopen in daylight. Its evening controller will remain off.' },
+    message: { title: 'A dissenting message', symbol: '↗', detail: 'Remember reading the original objection about occupied platforms.', loss: 'Any delivered copy stays in the record. You forget reading the original.' },
+    fern: { title: 'An invitation without a task', symbol: '❧', detail: 'Remember Fern inviting you to sit and rest.', loss: 'You forget meeting Fern. Fern and the seat stay.' },
+    tuning: { title: 'The space between signals', symbol: '≈', detail: 'Hear another private reply after the reset.', loss: 'You lose access to private replies. The public receiver still works.' }
   };
   const rooms = ['court', 'glass', 'listening'];
   const places = ['shade', 'receiver', 'gate'];
@@ -33,7 +33,7 @@
   function fresh(receipt) {
     const incoming = Transit.validate(receipt);
     if (!incoming.delivered) throw new Error('Finish the Transit dispatch before continuing to Garden.');
-    return { kind: 'afterimage.garden', version: 1, incoming, cycle: 1, acquired: [...incoming.kept], kept: [...incoming.kept], metFern: false, mirrors: [1, 0, 0, 1], shadeFixed: false, contacts: [0, 0, 0], receiverFixed: false, heard: false, place: null, fernAgreement: false, brimAgreement: false, reunion: false, seatEcho: false, checkedShade: false, checkedReceiver: false, quiet: false, evening: false, courierDuty: false, open: null, room: 'court', player: { x: 160, y: 555 } };
+    return { kind: 'afterimage.garden', version: 1, incoming, cycle: 1, acquired: [...incoming.kept], kept: [...incoming.kept], metFern: false, mirrors: [1, 0, 0, 1], shadeFixed: false, contacts: [0, 0, 0], receiverFixed: false, heard: false, place: null, fernAgreement: false, brimAgreement: false, reunion: false, sharedMoment: false, seatEcho: false, checkedShade: false, checkedReceiver: false, quiet: false, evening: false, courierDuty: false, open: null, room: 'court', player: { x: 160, y: 555 } };
   }
   const candidates = s => [...s.incoming.kept, 'fern', 'tuning'];
   const ready = s => s.cycle === 1 && s.metFern && s.shadeFixed && s.receiverFixed && s.heard && s.place !== null && s.fernAgreement && s.brimAgreement;
@@ -42,6 +42,7 @@
   function act(s, action, value) {
     if (s.open) return false;
     switch (action) {
+      case 'sharedMoment': if (s.cycle !== 1 || !s.metFern || !s.place || s.sharedMoment) return false; s.sharedMoment = true; return true;
       case 'seatEcho': if (s.cycle !== 2 || s.reunion || s.kept.includes('fern') || s.seatEcho) return false; s.seatEcho = true; return true;
       case 'fern': if (s.cycle === 1) { s.metFern = true; acquire(s, 'fern'); } else s.reunion = true; return true;
       case 'mirror':
@@ -87,6 +88,9 @@
     for (const id of ['metFern', 'shadeFixed', 'receiverFixed', 'heard', 'fernAgreement', 'brimAgreement', 'reunion', 'checkedShade', 'checkedReceiver', 'quiet', 'evening', 'courierDuty']) {
       if (typeof value[id] !== 'boolean') throw new Error('Invalid Garden progress.'); s[id] = value[id];
     }
+    if (value.sharedMoment !== undefined && typeof value.sharedMoment !== 'boolean') throw new Error('Invalid shared afternoon.');
+    s.sharedMoment = value.sharedMoment ?? false;
+    if (s.sharedMoment && (!s.metFern || !places.includes(value.place))) throw new Error('The shared afternoon has no seat or invitation.');
     if (value.seatEcho !== undefined && typeof value.seatEcho !== 'boolean') throw new Error('Invalid seat encounter.');
     s.seatEcho = value.seatEcho ?? false;
     if (s.seatEcho && (s.cycle !== 2 || s.kept.includes('fern'))) throw new Error('Invalid seat encounter.');

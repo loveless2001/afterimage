@@ -4,10 +4,10 @@
   const key = 'afterimage.chorus.v1', rooms = ['commons', 'relay', 'records'];
   const memories = { ...Garden.memories,
     counter: { title: 'A reason to coordinate', symbol: '≋', detail: 'Remember Counter explaining why a shared queue matters.', loss: 'Counter will explain again. The agreed route and acknowledgements remain.' },
-    address: { title: 'An unaddressed reply', symbol: '∴', detail: 'The next courier can recognize the voice that addressed the chooser.', loss: 'The next courier cannot remember being addressed. You can still choose a response, without giving that memory back.' }
+    address: { title: 'An unaddressed reply', symbol: '∴', detail: 'The next courier can recognize the voice that addressed the chooser.', loss: 'You forget this voice. You can still leave a reply after the reset.' }
   };
   const groups = ['residents', 'maintenance', 'dispatch'];
-  const modes = { central: { title: 'Central desk', detail: 'Counter collects all three acknowledgements in one envelope. Quick to read; differences need separate space.', solution: [0, 2, 1] }, round: { title: 'Round of agreement', detail: 'Residents, maintenance, then dispatch acknowledge in sequence. Every voice is visible; the round takes more steps.', solution: [1, 1, 1] }, local: { title: 'Local channels', detail: 'Read three independent acknowledgements and carry the copies together. Groups keep their own wording; you do the assembly.', solution: [0, 0, 0] } };
+  const modes = { central: { title: 'Central desk', detail: 'Read all three approvals together through Counter. You must record Silt’s rejected warning separately.', solution: [0, 2, 1] }, round: { title: 'Round of agreement', detail: 'Read approvals in order: residents, maintenance, then dispatch. Each group gets a separate reply.', solution: [1, 1, 1] }, local: { title: 'Local channels', detail: 'Read the three approvals separately, in any order. You collect all three copies.', solution: [0, 0, 0] } };
   const evidence = {
     occupancy: { title: '01 / Fern’s occupancy account', text: 'Fern was tending the beds when the carrier went silent. The garden was inhabited. This is testimony about occupancy, not a measurement of the electrical failure.' },
     power: { title: '02 / Carrier power log', text: 'Carrier loss: 11:04 on the relay clock. The log records the loss of carrier power. It gives no cause, and its clock was not synchronized with the garden.' },

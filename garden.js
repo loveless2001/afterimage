@@ -61,7 +61,7 @@
       if (!s.brimAgreement) return ['Ask who will read the log.', 'Call Brim from the listening house. Record only the job they offer.'];
       return ['Choose what continues.', 'The courtyard handoff is ready. Four candidates; two places to retain them.'];
     }
-    if (!s.reunion) return ['Return to Fern.', 'The repaired shade and placed seat remain. What do you recognize?'];
+    if (!s.reunion) return ['Look around the court.', 'The seat and Fern are still here. Visit either first; speak with Fern before opening the court.'];
     if (!s.checkedShade) return ['Check the glasshouse.', 'The shade controls also govern an optional evening opening.'];
     if (!s.checkedReceiver) return ['Check the receiver.', 'The public circuit stayed repaired. Your memories determine the quiet channel.'];
     return ['Open one place honestly.', 'Review the reopening ledger in the courtyard. Decide its hours and name the limits.'];
@@ -105,7 +105,7 @@
     if (s.shadeFixed) return ui.show(Story.shade(s), [
       ...(s.cycle === 2 && s.kept.includes('sequence') && !s.open ? [{ label: s.evening ? 'Withdraw the evening commitment' : 'Plan an evening opening', detail: s.evening ? 'Switch the controller off and return to a daylight-only plan.' : 'Review the courier’s own dusk inspection before accepting it.', run: () => eveningPlan() }] : []), leave()]);
     const lightScene = Story.shade(s);
-    ui.show({ ...lightScene, paragraphs: [lightScene.paragraphs[0], '[There is no timer. Assisted alignment produces the same physical repair.]'] }, [{ label: 'Latch the shade', primary: true, disabled: !G.lightPath(s).connected, run: () => { if (apply('latchShade')) shade(); } }, { label: 'Align the reflectors for me', run: () => { apply('alignLight'); refresh(); } }, leave('Leave the work for now')]);
+    ui.show({ ...lightScene, paragraphs: [lightScene.paragraphs[0], '[No timer. Use Align the reflectors for me if you want help.]'] }, [{ label: 'Latch the shade', primary: true, disabled: !G.lightPath(s).connected, run: () => { if (apply('latchShade')) shade(); } }, { label: 'Align the reflectors for me', run: () => { apply('alignLight'); refresh(); } }, leave('Leave the work for now')]);
     const latch = $('choices').firstElementChild, board = document.createElement('div'); board.className = 'garden-workbench';
     const svg = svgNode('svg', { viewBox: '0 0 360 280', role: 'img', 'aria-label': 'Light path through four reflectors to the diffuser. The buttons below turn the reflectors.' }); board.append(svg);
     const controls = document.createElement('div'); controls.className = 'light-controls'; board.append(controls);
@@ -125,15 +125,15 @@
     refresh(); buttons[0].focus();
   }
   function eveningPlan() {
-    if (s.evening) return say('garden.withdraw-evening', 'EVENING PLAN', 'Return to daylight hours?', ['The evening controller will switch off. You will no longer be recorded for the dusk inspection. Fern and Brim keep only their agreed morning tasks.'], [{ label: 'Use daylight only', primary: true, run: () => { if (apply('evening', false)) { ui.close(); ui.toast('Daylight plan. No evening duty assigned.'); } } }, leave('Keep the current plan')]);
-    say('garden.accept-evening', 'EVENING PLAN / YOUR COMMITMENT', 'Who will check the controller?', ['The retained service sequence can enable the evening lights. The courier must check the controller at dusk before that session of use.', 'You are accepting this job for yourself. Fern keeps the morning shade inspection; Brim keeps the morning public-log check. Neither has agreed to work overnight.', 'You can still choose daylight-only hours at the final opening review, which withdraws this evening commitment.'], [{ label: 'Accept the evening check', primary: true, run: () => { if (apply('evening', true)) { ui.close(); ui.toast('The evening controller is enabled. Its dusk check is your accepted job.'); } } }, leave('Leave the evening controller off')]);
+    if (s.evening) return say('garden.withdraw-evening', 'EVENING PLAN', 'Return to daylight hours?', ['Turn off the evening controller and cancel your dusk check. Fern and Brim keep their morning jobs.'], [{ label: 'Use daylight only', primary: true, run: () => { if (apply('evening', false)) { ui.close(); ui.toast('Daylight plan. No evening duty assigned.'); } } }, leave('Keep the current plan')]);
+    say('garden.accept-evening', 'EVENING PLAN / YOUR COMMITMENT', 'Who will check the controller?', ['To open after dusk, agree to check the evening controller before each use.', 'This is your job. Fern and Brim only cover their morning checks.', 'You can cancel this job by choosing daylight-only hours before opening.'], [{ label: 'Accept the evening check', primary: true, run: () => { if (apply('evening', true)) { ui.close(); ui.toast('The evening controller is enabled. Its dusk check is your accepted job.'); } } }, leave('Leave the evening controller off')]);
   }
   function receiver() {
     if (s.cycle === 2) apply('receiver');
     if (s.receiverFixed) return ui.show(Story.receiver(s), [
       ...(s.cycle === 1 ? [{ label: s.heard ? 'Listen to the quiet interval again' : 'Listen between the notices', primary: true, run: () => { apply('listen'); ui.show(Story.listening(s), [leave()]); } }] : s.kept.includes('tuning') && (s.quiet || !s.open) ? [{ label: s.quiet ? 'Listen to the personal reply again' : 'Restore the quiet channel', primary: true, run: () => { if (!s.quiet && !apply('quiet')) return; ui.show(Story.quiet(s), [leave()]); } }] : []), leave()]);
     const receiverScene = Story.receiver(s);
-    ui.show({ ...receiverScene, paragraphs: [receiverScene.paragraphs[0], '[All clues are written. Assisted alignment produces the same repaired circuit.]'] }, [{ label: 'Connect the receiver', primary: true, disabled: !G.receiverCircuit(s).connected, run: () => { if (apply('connect')) receiver(); } }, { label: 'Align the contacts for me', run: () => { apply('alignReceiver'); refresh(); } }, leave('Leave the repair for now')]);
+    ui.show({ ...receiverScene, paragraphs: [receiverScene.paragraphs[0], '[Use Align the contacts for me if you want help.]'] }, [{ label: 'Connect the receiver', primary: true, disabled: !G.receiverCircuit(s).connected, run: () => { if (apply('connect')) receiver(); } }, { label: 'Align the contacts for me', run: () => { apply('alignReceiver'); refresh(); } }, leave('Leave the repair for now')]);
     const connect = $('choices').firstElementChild, board = document.createElement('div'); board.className = 'garden-workbench';
     const rowNames = ['top', 'middle', 'bottom'], controls = document.createElement('div'); controls.className = 'garden-receiver-controls'; board.append(controls);
     const svg = svgNode('svg', { viewBox: '0 0 400 170', role: 'img', 'aria-label': 'Three-contact receiver circuit. Follow the lit route from IN to OUT.' }); board.prepend(svg);
@@ -151,31 +151,34 @@
     refresh(); buttons[0].focus();
   }
   function fern() {
-    const first = !s.metFern; apply('fern'); ui.show(Story.fern(s, first), [...(s.cycle === 1 && s.shadeFixed && !s.open ? [{ label: s.fernAgreement ? 'Review Fern’s morning agreement' : 'Ask about the morning shade check', run: fernAgreement }] : []), leave()]);
+    const first = !s.metFern; apply('fern'); ui.show(Story.fern(s, first), [...(s.cycle === 1 && s.place ? [{ label: 'Sit with Fern for a while', run: sit }] : []), ...(s.cycle === 1 && s.shadeFixed && !s.open ? [{ label: s.fernAgreement ? 'Review Fern’s morning agreement' : 'Ask about the morning shade check', run: fernAgreement }] : []), leave()]);
   }
   function fernAgreement() { ui.show(Story.fernAgreement(s), [...(!s.fernAgreement ? [{ label: 'Record Fern’s offered job', primary: true, run: () => { apply('fernAgreement'); fernAgreement(); } }] : []), leave()]); }
   function brim() {
     if (!s.receiverFixed) return say('garden.brim-offline', 'PUBLIC RECEIVER', 'The call needs power.', ['Restore the receiver at its workbench first. Brim has not yet been asked to take a Garden job.'], [leave()]);
     ui.show(Story.brim(s), [...(s.cycle === 1 && !s.brimAgreement ? [{ label: 'Record Brim’s offered job', primary: true, run: () => { apply('brimAgreement'); brim(); } }] : []), leave()]);
   }
+  function sit() {
+    ui.show(Story.sitting(s), [...(s.cycle === 1 && !s.sharedMoment ? [{ label: 'Ask what this place is for', run: () => { apply('sharedMoment'); ui.show(Story.sharedMoment(s), [leave('Get up when you are ready')]); } }] : []), leave('Get up when you are ready')]);
+  }
   function arrangePlace() {
-    if (apply('seatEcho')) return ui.show(Story.seatEcho(s), [leave('Sit for a moment')]);
-    if (s.cycle === 2 || s.open) return ui.show(Story.place(s), [leave('Leave the seat where it was placed')]);
+    if (apply('seatEcho')) return ui.show(Story.seatEcho(s), [{ label: 'Sit for a moment', run: sit }, leave('Step away')]);
+    if (s.cycle === 2 || s.open) return ui.show(Story.place(s), [{ label: 'Sit for a moment', run: sit }, leave('Leave the seat where it was placed')]);
     if (!s.metFern) return say('garden.place-unasked', 'COURTYARD', 'Ask whose place this is.', ['Fern is nearby. Speak with them before arranging the open seat.'], [leave()]);
-    ui.show(Story.place(s), [...Object.entries(Story.placeNames).map(([id, name]) => ({ label: 'Place it ' + name, selected: s.place === id, run: () => say('garden.confirm-place', 'PLACE / CONFIRM ARRANGEMENT', 'Leave the seat here?', ['The seat will stand ' + name + '. This arrangement will remain through the courier reset.', 'It assigns nobody a duty and promises no particular visitor.'], [{ label: 'Place the seat here', primary: true, run: () => { if (apply('place', id)) { ui.close(); ui.resetMovement(); ui.toast('The seat now stands ' + name + '.'); } } }, { label: 'Reconsider', run: arrangePlace }], arrangePlace) })), leave('Leave it for now')]);
+    ui.show(Story.place(s), [...(s.place ? [{ label: 'Sit with Fern for a while', run: sit }] : []), ...Object.entries(Story.placeNames).map(([id, name]) => ({ label: 'Place it ' + name, selected: s.place === id, run: () => say('garden.confirm-place', 'PLACE / CONFIRM ARRANGEMENT', 'Leave the seat here?', ['The seat will stand ' + name + '. This arrangement will remain through the courier reset.', 'Nobody is assigned a job by this choice.'], [{ label: 'Place the seat here', primary: true, run: () => { if (apply('place', id)) { ui.resetMovement(); ui.show(Story.place(s), [{ label: 'Sit with Fern for a while', run: sit }, leave('Step away')]); } } }, { label: 'Reconsider', run: arrangePlace }], arrangePlace) })), leave('Leave it for now')]);
   }
   function chooseMemories(selected = []) {
-    if (!G.ready(s)) return say('garden.handoff-unready', 'COURIER HANDOFF', 'Leave the work ready for someone.', ['Meet Fern, latch the shade, arrange the seat, repair and listen to the receiver, and record Fern’s and Brim’s offered morning jobs. The Field journal points to the next step.'], [leave()]);
+    if (!G.ready(s)) return say('garden.handoff-unready', 'COURIER HANDOFF', 'Leave the work ready for someone.', ['Finish the repairs, place the seat, listen to the receiver, and record both morning jobs. Open the Field journal for your next step.'], [leave()]);
     ui.show(Story.handoff(s), [...G.candidates(s).map(id => ({ label: G.memories[id].title, detail: G.memories[id].detail, toggle: true, selected: selected.includes(id), run: () => chooseMemories(selected.includes(id) ? selected.filter(k => k !== id) : selected.length < 2 ? [...selected, id] : [selected[1], id]) })), { label: selected.length === 2 ? 'Review the two released memories' : 'Choose two memories', primary: true, disabled: selected.length !== 2, run: () => {
       const lost = G.candidates(s).filter(id => !selected.includes(id));
-      say('garden.confirm-reset', 'CONFIRM COURIER HANDOFF', 'These two experiences will not continue.', [...lost.map(id => G.memories[id].title + ': ' + G.memories[id].loss), 'The repairs, seat position, incoming dispatch, and other people’s agreements remain. Courier 024 has not yet accepted any evening duty.'], [{ label: 'Release Courier 023', primary: true, run: () => { const next = G.reset(s, selected); ui.transition(() => { s = next; save(); updateHUD(); ui.toast('Courier 024. The work is still here.'); }); } }, { label: 'Reconsider', run: () => chooseMemories(selected) }], () => chooseMemories(selected));
+      say('garden.confirm-reset', 'CONFIRM COURIER HANDOFF', 'These two experiences will not continue.', [...lost.map(id => G.memories[id].title + ': ' + G.memories[id].loss), 'The repairs, seat, Transit record, and morning jobs stay. Courier 024 can decide about evening work after the reset.'], [{ label: 'Release Courier 023', primary: true, run: () => { const next = G.reset(s, selected); ui.transition(() => { s = next; save(); updateHUD(); ui.toast('Courier 024. The work is still here.'); }); } }, { label: 'Reconsider', run: () => chooseMemories(selected) }], () => chooseMemories(selected));
     } }, leave('Not yet')]);
   }
   function openingLedger() {
     if (s.open) return receipt();
     if (s.cycle === 1) return ui.show(Story.order(s), [{ label: 'Prepare the courier handoff', run: () => chooseMemories() }, leave()]);
-    if (!G.returnReady(s)) return say('garden.open-unready', 'REOPENING LEDGER', 'Check the place before certifying it.', ['Revisit Fern, inspect the latched shade in the glasshouse, and check the receiver in the listening house. No one has approved an opening yet.'], [leave()]);
-    say('garden.open-plan', 'REOPENING LEDGER / CHOOSE HOURS', 'How much can this opening promise?', ['Only the garden court and its public access path are covered. Other buildings and the far Transit platform are outside this opening.', 'Fern has accepted the morning shade inspection. Brim has accepted a morning public-log check.'], [
+    if (!G.returnReady(s)) return say('garden.open-unready', 'REOPENING LEDGER', 'Check the place before certifying it.', ['Talk to Fern. Check the shade in the glasshouse and the receiver in the listening house. Then return here to choose opening hours.'], [leave()]);
+    say('garden.open-plan', 'REOPENING LEDGER / CHOOSE HOURS', 'How much can this opening promise?', ['Open the garden court and its public access path only.', 'Fern has accepted the morning shade inspection. Brim has accepted a morning public-log check.'], [
       { label: 'Review daylight opening', detail: 'No evening use or dusk inspection. Fern’s and Brim’s morning commitments remain.', run: () => confirmOpening('daylight') },
       { label: 'Review daylight and evening opening', disabled: !s.evening, detail: s.evening ? 'The courier has accepted the evening controller check.' : s.kept.includes('sequence') ? 'First accept the dusk check at the glasshouse controller.' : 'The service sequence was released; the evening controller is unavailable.', run: () => confirmOpening('evening') }, leave('Check the place again')]);
   }

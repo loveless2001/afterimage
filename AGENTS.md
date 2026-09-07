@@ -11,6 +11,8 @@ This is an offline Canvas 2D browser game. Keep the runtime independent of Node,
 - On PowerShell systems that restrict npm.ps1, invoke npm.cmd instead.
 - Browser tests use this checkout's @playwright/test by default. Do not borrow dependencies from other projects.
 
+Keep titles and headlines evocative. Dialogue should sound spoken, and instructions must name concrete next actions. Use short paragraphs and remove repeated explanations. Keep memory-loss and ending consequences explicit.
+
 ## Project boundaries
 
 - state.js owns save validation, memory/reset rules, and the current navigation helper.

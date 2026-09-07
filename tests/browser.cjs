@@ -235,7 +235,7 @@ async function end(page, choice, ending) {
     assert.equal((await stored(story)).reunion, true);
     assert.deepEqual((await stored(story)).acquired, pair, 'The agreement does not restore the lost memory');
     assert.match(await story.locator('#dialog-title').innerText(), pair.includes('name') ? /remembered/ : greeting === 'space' ? /place left open/ : /call me Moth/);
-    if (greeting === 'space') assert.match(await story.locator('#dialog-body').innerText(), pair.includes('name') ? /wait until you spoke/ : /keep a promise/);
+    if (greeting === 'space') assert.match(await story.locator('#dialog-body').innerText(), pair.includes('name') ? /wait until you spoke/ : /So I waited/);
     await close(story); await interact(story, 'Moth');
     await story.getByRole('button', { name: 'What did you do while I was gone?', exact: true }).click();
     assert.match(await story.locator('#speaker').innerText(), /THE INTERVAL/); await close(story);

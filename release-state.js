@@ -3,9 +3,9 @@
   const Chorus = typeof module !== 'undefined' ? require('./chorus-state.js') : root.AfterimageChorus;
   const key = 'afterimage.release.v1', rooms = ['court', 'archive', 'yard'], memories = Chorus.memories;
   const endings = {
-    complete: { title: 'Complete / retire the shared carrier', action: 'Turn the shared carrier breaker off', object: 'breaker', detail: 'Close the shared signal service and evening lamps. Preserve the occupied local spaces and daylight garden as explicit exceptions. Keep the report in the local archive.' },
-    witness: { title: 'Witness / send an honest account', action: 'Send the sealed account', object: 'outbox', detail: 'Transmit the supported report, disagreement, and unknown cause beyond the network. Then retire the shared carrier and evening lamps. The message carries records; residents stay here. No rescue is promised.' },
-    remain: { title: 'Remain / maintain a smaller network', action: 'Connect the local service loop', object: 'loop', detail: 'Keep the garden and public receiver linked through the chosen Chorus route. Close the unused long-distance dispatch branch. Counter offers the route check; existing morning jobs remain. Evening use requires the courier’s renewed duty.' }
+    complete: { title: 'Complete / retire the shared carrier', action: 'Turn the shared carrier breaker off', object: 'breaker', detail: 'Stop shared messages and evening lamps. Keep residents, the daylight garden, and the local report.' },
+    witness: { title: 'Witness / send an honest account', action: 'Send the sealed account', object: 'outbox', detail: 'Send the report and its unresolved questions. Then stop shared messages and evening lamps. Residents stay here; sending a report does not guarantee rescue.' },
+    remain: { title: 'Remain / maintain a smaller network', action: 'Connect the local service loop', object: 'loop', detail: 'Keep local messages running. Close unused long-distance dispatch. Counter checks the route; Fern and Brim keep their morning jobs. Evening use needs your renewed dusk check.' }
   };
   const candidates = s => [...s.kept];
   function fresh(receipt) {

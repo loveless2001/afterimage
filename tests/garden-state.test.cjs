@@ -46,3 +46,20 @@ test('a connected bridge does not imply Silt crossed it',()=>{
  const incoming=receipt('stay','book',['greeting','sequence'],false);incoming.bridge=true;T.validate(incoming);const s=G.fresh(incoming);
  assert.equal(s.incoming.siltReturned,false);assert.match(Story.transitRecord(s).join(' '),/bridge is connected/);assert.match(Story.transitRecord(s).join(' '),/did not record Silt crossing back/);assert.match(Story.quiet(s).paragraphs.join(' '),/bridge is connected/);
 });
+
+
+test('the shared afternoon is optional, earned, and compatible with older saves',()=>{
+ const fresh=G.preview('book');assert.equal(G.act(fresh,'sharedMoment'),false);G.act(fresh,'fern');assert.equal(G.act(fresh,'sharedMoment'),false);G.act(fresh,'place','gate');assert.equal(G.act(fresh,'sharedMoment'),true);assert.equal(G.act(fresh,'sharedMoment'),false);assert.deepEqual(G.validate(fresh),fresh);
+ const first=prepared();const old=structuredClone(first);delete old.sharedMoment;assert.equal(G.validate(old).sharedMoment,false);assert.equal(G.ready(G.validate(old)),true);
+ for(const pair of combinations(G.candidates(first))){
+  const legacy=G.reset(G.validate(old),pair);assert.equal(G.validate(legacy).sharedMoment,false);if(pair.includes('fern'))assert.doesNotMatch(Story.fern(legacy).paragraphs.join(' '),/remember asking|dry leaf/);
+ }
+ assert.equal(G.act(first,'sharedMoment'),true);for(const pair of combinations(G.candidates(first))){const returned=G.reset(first,pair);assert.equal(returned.sharedMoment,true);assert.equal(G.act(returned,'sharedMoment'),false);assert.deepEqual(G.validate(returned),returned);const before=JSON.stringify(returned);const scene=Story.sitting(returned).paragraphs.join(' ');assert.match(scene,pair.includes('fern')?/remember sitting here with Fern/:/do not remember being here before/);assert.equal(JSON.stringify(returned),before);}
+ for(const edit of [s=>s.sharedMoment='true',s=>{s.sharedMoment=true;s.place=null;},s=>{s.sharedMoment=true;s.metFern=false;}]){const invalid=structuredClone(first);edit(invalid);assert.throws(()=>G.validate(invalid));}
+});
+
+test('the seat describes the current visit and the optional echo does not restore memory',()=>{
+ const first=prepared();first.shadeFixed=false;first.fernAgreement=false;assert.doesNotMatch(Story.place(first).paragraphs.join(' '),/repaired shade/);assert.match(Story.sitting(first).paragraphs.join(' '),/still unfinished/);
+ const s=G.reset(prepared(),['greeting','sequence']);const pair=[...s.kept];assert.equal(G.act(s,'seatEcho'),true);assert.equal(G.act(s,'seatEcho'),false);assert.deepEqual(s.kept,pair);assert.deepEqual(s.acquired,pair);assert.equal(G.validate(s).seatEcho,true);assert.doesNotMatch(Story.place(s).paragraphs.join(' '),/Move it|will survive/);assert.equal(Story.seatEcho().paragraphs[0],'The courier doesn’t remember why that seat is there. But you came looking for it.');G.act(s,'fern');assert.match(Story.sitting(s).paragraphs.join(' '),/This is a new conversation/);assert.deepEqual(s.acquired,pair);
+ const retained=G.reset(prepared(),['fern','tuning']);assert.equal(G.act(retained,'seatEcho'),false);const visited=G.reset(prepared(),['greeting','sequence']);G.act(visited,'fern');assert.equal(G.act(visited,'seatEcho'),false);const old=structuredClone(s);delete old.seatEcho;delete old.sharedMoment;assert.equal(G.validate(old).seatEcho,false);
+});

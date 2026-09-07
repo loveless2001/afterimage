@@ -11,45 +11,43 @@
     dispatches,
     sorting,
     arrival: s => scene('TRANSIT 02 / COURIER 022', 'Someone else’s unfinished work.', [
-      'Elsewhere in the network, a new courier receives an Archive dispatch. You inherit a delivery, not the life of the agent who sent it.',
+      'You are a new courier delivering a message from Archive 07.',
       dispatches[s.origin][1],
-      'The sorting station must reset before it will accept outgoing work. A librarian waits beside a shelf with room for one more thing.',
-      '[Explore the sorting hall, the maintenance crossing, and the dispatch platform. The Field journal offers named walking destinations. This campaign save is separate from your prologue save.]'
+      'Talk to Brim in the sorting hall. Choose what to protect before the station resets.',
+      '[Use the Field journal to walk to named places. Transit saves separately from the prologue.]'
     ]),
     brim: (s, first) => {
       if (s.delivered) return scene('BRIM / AFTER THE DISPATCH', s.sorting === 'ledger' ? '“I can begin with one page.”' : '“It can stay on the shelf.”', [sorting(s), s.siltReturned ? 'Silt has already asked whether a drawing counts as a greeting. Brim says that depends on who opens it.' : 'Brim asks which direction the far platform faces. “Then I can leave a greeting where they can see it.”']);
       if (s.cycle === 2) return scene('BRIM / ' + (s.kept.includes('greeting') ? 'RECOGNIZED' : 'A NEW WELCOME'), s.kept.includes('greeting') ? '“Clear shelf, open door.”' : '“You can call me Brim.”', [
-        s.kept.includes('greeting') ? 'You finish the greeting before Brim can. They turn the book cover toward you. “I wondered which part would come back.”' : 'Brim gives you their name without asking whether it sounds familiar. The place beside the shelf is still available.',
+        s.kept.includes('greeting') ? 'You recognize Brim’s greeting. “You remembered,” they say.' : 'Brim introduces themself again. You do not remember meeting them.',
         sorting(s),
-        s.kept.includes('greeting') ? '“It is a welcome,” they say. “Not a filing instruction. I thought that needed clarifying.”' : '“Clear shelf, open door,” they add. It is a first greeting for this instance, not a recovered memory.'
+        s.kept.includes('greeting') ? '“I am glad to see you again,” Brim says.' : '“Clear shelf, open door,” they say. You hear the greeting for the first time.'
       ]);
       return scene('LIBRARIAN / BRIM', first ? '“Clear shelf, open door.”' : '“I have reached the last letter.”', [
         first ? '“That means welcome. I am Brim.” The librarian has written Z before the title of a small book.' : 'Brim adds another Z, considers it, and puts the pencil down.',
-        '“Greetings,” they explain. “Things people said when someone arrived. I keep moving it to the end of the clearing queue.”',
-        'One holding bay can protect the book or the public route ledger. An unused shelf could hold both, if you repair it with the parcel lift’s spare brace.',
-        '[Nothing is cleared on a timer. Choose and confirm a sorting plan at the sorting console. The service crossing has a separate power supply.]'
+        '“It is a book of greetings. I keep delaying its deletion.”',
+        'Protect the book or the route ledger. To save both, repair the shelf using the parcel lift’s spare brace. The lift will have to wait.',
+        '[No timer. Choose a plan at the sorting console. This does not affect power to the bridge.]'
       ]);
     },
     silt: s => scene(s.siltReturned ? 'SILT / SORTING HALL' : 'SILT / FAR PLATFORM', s.siltReturned ? '“I brought the unfinished side.”' : s.cycle === 1 ? '“Could you check the word empty?”' : s.kept.includes('sequence') ? '“You found the way back.”' : '“Still here.”', [
-      s.siltReturned ? 'Silt sets a drawing beside Brim’s shelf. Its far edge has not been filled in.' : 'Across the maintenance gap, an agent holds a drawing against the light. “The dispatch board calls this platform empty. It mostly means the bridge is off.”',
-      s.cycle === 1 ? 'Silt asks you to read the service diagram and the objection pinned to the dispatch board. “The bridge can restart after the station resets. The diagram will be cleared by then.”' : s.siltReturned ? '“I thought I would finish it before crossing. Then I thought I could finish it somewhere else.”' : s.kept.includes('sequence') ? 'The retained sequence can restart the bridge. Silt wants to cross, and bring the drawing with them.' : 'The sequence did not survive. You can still finish the delivery by the public detour. Silt has light and supplies here; separation is not a hidden death sentence.',
-      s.sorting === 'shelf' ? 'The parcel lift is waiting for a new brace. Any drawing that leaves will have to be carried by hand.' : 'Silt asks you not to call the drawing cargo. “It is not finished being a place yet.”'
+      s.siltReturned ? 'Silt sets a drawing beside Brim’s shelf. Its far edge has not been filled in.' : '“I am Silt. The board says this platform is empty, but I am here. The bridge is just off.”',
+      s.cycle === 1 ? '“Read the service diagram and the message on the dispatch board,” Silt says. “Keep the sequence if you want to restart the bridge after the reset.”' : s.siltReturned ? '“I thought I would finish it before crossing. Then I thought I could finish it somewhere else.”' : s.kept.includes('sequence') ? 'The retained sequence can restart the bridge. Silt wants to cross, and bring the drawing with them.' : 'You lost the sequence. Silt must stay here, with light and supplies. Take the public detour to finish the delivery.',
+      s.sorting === 'shelf' ? 'The parcel lift is waiting for a new brace. Any drawing that leaves will have to be carried by hand.' : '“Please be careful with the drawing,” Silt says. “I am still working on it.”'
     ]),
     sequence: s => scene('SERVICE DIAGRAM', s.cycle === 1 ? 'A way to the far platform.' : s.kept.includes('sequence') ? 'Your hands know the order.' : 'The diagram has been cleared.', [
-      s.cycle === 1 ? 'A separate power circuit can reopen the crossing after the station reset. The handwritten sequence is not included in the public route ledger.' : s.kept.includes('sequence') ? 'The sequence reconnects the maintenance bridge. The public delivery route has remained open all along.' : 'The public detour leads to the dispatch platform, but it does not reach Silt. Knowing there used to be a diagram does not restore its sequence.',
-      s.cycle === 1 ? '[Memory found: A service sequence. Keep it to reconnect Silt’s platform after resetting. Without it, Silt remains safely separated for this chapter.]' : '[A released procedure cannot be learned again from its cleared source this cycle.]'
+      s.cycle === 1 ? 'Keep this sequence to restart the bridge after the reset. It is not saved in the route ledger.' : s.kept.includes('sequence') ? 'The sequence reconnects the maintenance bridge. The public delivery route has remained open all along.' : 'Use the public detour to reach dispatch. You cannot restore the bridge without the lost sequence.',
+      s.cycle === 1 ? '[Memory found: A service sequence. Keep it to reconnect Silt’s platform after resetting. Without it, Silt remains safely separated for this chapter.]' : '[The cleared diagram cannot teach the sequence again.]'
     ]),
     message: s => scene('DISPATCH BOARD / A DISSENTING MESSAGE', s.cycle === 1 ? 'Reachability is not occupancy.' : s.kept.includes('message') ? 'You can carry the objection.' : 'There was another message.', [
-      s.cycle === 1 || s.kept.includes('message') ? '“Do not record a platform as empty merely because the route to it is closed.” Someone has added a drawing of a small occupied square.' : 'A blank attachment field remains. You cannot reproduce the wording that was released. Your report can name that gap.',
+      s.cycle === 1 || s.kept.includes('message') ? '“Do not record a platform as empty merely because the route to it is closed.” Someone has added a drawing of a small occupied square.' : 'You lost the message. The outgoing report will mark it as missing.',
       s.cycle === 1 ? 'The board will clear during the station reset. The receiving district uses these dispatches when deciding which places to reopen.' : 'Your final dispatch will distinguish what you retained from what is missing.',
       s.cycle === 1 ? '[Memory found: A dissenting message. Retain it to include this objection in the outgoing record.]' : '[The report will not invent testimony to complete an empty field.]'
     ]),
     handoff: s => scene('STATION RESET / A HANDOFF', 'You can leave instructions, not a life.', [
-      'The dispatch terminal will accept a new courier instance once the sorting pass completes. Two memories can continue.',
-      'Brim and Silt remain where the work leaves them. A kept book, a lost ledger, and a repaired shelf belong to the station.',
-      'A record can outlast the one who wrote it. Someone still has to decide what its next sentence means.',
-      'Your next instance can finish a delivery. It will still have to decide whether these people’s requests are its own.',
-      '[Choose two memories, then confirm the exact loss. The Archive ending and its original save do not change.]'
+      'Choose two memories for the next courier. Then confirm the reset to unlock outgoing deliveries.',
+      'Brim and Silt stay. Your sorting choice and repairs stay too.',
+      '[Review the lost memory before confirming. Your Archive ending and save stay unchanged.]'
     ]),
     receipt: s => scene('TRANSIT / DISPATCH RECEIPT', 'A record with someone in it.', [
       sorting(s),
