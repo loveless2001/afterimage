@@ -33,7 +33,7 @@
   function fresh(receipt) {
     const incoming = Transit.validate(receipt);
     if (!incoming.delivered) throw new Error('Finish the Transit dispatch before continuing to Garden.');
-    return { kind: 'afterimage.garden', version: 1, incoming, cycle: 1, acquired: [...incoming.kept], kept: [...incoming.kept], metFern: false, mirrors: [1, 0, 0, 1], shadeFixed: false, contacts: [0, 0, 0], receiverFixed: false, heard: false, place: null, fernAgreement: false, brimAgreement: false, reunion: false, checkedShade: false, checkedReceiver: false, quiet: false, evening: false, courierDuty: false, open: null, room: 'court', player: { x: 160, y: 555 } };
+    return { kind: 'afterimage.garden', version: 1, incoming, cycle: 1, acquired: [...incoming.kept], kept: [...incoming.kept], metFern: false, mirrors: [1, 0, 0, 1], shadeFixed: false, contacts: [0, 0, 0], receiverFixed: false, heard: false, place: null, fernAgreement: false, brimAgreement: false, reunion: false, seatEcho: false, checkedShade: false, checkedReceiver: false, quiet: false, evening: false, courierDuty: false, open: null, room: 'court', player: { x: 160, y: 555 } };
   }
   const candidates = s => [...s.incoming.kept, 'fern', 'tuning'];
   const ready = s => s.cycle === 1 && s.metFern && s.shadeFixed && s.receiverFixed && s.heard && s.place !== null && s.fernAgreement && s.brimAgreement;
@@ -42,6 +42,7 @@
   function act(s, action, value) {
     if (s.open) return false;
     switch (action) {
+      case 'seatEcho': if (s.cycle !== 2 || s.reunion || s.kept.includes('fern') || s.seatEcho) return false; s.seatEcho = true; return true;
       case 'fern': if (s.cycle === 1) { s.metFern = true; acquire(s, 'fern'); } else s.reunion = true; return true;
       case 'mirror':
         if (s.cycle !== 1 || s.shadeFixed || !Number.isInteger(value) || value < 0 || value > 3) return false;
@@ -86,6 +87,9 @@
     for (const id of ['metFern', 'shadeFixed', 'receiverFixed', 'heard', 'fernAgreement', 'brimAgreement', 'reunion', 'checkedShade', 'checkedReceiver', 'quiet', 'evening', 'courierDuty']) {
       if (typeof value[id] !== 'boolean') throw new Error('Invalid Garden progress.'); s[id] = value[id];
     }
+    if (value.seatEcho !== undefined && typeof value.seatEcho !== 'boolean') throw new Error('Invalid seat encounter.');
+    s.seatEcho = value.seatEcho ?? false;
+    if (s.seatEcho && (s.cycle !== 2 || s.kept.includes('fern'))) throw new Error('Invalid seat encounter.');
     for (const [id, length, max] of [['mirrors', 4, 1], ['contacts', 3, 2]]) {
       if (!Array.isArray(value[id]) || value[id].length !== length || value[id].some(n => !Number.isInteger(n) || n < 0 || n > max)) throw new Error('Invalid repair position.'); s[id] = [...value[id]];
     }

@@ -273,6 +273,7 @@
       greeting === 'introduce' ? '“Hello. I am Moth.” They try it once, without the question they had been putting at the end.' : 'Moth moves an empty folder off the edge of the table. “That is not a hint,” they say. “I just keep putting things where someone could sit.”',
       greeting === 'introduce' ? '“You will not owe me the next sentence. I can wait for it.”' : '“I might want to call out. But you can be the one who decides when to speak.”',
       'You ask what happens if you do remember. “Then we can be pleased,” Moth says. “I do not think we need instructions for that.”',
+      '“An invitation does not stop being for you because you have to read it twice,” Moth says.',
       '[Moth keeps their side of this agreement. It does not preserve your memory of meeting them or use a retention slot.]'
     ], [leave('Until then')]);
   }

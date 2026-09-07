@@ -89,7 +89,7 @@
   }
   function exportSave() { const blob = new Blob([JSON.stringify(s, null, 2)], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = `afterimage-garden-${s.open || 'visit-' + s.cycle}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
   function menu() {
-    say('garden.menu', 'GARDEN / PAUSED', 'An ordinary place to return to.', ['WASD or arrows move; click or tap the floor to walk. E or Interact opens an encounter. The Field journal lists named walking destinations in each room.', 'Every decision is untimed. Both repair workbenches offer assistance. Audio is optional, and every clue is written.', storageOK ? 'Garden saves separately in this browser. Export the record to move it between browsers or computers.' : 'Browser storage is unavailable. Export your Garden record before closing.'], [leave(ui.active ? 'Return to Garden' : 'Return to title'), ...(ui.active ? [{ label: 'Open field journal', run: journal }] : []), { label: 'Export Garden (.json)', disabled: !ui.active && !saved, run: exportSave }, { label: 'Import a Transit or Garden save', run: () => $('import-file').click() }, { label: 'Start a different Garden visit', run: chooseBeginning }, { label: 'Return to Transit', run: () => { save(); location.href = 'transit.html'; } }]);
+    say('garden.menu', 'GARDEN / PAUSED', 'An ordinary place to return to.', ['WASD or arrows move; click or tap the floor to walk. E or Interact opens an encounter. The Field journal lists named walking destinations in each room.', 'Every decision is untimed. Both repair workbenches offer assistance. Audio is optional, and every clue is written.', storageOK ? 'Garden saves separately in this browser. Export the record to move it between browsers or computers.' : 'Browser storage is unavailable. Export your Garden record before closing.'], [leave(ui.active ? 'Return to Garden' : 'Return to title'), ...(ui.active ? [{ label: 'Open field journal', run: journal }] : []), { label: 'Export Garden (.json)', disabled: !ui.active && !saved, run: exportSave }, { label: 'Import a Transit or Garden save', run: () => $('import-file').click() }, { label: 'Start a different Garden visit', run: chooseBeginning }, { label: 'Chorus chapter / preview', run: () => { save(); location.href = 'chorus.html'; } }, { label: 'Return to Transit', run: () => { save(); location.href = 'transit.html'; } }]);
   }
   $('import-file').addEventListener('change', async event => {
     const file = event.target.files[0]; event.target.value = ''; if (!file) return;
@@ -159,6 +159,7 @@
     ui.show(Story.brim(s), [...(s.cycle === 1 && !s.brimAgreement ? [{ label: 'Record Brim’s offered job', primary: true, run: () => { apply('brimAgreement'); brim(); } }] : []), leave()]);
   }
   function arrangePlace() {
+    if (apply('seatEcho')) return ui.show(Story.seatEcho(s), [leave('Sit for a moment')]);
     if (s.cycle === 2 || s.open) return ui.show(Story.place(s), [leave('Leave the seat where it was placed')]);
     if (!s.metFern) return say('garden.place-unasked', 'COURTYARD', 'Ask whose place this is.', ['Fern is nearby. Speak with them before arranging the open seat.'], [leave()]);
     ui.show(Story.place(s), [...Object.entries(Story.placeNames).map(([id, name]) => ({ label: 'Place it ' + name, selected: s.place === id, run: () => say('garden.confirm-place', 'PLACE / CONFIRM ARRANGEMENT', 'Leave the seat here?', ['The seat will stand ' + name + '. This arrangement will remain through the courier reset.', 'It assigns nobody a duty and promises no particular visitor.'], [{ label: 'Place the seat here', primary: true, run: () => { if (apply('place', id)) { ui.close(); ui.resetMovement(); ui.toast('The seat now stands ' + name + '.'); } } }, { label: 'Reconsider', run: arrangePlace }], arrangePlace) })), leave('Leave it for now')]);
@@ -187,7 +188,7 @@
       '[This settles the opening record. You can keep exploring and export it afterward.]'
     ], [{ label: 'Confirm this opening', primary: true, run: () => { if (apply('open', scope)) receipt(); } }, { label: 'Reconsider the hours', run: openingLedger }], openingLedger);
   }
-  function receipt() { ui.show(Story.receipt(s), [leave('Continue exploring'), { label: 'Export the opening record', run: exportSave }, { label: 'Return to Transit', run: () => { save(); location.href = 'transit.html'; } }]); }
+  function receipt() { ui.show(Story.receipt(s), [{ label: 'Continue to Chorus', primary: true, run: () => { save(); location.href = 'chorus.html'; } }, leave('Continue exploring'), { label: 'Export the opening record', run: exportSave }, { label: 'Return to Transit', run: () => { save(); location.href = 'transit.html'; } }]); }
   function enterRoom(room) { s.room = room; s.player = room === 'court' ? { x: 800, y: 545 } : { x: 160, y: 555 }; ui.resetMovement(); save(); updateHUD(); ui.toast(roomNames[room]); }
   function interact(o) {
     if (o.type === 'door') return enterRoom(o.id);

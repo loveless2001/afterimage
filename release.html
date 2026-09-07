@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#e7e5dc">
+  <title>AFTERIMAGE — Release: What remains unfinished</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="release">
+  <canvas id="world" aria-label="release district. Use WASD or arrows, E to interact, or the Field journal for destinations."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header>
+    <a class="wordmark" href="#" id="home">AFTERIMAGE<span>RELEASE / WHAT REMAINS UNFINISHED</span></a>
+    <nav aria-label="Game controls"><button id="journal" hidden>Field journal</button><button id="sound" aria-pressed="false">Sound: off</button><button id="help">Menu / help</button></nav>
+  </header>
+  <main id="hud" hidden>
+    <section class="assignment"><p class="eyebrow">RELEASE 05 <span id="cycle">/ FIRST VISIT</span></p><h1 id="objective">Meet the gardener.</h1><p id="hint">Fern is in the courtyard.</p></section>
+    <aside class="memory-panel"><p class="eyebrow">RETENTION <span>02 SLOTS</span></p><div id="memories"></div><p id="memory-note">What survives is your decision.</p></aside>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="interaction" hidden><span id="interact-label"></span><button id="interact">E <span>Interact</span></button></div>
+    <footer><span id="location">THE GARDEN COURT</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">COURIER 023</span></footer>
+  </main>
+  <section id="cover" class="cover">
+    <div class="cover-inner"><p class="eyebrow">A PLAYABLE CHAPTER / 05</p><h2>A future with<br><em>names beside it.</em></h2><p class="intro">The work cannot all continue.<br>Read what each ending leaves.</p><button id="start" class="primary">Enter Release <span>↗</span></button><div class="chapter-links"><button id="choose-origin">Choose another beginning</button><a href="chorus.html">Chorus chapter ↗</a></div><p class="cover-meta">THREE ROOMS · TWO MEMORIES · NO TIMER</p><p class="cover-note">A continuation of Chorus. Your earlier chapter saves stay intact.</p></div><div class="cover-index">AFTERIMAGE <span>WHAT REMAINS UNFINISHED</span></div>
+  </section>
+  <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
+  <div id="transition" aria-hidden="true"><p>RELEASING COURIER 024</p><span>The agreed work remains.</span></div>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <script src="state.js"></script>
+  <script src="transit-state.js"></script>
+  <script src="garden-state.js"></script>
+  <script src="garden-story.js"></script>
+  <script src="chorus-state.js"></script>
+  <script src="chorus-story.js"></script>
+  <script src="release-state.js"></script>
+  <script src="release-story.js"></script>
+  <script src="chapter-ui.js"></script>
+  <script src="chapter-flow.js"></script>
+  <script src="release.js"></script>
+</body>
+</html>

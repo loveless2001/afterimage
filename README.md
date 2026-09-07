@@ -1,6 +1,6 @@
 # AFTERIMAGE
 
-An offline browser game about memory, unfinished work, and small acts of care. The Archive prologue leads into playable Transit and Garden prototypes. Only two personal memories survive each courier reset.
+An offline browser game about memory, unfinished work, and small acts of care. The Archive prologue now leads through playable Transit, Garden, Chorus, and Release prototypes. Only two personal memories survive each courier reset.
 
 ## Play
 
@@ -18,7 +18,7 @@ Talk to Moth again after giving the flower to discuss your goodbye. You can ask 
 
 Open transit.html or choose Transit / chapter preview on the prologue title. A completed prologue ending becomes a dispatch for Courier 022; standalone previews support all three endings. The original agent and Moth keep their ending.
 
-Explore the sorting hall, maintenance crossing, and dispatch platform. Meet Brim and Silt, protect a book or ledger or repair a shelf for both, and retain two of three memories. After resetting, revisit the people and consequences, reconnect the bridge if you kept its sequence, and review the outgoing dispatch. The public detour always allows completion. The completed dispatch now continues into Garden. Chorus and Release remain planned.
+Explore the sorting hall, maintenance crossing, and dispatch platform. Meet Brim and Silt, protect a book or ledger or repair a shelf for both, and retain two of three memories. After resetting, revisit the people and consequences, reconnect the bridge if you kept its sequence, and review the outgoing dispatch. The public detour always allows completion. The completed dispatch now continues into Garden. Garden continues to Chorus, then Release.
 
 The shelf has three adjustable fittings and an assisted alignment option. Sorting, reset, replacement saves, and final delivery require explicit confirmation. Transit uses its own afterimage.transit.v1 save and accepts exported prologue endings or campaign saves from Menu / help. Importing never replaces the original prologue save.
 
@@ -30,7 +30,21 @@ Explore the courtyard, glasshouse, and listening house. Meet Fern, direct four r
 
 Ask Fern and Brim to record the morning upkeep they offer. Then retain two of four candidates: two memories brought from Transit and two Garden experiences. After the reset, the physical repairs, seat, incoming documents, and other people's commitments remain. The service sequence permits an evening opening only if the courier accepts its dusk check. The new tuning memory restores a quiet personal channel. Daylight opening and public messages always remain possible.
 
-Garden uses afterimage.garden.v1 and includes a validated snapshot of the completed Transit dispatch. Importing either a completed Transit save or a Garden record requires a replacement preview; earlier saves remain untouched. Revisit controls for earlier chapters open those saved chapter records. Future chapters and the full 3–5 hour campaign remain a design target, not a claim about these prototypes.
+Garden uses afterimage.garden.v1 and includes a validated snapshot of the completed Transit dispatch. Importing either a completed Transit save or a Garden record requires a replacement preview; earlier saves remain untouched. Revisit controls for earlier chapters open those saved chapter records. The full 3–5 hour campaign remains a pacing and production target, not a claim about these compact prototypes.
+
+## Chorus: A place to disagree
+
+Continue from a completed Garden record or open chorus.html for labelled previews. Courier 024 chooses a central desk, round of agreement, or local channels, then physically routes the signal board and coordinates one inspection window. Read six sources across three rooms and draft three supported claims. The cause of the carrier loss remains unestablished; uncertainty is a usable conclusion.
+
+The unaddressed receiver makes the story's first deliberate address to the person choosing the memories. Retain two of four experiences, then return as Courier 025. Records and agreements survive; recognition does not. An earlier evening duty ends at the handoff and requires both the retained sequence and explicit renewed consent. Chorus uses its own afterimage.chorus.v1 save, with the completed Garden receipt nested inside.
+
+## Release: What remains unfinished
+
+Continue from Chorus or open release.html. Inspect the changed garden, local records, and service yard. Review Complete, Witness, or Remain, then enact the plan at its named control. Every memory pair can reach all three endings. Remain requires recording Counter's offered route check; there is no hidden memory requirement.
+
+Complete retires the shared carrier with inhabited local exceptions. Witness sends the supported account before retirement, without transferring residents or promising rescue. Remain keeps a smaller local loop with named upkeep. Earlier losses, Silt's location, the seat, documents, and renewed duties shape the consequences. Return to Fern for the coda; exploration and export remain available afterward. Release uses afterimage.release.v1 and adds no further memory reset.
+
+Subtle earlier lines prepare this address. Garden's seat encounter appears once only if Fern's invitation was released and the returned courier visits the seat before Fern. It grants no memory, achievement, or explanation. Old Garden v1 saves remain compatible.
 
 ## Development on Windows or WSL
 
@@ -60,7 +74,7 @@ Keep a Windows checkout on the Windows filesystem and a separate WSL checkout on
 
 Progress saves automatically in the browser when available. File URLs, ports, browsers, and machines may have separate saves. Use Menu / help → Export memory and Import memory to transfer a save. Older v1 saves remain supported. Storage-denied environments can still play and export manually.
 
-The development server exposes only the game files. For a portable game release, include index.html, style.css, state.js, game.js, transit.html, transit-state.js, transit-story.js, transit.js, garden.html, garden-state.js, garden-story.js, chapter-ui.js, garden.js, and optionally the launch scripts. No tests, dependencies, or repository metadata are needed by players.
+The development server exposes only the game files. For a portable game release, use the 22 runtime files copied by npm run build into dist/, plus the optional launch scripts. No tests, dependencies, or repository metadata are needed by players.
 
 ## Online demo
 

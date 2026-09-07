@@ -1,6 +1,6 @@
 # AFTERIMAGE — full game proposal
 
-Design proposal · 7 September 2026 · Archive, Transit, and the Garden prototype are implemented. Chorus and Release remain planned.
+Design proposal · 7 September 2026 · All five chapters have connected playable prototypes. The durations and production scope below remain targets, not current playtime claims.
 
 ## The game in one sentence
 
@@ -202,4 +202,4 @@ A separate Garden save embeds a validated, completed Transit snapshot and preser
 
 ## Next production gate
 
-Playtest the linked **Transit / The last page** and **Garden / Reopening day** prototypes before expanding to Chorus. Check whether inherited consequences are understandable, both practical procedures compete with personal memories, and the narrower reopening feels like an enacted choice. Controller and text-size support are the next foundation gaps to resolve alongside that feedback.
+Playtest the complete linked prototype from Archive through Release. Check whether the gradual player address feels earned, the six-source report makes uncertainty useful, route choices feel different in practice, and all three ending plans communicate their concrete limits. Controller and text-size support, richer physical environments, pacing, and external playtests remain production work.

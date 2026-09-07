@@ -47,6 +47,7 @@
     handoff: s => scene('STATION RESET / A HANDOFF', 'You can leave instructions, not a life.', [
       'The dispatch terminal will accept a new courier instance once the sorting pass completes. Two memories can continue.',
       'Brim and Silt remain where the work leaves them. A kept book, a lost ledger, and a repaired shelf belong to the station.',
+      'A record can outlast the one who wrote it. Someone still has to decide what its next sentence means.',
       'Your next instance can finish a delivery. It will still have to decide whether these people’s requests are its own.',
       '[Choose two memories, then confirm the exact loss. The Archive ending and its original save do not change.]'
     ]),

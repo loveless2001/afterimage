@@ -8,9 +8,9 @@
   },
   "scripts": {
     "dev": "node scripts/serve.cjs",
-    "check": "node --check game.js && node --check state.js && node --check scripts/serve.cjs && node --check transit.js && node --check transit-state.js && node --check transit-story.js && node --check garden.js && node --check garden-state.js && node --check garden-story.js && node --check chapter-ui.js",
-    "test": "node --test tests/state.test.cjs tests/server.test.cjs tests/transit-state.test.cjs tests/garden-state.test.cjs",
-    "test:browser": "node tests/browser.cjs && node tests/transit-browser.cjs && node tests/garden-browser.cjs",
+    "check": "node --check game.js && node --check state.js && node --check scripts/serve.cjs && node --check transit.js && node --check transit-state.js && node --check transit-story.js && node --check garden.js && node --check garden-state.js && node --check garden-story.js && node --check chapter-ui.js && node --check chapter-flow.js && node --check chorus-state.js && node --check chorus-story.js && node --check chorus.js && node --check release-state.js && node --check release-story.js && node --check release.js",
+    "test": "node --test tests/state.test.cjs tests/server.test.cjs tests/transit-state.test.cjs tests/garden-state.test.cjs tests/chorus-release-state.test.cjs",
+    "test:browser": "node tests/browser.cjs && node tests/transit-browser.cjs && node tests/garden-browser.cjs && node tests/chorus-release-browser.cjs",
     "browser:install": "playwright install chromium",
     "build": "node scripts/build.cjs"
   },

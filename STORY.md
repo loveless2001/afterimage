@@ -44,3 +44,14 @@ Transit begins with a different agent, Courier 022, and preserves all three Arch
 The Transit sorting result, Silt's actual location, and the presence or absence of the delivered objection constrain Garden. A lost book does not return, a separated resident does not teleport into the courtyard, and a missing attachment is not silently reconstructed. A delivered document can remain available after the courier releases its personal memory of reading the source.
 
 Garden gives Fern a particular invitation, a dislike of inspirational labels, and a limited morning commitment. Brim agrees to a morning receiver-log check. The courier must explicitly accept the evening job; Silt receives no automatic duty. Shade, receiver wiring, furniture, and accepted agreements survive the handoff independently of recognition. An evening opening and quiet personal channel have separate memory requirements; a daylight court and public receiver remain available without them.
+
+
+## Chorus, Release, and the address beyond the courier
+
+Chorus receives Courier 024 and resets once to Courier 025. Its six fixed sources establish occupancy and a filtered warning, but no causal link to the carrier loss. A central desk, ordered round, or three local copies changes the acknowledgement work. Counter values coordination and also acknowledges the intake's failure. Neither the report nor the route invents an extra memory slot.
+
+The address develops in five steps: an ambiguous invitation from Moth; a Transit record that outlasts its author; a one-time Garden seat line if the invitation was released and the seat was visited before Fern; the Chorus receiver explicitly addressing the chooser; and Release asking, “Which part of this are you choosing to continue?” No fake crash, file manipulation, forced replay, or punishment for leaving is involved. Other residents do not suddenly share the receiver's awareness.
+
+Evening duty stops at the Chorus reset. Courier 025 must retain the sequence and accept the check, or evening use pauses. No job transfers automatically to Fern, Brim, Silt, or Counter. Release records Counter's offered morning route check only for the smaller local loop. Retiring the shared carrier also ends the receiver-log and dusk duties attached to it.
+
+Release reviews the actual prior records in three abbreviated spaces. Complete, Witness, and Remain are each prepared, then enacted at a distinct marked control, followed by a playable return to Fern. All plans preserve explicitly named local inhabited exceptions and daylight access. Witness transmits an account, not residents; receipt or rescue is not guaranteed. No final plan restores an erased person, a lost book, a missing original attachment, or an unmade crossing.

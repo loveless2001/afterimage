@@ -13,6 +13,15 @@ const files = new Map([
   ...['garden.js', 'garden-state.js', 'garden-story.js', 'chapter-ui.js'].map(name => ['/' + name, [name, 'text/javascript; charset=utf-8']]),
   ['/transit.html', ['transit.html', 'text/html; charset=utf-8']],
   ...['transit.js', 'transit-state.js', 'transit-story.js'].map(name => ['/' + name, [name, 'text/javascript; charset=utf-8']]),
+  ['/chapter-flow.js', ['chapter-flow.js', 'text/javascript; charset=utf-8']],
+  ['/chorus.html', ['chorus.html', 'text/html; charset=utf-8']],
+  ['/chorus-state.js', ['chorus-state.js', 'text/javascript; charset=utf-8']],
+  ['/chorus-story.js', ['chorus-story.js', 'text/javascript; charset=utf-8']],
+  ['/chorus.js', ['chorus.js', 'text/javascript; charset=utf-8']],
+  ['/release.html', ['release.html', 'text/html; charset=utf-8']],
+  ['/release-state.js', ['release-state.js', 'text/javascript; charset=utf-8']],
+  ['/release-story.js', ['release-story.js', 'text/javascript; charset=utf-8']],
+  ['/release.js', ['release.js', 'text/javascript; charset=utf-8']],
   ['/game.js', ['game.js', 'text/javascript; charset=utf-8']]
 ]);
 

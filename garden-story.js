@@ -14,6 +14,7 @@
     return [sorting, silt, i.kept.includes('message') ? 'The delivered objection is attached: “Do not record a platform as empty merely because the route to it is closed.” This external record survives a later loss of the personal memory.' : 'The incoming attachment says: “Objection not retained; wording unavailable.” No wording has been supplied to fill it.'];
   }
   const api = {
+    seatEcho: () => scene('garden.seat-echo', 'THE OPEN SEAT', 'It is still here.', ['The courier doesn’t remember why that seat is there. But you came looking for it.']),
     placeNames, archiveRecord, transitRecord,
     arrival: s => scene('garden.arrival', 'GARDEN 03 / COURIER 023', 'A place with no completion date.', [
       'The courier who finished the Transit dispatch follows its public route to a small courtyard. This is the same Courier 023, carrying the same two retained memories. Arrival is not another reset.',
@@ -99,7 +100,7 @@
       'PLACE / The seat is ' + placeNames[s.place] + '. ' + (s.incoming.siltReturned ? 'Silt and the drawing are in the court.' : 'Silt remains on the far Transit platform; the receiver record names that separation.'),
       'RECEIVER / ' + (s.quiet ? 'Public notices and the calibrated quiet channel are available.' : 'Public notices remain available. The quiet channel was not restored.'),
       archiveRecord(s),
-      '[End of the playable Garden slice. Chorus remains a future chapter. You can explore the opened court, export this record, or revisit Transit.]'
+      '[The opening record can now continue to Chorus. You can also explore the opened court or export this record.]'
     ])
   };
   root.AfterimageGardenStory = api;
