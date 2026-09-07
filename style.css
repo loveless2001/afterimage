@@ -2,3 +2,20 @@
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
 @media(max-width:520px){header{flex-wrap:wrap;gap:10px}header nav{margin-left:auto}#journal{font-size:9px;padding:8px 6px}.wordmark{font-size:14px;letter-spacing:2px}}
+
+/* The manual relay uses the same three tracks in every contact and port. */
+.relay-workbench{margin:20px 0 4px;padding:15px 12px;border:1px solid var(--line);background:#e3e5d8}
+.relay-circuit{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:start}
+.relay-contact{display:block;min-width:0;width:100%;padding:0;background:#f0eee5;border:1px solid #919782;border-radius:0;position:relative}
+.relay-contact:focus-visible{z-index:1;outline-offset:1px}
+.relay-circuit svg{display:block;width:100%;height:auto;overflow:visible}
+.relay-port{padding:1px 0}
+.relay-track{stroke:#8c958536;stroke-width:1;stroke-dasharray:3 5}
+.relay-wire{stroke:#737467;stroke-width:3;fill:none}
+.relay-terminal{fill:#737467}
+.powered .relay-wire{stroke:#4c683a;stroke-width:5}
+.powered .relay-terminal{fill:#4c683a}
+.relay-caption{fill:#515b46;font:11px monospace}
+#dialog-body .relay-readout{font:10px/1.8 monospace;margin:12px 0 8px;color:#545d4c}
+#dialog-body .relay-status{font-size:12px;line-height:1.5;margin:0;min-height:36px}
+@media(max-width:520px){.relay-workbench{padding:12px 7px}.relay-contact{min-height:44px}.relay-caption{font-size:12px}}

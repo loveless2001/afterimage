@@ -53,6 +53,19 @@ async function selectPair(page, pair) {
   await page.waitForFunction(k => JSON.parse(localStorage.getItem(k)).cycle === 2, key);
   await page.waitForTimeout(100);
 }
+async function solveRelay(page, id) {
+  const wanted = id === 'west' ? ['top to middle', 'middle to middle', 'middle to top'] : ['bottom to middle', 'middle to bottom', 'bottom to top'];
+  for (let i = 0; i < 3; i++) {
+    const contact = page.getByRole('button', { name: new RegExp(`^Shift contact ${i + 1}:`) });
+    for (let attempts = 0; attempts < 3 && !(await contact.getAttribute('aria-label')).includes(wanted[i]); attempts++) await contact.click();
+    assert.match(await contact.getAttribute('aria-label'), new RegExp(wanted[i]));
+  }
+  assert.match(await page.locator('.relay-status').innerText(), /Ready to connect/);
+  assert.equal((await stored(page)).relays.includes(id), false);
+  await page.getByRole('button', { name: 'Connect relay', exact: true }).click();
+  assert.equal((await stored(page)).relays.includes(id), true);
+  await close(page);
+}
 async function end(page, choice, ending) {
   await page.getByRole('button', { name: new RegExp('^' + choice) }).click();
   await page.getByRole('button', { name: 'Choose this ending', exact: true }).click();
@@ -84,8 +97,18 @@ async function end(page, choice, ending) {
   // No route: both relays must actually be visited, and the threshold initially refuses.
   await walk(p, 565, 250); await walk(p, 880, 245); await interact(p, 'The return threshold');
   assert.match(await p.locator('#dialog-title').innerText(), /do not remember/); await close(p);
-  await walk(p, 100, 230); await interact(p, 'West relay'); await close(p);
-  await walk(p, 860, 240); await walk(p, 865, 390); await interact(p, 'East relay'); await close(p);
+  await walk(p, 100, 230); await interact(p, 'West relay');
+  assert.equal(await p.getByRole('button', { name: 'Connect relay', exact: true }).isDisabled(), true);
+  const firstContact = p.getByRole('button', { name: /^Shift contact 1:/ });
+  await firstContact.focus(); await p.keyboard.press('Enter');
+  assert.equal(await firstContact.evaluate(el => el === document.activeElement), true);
+  assert.equal((await stored(p)).relayContacts.west[0], 0);
+  assert.deepEqual((await stored(p)).relays, []);
+  await p.screenshot({ path: path.join(output, 'relay-workbench.png') });
+  await close(p); await p.reload(); await begin(p); await interact(p, 'West relay');
+  assert.match(await p.getByRole('button', { name: /^Shift contact 1:/ }).getAttribute('aria-label'), /top to middle, powered/);
+  await solveRelay(p, 'west');
+  await walk(p, 860, 240); await walk(p, 865, 390); await interact(p, 'East relay'); await solveRelay(p, 'east');
   await walk(p, 880, 245); await interact(p, 'The return threshold');
   await p.getByRole('button', { name: 'Read the final assignment', exact: true }).click();
   await end(p, 'Send a witness signal', 'witness');
@@ -95,7 +118,11 @@ async function end(page, choice, ending) {
   const download = await downloadPromise; const savePath = path.join(output, 'witness-save.json'); await download.saveAs(savePath);
   assert.equal(S.validate(JSON.parse(fs.readFileSync(savePath))).ending, 'witness');
   await p.reload(); await begin(p); assert.match(await p.locator('#speaker').innerText(), /ENDING B/);
-  console.log('PASS: full journey without route, witness ending, export and reload');
+  await close(p); await walk(p, 100, 230); await interact(p, 'West relay');
+  assert.equal(await p.locator('#dialog-title').innerText(), 'No further work required.');
+  assert.equal(await p.locator('.relay-workbench').count(), 0);
+  assert.equal((await stored(p)).ending, 'witness');
+  console.log('PASS: full journey without route, witness ending, export, reload and post-ending relay');
   await p.context().close();
 
   // The remaining pairs use a real first-cycle save at the threshold, then traverse cycle two.
@@ -144,6 +171,25 @@ async function end(page, choice, ending) {
   await navigation.context().close();
   console.log('PASS: journal navigation around shelves and persistent shared activity');
 
+  // Assistance uses the same circuit and requires an explicit connection on a narrow screen.
+  const assist = await newPage({ ...S.reset(firstCycle, ['name', 'song']), reunion: true, player: { x: 100, y: 230 } }, { width: 390, height: 844 });
+  await begin(assist); await interact(assist, 'West relay');
+  await assist.keyboard.press('Shift+Tab');
+  assert.equal(await assist.evaluate(() => document.activeElement.textContent), 'Leave the cover open');
+  assert.equal(await assist.locator('.relay-contact').count(), 3);
+  for (const button of await assist.locator('.relay-contact').all()) {
+    const box = await button.boundingBox(); assert.ok(box.width >= 44 && box.height >= 44);
+  }
+  await assist.screenshot({ path: path.join(output, 'mobile-relay.png') });
+  await assist.getByRole('button', { name: /^Align contacts for me/ }).click();
+  assert.deepEqual((await stored(assist)).relays, []);
+  await assist.getByRole('button', { name: 'Connect relay', exact: true }).click();
+  assert.deepEqual((await stored(assist)).relays, ['west']);
+  assert.equal(await assist.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  await close(assist); await assist.locator('#journal').click();
+  assert.match(await assist.locator('#dialog-body').innerText(), /WEST \/ Connected to the threshold/);
+  await assist.context().close();
+  console.log('PASS: manual relay circuits, partial reload, narrow-screen assistance and journal progress');
   const blockedStorage = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   await blockedStorage.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked by browser policy', 'SecurityError'); } }));
   const r = await blockedStorage.newPage(); r.on('pageerror', e => errors.push(e.message)); await r.goto(url); await begin(r); await r.locator('#help').click();

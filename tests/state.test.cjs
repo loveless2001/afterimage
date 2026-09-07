@@ -78,3 +78,51 @@ test('walking routes around shelves and rejects blocked destinations', () => {
   assert.equal(S.findPath(start, { x: 450, y: 310 }, shelves), null);
   assert.equal(S.findPath(start, { x: 5, y: 10 }, shelves), null);
 });
+
+test('relay circuits have one continuous solution and require explicit connection', () => {
+  for (const id of ['west', 'east']) {
+    const s = S.reset(ready(), ['name', 'song']);
+    assert.equal(S.restoreRelay(s, id), false);
+    let solutions = 0;
+    for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 3; c++) {
+      s.relayContacts[id] = [a, b, c];
+      if (S.relayCircuit(s, id).connected) solutions++;
+    }
+    assert.equal(solutions, 1);
+    assert.equal(S.alignRelay(s, id), true);
+    assert.deepEqual(s.relays, [], 'assistance aligns but does not commit the connection');
+    assert.equal(S.relayCircuit(s, id).connected, true);
+    assert.equal(S.restoreRelay(s, id), true);
+    assert.equal(S.restoreRelay(s, id), false, 'connection is idempotent');
+    assert.equal(S.shiftRelay(s, id, 0), false, 'restored wiring stays in place');
+    assert.deepEqual(s.relays, [id]);
+  }
+  const fresh = S.fresh();
+  assert.equal(S.alignRelay(fresh, 'west'), false);
+  assert.equal(S.shiftRelay(fresh, 'east', 0), false);
+  const ended = { ...S.reset(ready(), ['name', 'song']), ending: 'stay' };
+  assert.equal(S.alignRelay(ended, 'west'), false);
+});
+
+test('partial relay work round-trips independently and old v1 restores stay restored', () => {
+  const s = S.reset(ready(), ['name', 'song']);
+  const eastBefore = [...s.relayContacts.east];
+  assert.equal(S.shiftRelay(s, 'west', 0), true);
+  assert.deepEqual(s.relayContacts.east, eastBefore);
+  assert.deepEqual(S.validate(JSON.parse(JSON.stringify(s))), s);
+  const old = { ...s, relays: ['west'] }; delete old.relayContacts;
+  const migrated = S.validate(old);
+  assert.deepEqual(migrated.relays, ['west']);
+  assert.equal(S.relayCircuit(migrated, 'west').connected, true);
+  assert.deepEqual(migrated.relayContacts.east, S.fresh().relayContacts.east);
+  assert.equal(S.restoreRelay(migrated, 'west'), false);
+  const fresh = S.fresh(); fresh.relayContacts.west[0] = 0;
+  assert.equal(S.fresh().relayContacts.west[0], 2, 'new instances do not share arrays');
+  for (const contacts of [null, [], {}, { west: [0, 1], east: [0, 0, 0] }, { west: [0, 1, 3], east: [0, 0, 0] }, { west: [0, '1', 2], east: [0, 0, 0] }]) {
+    assert.throws(() => S.validate({ ...s, relayContacts: contacts }));
+  }
+  assert.throws(() => S.validate({ ...s, relays: ['east'] }), /connected circuit/);
+  assert.equal(S.shiftRelay(s, 'missing', 0), false);
+  assert.equal(S.shiftRelay(s, 'west', -1), false);
+  assert.equal(S.shiftRelay(s, 'west', 1.5), false);
+});

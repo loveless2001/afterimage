@@ -5,7 +5,45 @@
     route: { title: 'A way through', detail: 'Bypass the archive relays.', symbol: '⌁' },
     song: { title: 'An unfinished song', detail: 'Carry a signal beyond the archive.', symbol: '♪' }
   };
-  const fresh = () => ({ version: 1, cycle: 1, acquired: [], kept: [], met: false, gift: false, flowerSpot: null, relays: [], gate: false, reunion: false, ending: null, player: { x: 450, y: 575 } });
+  // Each contact shifts a signal between three labeled tracks. Nothing is timed.
+  const relayLayouts = {
+    west: { input: 0, output: 0, offsets: [1, 0, 2], initial: [2, 0, 2] },
+    east: { input: 2, output: 0, offsets: [2, 1, 1], initial: [0, 0, 0] }
+  };
+  function relaySolution(id) {
+    const layout = relayLayouts[id];
+    let track = layout.input;
+    return layout.offsets.map(offset => { const input = track; track = (track + offset) % 3; return input; });
+  }
+  function relayCircuit(s, id) {
+    const layout = relayLayouts[id], contacts = s.relayContacts[id];
+    let track = layout.input, live = true;
+    const outputs = [], powered = contacts.map((input, i) => {
+      const output = (input + layout.offsets[i]) % 3;
+      outputs.push(output); live = live && input === track; track = output;
+      return live;
+    });
+    return { outputs, powered, connected: live && track === layout.output };
+  }
+  function editableRelay(s, id) {
+    return Object.hasOwn(relayLayouts, id) && s.cycle === 2 && !s.ending && !s.relays.includes(id);
+  }
+  function shiftRelay(s, id, contact) {
+    if (!editableRelay(s, id) || !Number.isInteger(contact) || contact < 0 || contact > 2) return false;
+    s.relayContacts[id][contact] = (s.relayContacts[id][contact] + 1) % 3;
+    return true;
+  }
+  function alignRelay(s, id) {
+    if (!editableRelay(s, id)) return false;
+    s.relayContacts[id] = relaySolution(id);
+    return true;
+  }
+  function restoreRelay(s, id) {
+    if (!editableRelay(s, id) || !relayCircuit(s, id).connected) return false;
+    s.relays.push(id);
+    return true;
+  }
+  const fresh = () => ({ version: 1, cycle: 1, acquired: [], kept: [], met: false, gift: false, flowerSpot: null, relays: [], relayContacts: { west: [...relayLayouts.west.initial], east: [...relayLayouts.east.initial] }, gate: false, reunion: false, ending: null, player: { x: 450, y: 575 } });
   function acquire(s, key) { if (s.cycle !== 1 || !memories[key]) return; if (!s.acquired.includes(key)) s.acquired.push(key); }
   function reset(s, kept) {
     if (s.cycle !== 1 || !s.gift || s.acquired.length !== 3 || kept.length !== 2 || new Set(kept).size !== 2 || kept.some(k => !s.acquired.includes(k))) throw new Error('Choose two acquired memories after giving the gift.');
@@ -19,6 +57,18 @@
       const allowed = key === 'relays' ? ['west', 'east'] : Object.keys(memories);
       if (!Array.isArray(value[key]) || value[key].some(v => !allowed.includes(v)) || new Set(value[key]).size !== value[key].length) throw new Error('Invalid save memories.');
       s[key] = [...value[key]];
+    }
+    if (value.relayContacts !== undefined) {
+      if (!value.relayContacts || typeof value.relayContacts !== 'object' || Array.isArray(value.relayContacts)) throw new Error('Invalid relay contacts.');
+      for (const id of Object.keys(relayLayouts)) {
+        const contacts = value.relayContacts[id];
+        if (!Array.isArray(contacts) || contacts.length !== 3 || contacts.some(v => !Number.isInteger(v) || v < 0 || v > 2)) throw new Error('Invalid relay contacts.');
+        s.relayContacts[id] = [...contacts];
+        if (s.relays.includes(id) && !relayCircuit(s, id).connected) throw new Error('A restored relay must have a connected circuit.');
+      }
+    } else {
+      // Pre-workbench v1 saves may already have restored either relay.
+      for (const id of s.relays) s.relayContacts[id] = relaySolution(id);
     }
     if (value.flowerSpot !== undefined && ![null, 'light', 'company'].includes(value.flowerSpot)) throw new Error('Invalid flower placement.');
     s.flowerSpot = value.flowerSpot || null;
@@ -69,7 +119,7 @@
     }
     return null;
   }
-  const api = { memories, fresh, acquire, reset, validate, findPath };
+  const api = { memories, fresh, acquire, reset, validate, findPath, relayLayouts, relayCircuit, shiftRelay, alignRelay, restoreRelay };
   root.AfterimageState = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

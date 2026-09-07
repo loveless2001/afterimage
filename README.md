@@ -10,6 +10,8 @@ Move with WASD, arrow keys, or click/tap the floor. Press E or the on-screen but
 
 After bringing Moth the flower, choose its place together. Its placement survives the reset without using a memory slot. Audio is optional, decisions are untimed, and motion follows your system preference.
 
+Without the route memory, restore the two relays by shifting three contacts into a continuous circuit. Follow the lit path from IN to OUT, then choose Connect relay. Each relay has different wiring. Progress saves between visits; Align contacts for me provides an untimed assisted path with the same story outcome.
+
 ## Development on Windows or WSL
 
 The reference Node version is 22.19.0, matching the Windows development installation at setup. The game itself does not require Node. Install dependencies separately in each OS checkout:
@@ -42,4 +44,4 @@ The development server exposes only the game files. For a portable game release,
 
 ## Online demo
 
-Play at https://loveless2001.github.io/afterimage/. Pushes to main publish an allowlisted game-only build through GitHub Actions. Run npm run build to create that build locally. The website remains public even when the source repository is private; browsers necessarily download its HTML, CSS, and JavaScript.
+Play at https://loveless2001.github.io/afterimage/. Pushes to main publish an allowlisted game-only build through GitHub Actions. Run npm run build to create that build locally. The repository and website are public. GitHub Pages from a private repository requires an eligible paid GitHub plan. Browsers necessarily download the published HTML, CSS, and JavaScript.

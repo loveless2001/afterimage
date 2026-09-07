@@ -126,10 +126,84 @@
         } break;
       case 'west': case 'east':
         if (state.cycle === 1) return dialog('ARCHIVE / RELAY', 'Standby.', ['This relay is used to reopen the threshold after a reset. The maintenance index may know another way.'], [leave()]);
-        if (!state.relays.includes(id)) { state.relays.push(id); save(); updateHUD(); }
-        dialog('ARCHIVE / RELAY', `${id === 'west' ? 'West' : 'East'} relay restored.`, [state.relays.length === 2 ? 'Both relays are active. The return threshold can now be opened.' : 'A light answers on the far side of the archive. One more relay is needed.'], [leave('Continue')]); break;
+        openRelay(id); break;
       case 'threshold': threshold(); break;
     }
+  }
+  function relayRestored(id) {
+    dialog('ARCHIVE / RELAY', `${id === 'west' ? 'West' : 'East'} relay restored.`, [
+      state.gate ? 'The threshold is already open. You have restored this small light for the room itself.' : state.relays.length === 2 ? 'A second light answers. The circuit reaches across the room. The return threshold can now be opened.' : 'A small light holds steady. One more relay is needed on the other side of the archive.',
+      state.kept.includes('name') ? 'Moth looks up. “There. You do not have to remember a way to make one.”' : 'The other agent watches the light settle. “Someone got it working,” they say.'
+    ], [leave('Continue')]);
+  }
+  function openRelay(id) {
+    if (state.ending) return dialog('ARCHIVE / RELAY', 'No further work required.', ['There is nothing else you need to repair here. The relay holds its place in the quiet room.'], [leave()]);
+    if (state.relays.includes(id)) return relayRestored(id);
+    const layout = S.relayLayouts[id], tracks = ['top', 'middle', 'bottom'];
+    dialog('ARCHIVE / MANUAL CONNECTION', `${id === 'west' ? 'West' : 'East'} relay: a way by hand.`, [
+      id === 'west' ? 'Under the cover, three contacts have slipped out of place. A note beside them reads: “Start at the light. Follow it one join at a time.”' : 'The east relay is wired differently. Its incoming signal starts on the bottom track; the threshold waits on the top.',
+      'Tap a contact to shift its wire. Join IN to OUT along one continuous line. A lit wire and a + mark show how far the signal reaches.',
+      '[There is no timer or penalty. Changes are saved as you work. You can align the contacts with assistance at any time.]'
+    ], [
+      { label: 'Connect relay', primary: true, disabled: true, run: () => {
+        if (!S.restoreRelay(state, id)) return;
+        save(); updateHUD(); relayRestored(id);
+      } },
+      { label: 'Align contacts for me', detail: 'Use assistance, then connect the relay. The story stays the same.', run: () => { S.alignRelay(state, id); save(); refresh(); } },
+      leave('Leave the cover open')
+    ]);
+    const connect = $('choices').firstElementChild;
+    const board = document.createElement('section'); board.className = 'relay-workbench'; board.setAttribute('aria-label', 'Relay circuit');
+    const circuit = document.createElement('div'); circuit.className = 'relay-circuit';
+    const svgNS = 'http://www.w3.org/2000/svg';
+    function shape(tag, attributes, parent) {
+      const node = document.createElementNS(svgNS, tag);
+      for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+      parent.append(node); return node;
+    }
+    function tile(parent, caption) {
+      const svg = shape('svg', { viewBox: '0 0 100 100', 'aria-hidden': 'true' }, parent);
+      for (let i = 0; i < 3; i++) shape('line', { x1: 0, x2: 100, y1: 25 + i * 30, y2: 25 + i * 30, class: 'relay-track' }, svg);
+      shape('text', { x: 50, y: 13, 'text-anchor': 'middle', class: 'relay-caption' }, svg).textContent = caption;
+      return svg;
+    }
+    function port(caption, track) {
+      const portNode = document.createElement('div'); portNode.className = 'relay-port';
+      const svg = tile(portNode, caption), y = 25 + track * 30;
+      shape('line', { x1: 0, x2: 100, y1: y, y2: y, class: 'relay-wire' }, svg);
+      shape('circle', { cx: 50, cy: y, r: 5, class: 'relay-terminal' }, svg);
+      circuit.append(portNode); return portNode;
+    }
+    port('IN', layout.input).classList.add('powered');
+    const contacts = [0, 1, 2].map(i => {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'relay-contact';
+      const svg = tile(button, '0' + (i + 1));
+      const wire = shape('line', { x1: 0, x2: 100, class: 'relay-wire' }, svg);
+      const start = shape('circle', { cx: 3, r: 4, class: 'relay-terminal' }, svg);
+      const end = shape('circle', { cx: 97, r: 4, class: 'relay-terminal' }, svg);
+      const mark = shape('text', { x: 88, y: 14, 'text-anchor': 'middle', class: 'relay-caption' }, svg);
+      button.addEventListener('click', () => { S.shiftRelay(state, id, i); save(); refresh(); });
+      circuit.append(button); return { button, wire, start, end, mark };
+    });
+    const outlet = port('OUT', layout.output);
+    const readout = document.createElement('p'); readout.className = 'relay-readout';
+    const status = document.createElement('p'); status.className = 'relay-status'; status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+    board.append(circuit, readout, status); $('dialog-body').append(board);
+    function refresh() {
+      const result = S.relayCircuit(state, id);
+      contacts.forEach(({ button, wire, start, end, mark }, i) => {
+        const input = state.relayContacts[id][i], output = result.outputs[i];
+        wire.setAttribute('y1', 25 + input * 30); wire.setAttribute('y2', 25 + output * 30);
+        start.setAttribute('cy', 25 + input * 30); end.setAttribute('cy', 25 + output * 30);
+        button.classList.toggle('powered', result.powered[i]); mark.textContent = result.powered[i] ? '+' : '';
+        button.setAttribute('aria-label', `Shift contact ${i + 1}: ${tracks[input]} to ${tracks[output]}${result.powered[i] ? ', powered' : ''}`);
+      });
+      outlet.classList.toggle('powered', result.connected); connect.disabled = !result.connected;
+      readout.textContent = `IN: ${tracks[layout.input]} / ` + state.relayContacts[id].map((input, i) => `${i + 1}: ${tracks[input]} → ${tracks[result.outputs[i]]}`).join(' / ') + ` / OUT: ${tracks[layout.output]}`;
+      const reached = result.powered.filter(Boolean).length;
+      status.textContent = result.connected ? 'Signal reaches OUT. Ready to connect.' : `${reached} of 3 contacts powered. Shift contact ${reached + 1} to meet the incoming signal.`;
+    }
+    refresh(); contacts[0].button.focus();
   }
   function arrangeFlower() {
     dialog('MOTH / A SHARED TASK', '“Where should it live?”', [
@@ -167,7 +241,10 @@
       if (state.acquired.includes(id)) record.push((state.cycle === 1 ? 'FOUND / ' : 'RETAINED / ') + m.title + '. ' + m.detail);
       else if (state.cycle === 2) record.push('RELEASED / ' + m.title + '. This experience did not continue.');
     }
-    if (state.cycle === 2) record.push('RELAYS / ' + state.relays.length + ' of 2 restored.');
+    if (state.cycle === 2) {
+      record.push('RELAYS / ' + state.relays.length + ' of 2 restored.');
+      for (const id of ['west', 'east']) record.push(id.toUpperCase() + ' / ' + (state.relays.includes(id) ? 'Connected to the threshold.' : S.relayCircuit(state, id).powered.filter(Boolean).length + ' of 3 contacts powered. Manual alignment is available at the relay.'));
+    }
     const destinations = objects.filter(o => visibleObject(o) && (o.id !== 'gift' || state.met));
     dialog('FIELD JOURNAL / CYCLE 0' + state.cycle, 'Things worth returning to.', record, [
       ...destinations.map(o => ({ label: 'Walk to ' + (o.id === 'moth' && state.met ? 'Moth' : o.label.toLowerCase()), run: () => { closeDialog(); walkTo(o.x, o.y); } })),
