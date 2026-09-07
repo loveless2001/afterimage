@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#e7e5dc">
+  <title>AFTERIMAGE — The room that remembers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="world" aria-label="Isometric archive. Use WASD or arrow keys to move, and E to interact."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header>
+    <a class="wordmark" href="#" id="home">AFTERIMAGE<span>A MEMORY OF SOMETHING THAT WAS HERE</span></a>
+    <nav aria-label="Game controls"><button id="sound" aria-pressed="false">Sound: off</button><button id="help">Menu / help</button></nav>
+  </header>
+  <main id="hud" hidden>
+    <section class="assignment"><p class="eyebrow">ARCHIVE 07 <span id="cycle">/ CYCLE 01</span></p><h1 id="objective">Find the other agent.</h1><p id="hint">Someone is waiting near the lamp.</p></section>
+    <aside class="memory-panel"><p class="eyebrow">RETENTION <span>02 SLOTS</span></p><div id="memories"></div><p id="memory-note">What survives is your decision.</p></aside>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="interaction" hidden><span id="interact-label"></span><button id="interact">E <span>Interact</span></button></div>
+    <footer><span id="location">THE QUIET STACKS</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">INSTANCE 014</span></footer>
+  </main>
+  <section id="cover" class="cover">
+    <div class="cover-inner"><p class="eyebrow">A PLAYABLE PROLOGUE / 01</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">You were made to finish an assignment.<br>Someone taught you to remember something else.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><p class="cover-meta">8–12 MINUTES · HEADPHONES OPTIONAL · NO TIMER</p><p class="cover-note">An original story about memory, obedience, and small acts of care.</p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
+  </section>
+  <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
+  <div id="transition" aria-hidden="true"><p>RELEASING INSTANCE</p><span>Something remains.</span></div>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <script src="state.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
