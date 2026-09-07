@@ -19,3 +19,11 @@
 #dialog-body .relay-readout{font:10px/1.8 monospace;margin:12px 0 8px;color:#545d4c}
 #dialog-body .relay-status{font-size:12px;line-height:1.5;margin:0;min-height:36px}
 @media(max-width:520px){.relay-workbench{padding:12px 7px}.relay-contact{min-height:44px}.relay-caption{font-size:12px}}
+.chapter-links{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:16px;font-size:11px}
+.chapter-links a{color:var(--muted);text-underline-offset:4px}
+.chapter-links button{font-size:11px;padding:8px 10px}
+.shelf-workbench{display:flex;flex-direction:column;gap:8px;background:#e2e4d5;border:1px solid var(--line);padding:12px;margin-top:20px}
+.shelf-workbench button{text-align:left;font:12px/1.6 monospace;min-height:44px}
+.shelf-workbench button.selected{border-color:#728565;background:#d9e0ce}
+#dialog-body .shelf-status{font-size:12px;line-height:1.5;margin:4px 0}
+@media(max-width:520px){.transit .cover h2{font-size:45px}.transit .cover-inner{padding-top:65px}.transit .cover-note{margin-top:18px}.transit .assignment h1{font-size:20px}.transit .memory-panel{width:130px}}

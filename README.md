@@ -14,6 +14,14 @@ Without the route memory, restore the two relays by shifting three contacts into
 
 Talk to Moth again after giving the flower to discuss your goodbye. You can ask for a new introduction or room to approach after the reset. Moth remembers the agreement; your two memory slots still determine what you recognize. Before the final choice, ask what Moth wants. After staying or sending the signal, visit them for an aftermath scene.
 
+## Transit: The last page
+
+Open transit.html or choose Transit / chapter preview on the prologue title. A completed prologue ending becomes a dispatch for Courier 022; standalone previews support all three endings. The original agent and Moth keep their ending.
+
+Explore the sorting hall, maintenance crossing, and dispatch platform. Meet Brim and Silt, protect a book or ledger or repair a shelf for both, and retain two of three memories. After resetting, revisit the people and consequences, reconnect the bridge if you kept its sequence, and review the outgoing dispatch. The public detour always allows completion. This is one playable chapter slice; Garden and the remaining campaign are still planned.
+
+The shelf has three adjustable fittings and an assisted alignment option. Sorting, reset, replacement saves, and final delivery require explicit confirmation. Transit uses its own afterimage.transit.v1 save and accepts exported prologue endings or campaign saves from Menu / help. Importing never replaces the original prologue save.
+
 ## Development on Windows or WSL
 
 The reference Node version is 22.19.0, matching the Windows development installation at setup. The game itself does not require Node. Install dependencies separately in each OS checkout:
@@ -42,7 +50,7 @@ Keep a Windows checkout on the Windows filesystem and a separate WSL checkout on
 
 Progress saves automatically in the browser when available. File URLs, ports, browsers, and machines may have separate saves. Use Menu / help → Export memory and Import memory to transfer a save. Older v1 saves remain supported. Storage-denied environments can still play and export manually.
 
-The development server exposes only the game files. For a portable game release, include index.html, style.css, state.js, game.js, and optionally the launch scripts. No tests, dependencies, or repository metadata are needed by players.
+The development server exposes only the game files. For a portable game release, include index.html, style.css, state.js, game.js, transit.html, transit-state.js, transit-story.js, transit.js, and optionally the launch scripts. No tests, dependencies, or repository metadata are needed by players.
 
 ## Online demo
 

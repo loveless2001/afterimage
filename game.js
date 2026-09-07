@@ -421,6 +421,7 @@
     dialog(e[0], e[1], [...e[2], '[End of the playable prologue. Each pair of memories changes the second cycle. No ending is scored.]'], [
       { label: 'Remain in the room', primary: true, run: closeDialog },
       { label: 'Try a different memory choice', run: replayChoice },
+      { label: 'Continue with the courier', run: () => { save(); location.href = 'transit.html'; } },
       { label: 'Export this memory', run: exportSave }
     ]);
   }

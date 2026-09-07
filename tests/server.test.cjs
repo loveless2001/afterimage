@@ -15,9 +15,10 @@ test('local server serves game assets and excludes repository files', async () =
     assert.equal(script.status, 200);
     assert.match(script.headers.get('content-type'), /javascript/);
     assert.equal((await fetch(base + '/style.css', { method: 'HEAD' })).status, 200);
-    for (const url of ['/.git/config', '/package.json', '/tests/state.test.cjs', '/%2e%2e%2fpackage.json']) {
+    for (const url of ['/research/README.md', '/transit-state.test.cjs', '/.git/config', '/package.json', '/tests/state.test.cjs', '/%2e%2e%2fpackage.json']) {
       assert.equal((await fetch(base + url)).status, 404);
     }
+    for (const asset of ['transit.html', 'transit.js', 'transit-state.js', 'transit-story.js']) assert.equal((await fetch(base + '/' + asset)).status, 200);
     assert.equal((await fetch(base, { method: 'POST' })).status, 405);
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });

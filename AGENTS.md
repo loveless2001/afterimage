@@ -14,6 +14,7 @@ This is an offline Canvas 2D browser game. Keep the runtime independent of Node,
 ## Project boundaries
 
 - state.js owns save validation, memory/reset rules, and the current navigation helper.
+- transit-state.js owns the separate courier save and chapter rules; transit-story.js owns its scenes; transit.js owns its rooms and browser integration.
 - game.js owns encounters, input, Canvas rendering, and browser integration.
 - index.html and style.css own the interface.
 - scripts/serve.cjs serves an explicit allowlist. Update it when shipping a new runtime asset.
@@ -23,4 +24,4 @@ Preserve v1 save compatibility, explicit reset/ending confirmation, optional aud
 
 Use native tools in each OS's own checkout. Never share node_modules or build caches between Windows and WSL. Use relative paths, consistent filename casing, and Node APIs for shared scripts. Respect .gitattributes.
 
-The original WSL prototype also contains a separate research archive and unrelated Git history. Do not merge that history or copy research/PDFs into this game repository. Only game source, game development documentation, tooling, and tests belong here. Do not publish changes unless requested.
+The original WSL prototype contains unrelated Git history; do not merge that history into this game repository. At the user's request, a local copy of its research archive now lives in research/. Keep research/ ignored by Git and excluded from all game builds and servers. Do not publish the research or downloaded PDFs without an explicit request to do so. Game source, game development documentation, tooling, and tests may be tracked. Do not publish changes unless requested.

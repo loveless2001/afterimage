@@ -8,9 +8,9 @@
   },
   "scripts": {
     "dev": "node scripts/serve.cjs",
-    "check": "node --check game.js && node --check state.js && node --check scripts/serve.cjs",
-    "test": "node --test tests/state.test.cjs tests/server.test.cjs",
-    "test:browser": "node tests/browser.cjs",
+    "check": "node --check game.js && node --check state.js && node --check scripts/serve.cjs && node --check transit.js && node --check transit-state.js && node --check transit-story.js",
+    "test": "node --test tests/state.test.cjs tests/server.test.cjs tests/transit-state.test.cjs",
+    "test:browser": "node tests/browser.cjs && node tests/transit-browser.cjs",
     "browser:install": "playwright install chromium",
     "build": "node scripts/build.cjs"
   },

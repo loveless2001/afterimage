@@ -9,6 +9,8 @@ const files = new Map([
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
   ['/style.css', ['style.css', 'text/css; charset=utf-8']],
   ['/state.js', ['state.js', 'text/javascript; charset=utf-8']],
+  ['/transit.html', ['transit.html', 'text/html; charset=utf-8']],
+  ...['transit.js', 'transit-state.js', 'transit-story.js'].map(name => ['/' + name, [name, 'text/javascript; charset=utf-8']]),
   ['/game.js', ['game.js', 'text/javascript; charset=utf-8']]
 ]);
 
