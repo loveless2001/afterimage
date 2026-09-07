@@ -107,7 +107,7 @@
         dialog('UNCLASSIFIED / 001', 'Something the archive cannot use.', ['A flower folded from a page of failed instructions. There is no reward for taking it to Moth.'], [
           { label: 'Bring the flower to Moth', primary: true, run: () => {
             state.gift = true; save();
-            dialog('MOTH', '“Is this for the assignment?”', ['You say you do not think so.', '“Oh.” Moth turns it over carefully. “Then I will keep it.”', '[The flower belongs to the room. It does not use a memory slot.]'], [leave('Stay a moment, then continue')]);
+            dialog('MOTH', '“Is this for the assignment?”', ['You say you do not think so.', '“Oh.” Moth turns it over carefully. “Then I will keep it.”', '[The flower belongs to the room. It does not use a memory slot.]'], [{ label: 'Find a place for it together', run: arrangeFlower }, leave('Stay a moment, then continue')]);
           } }, leave()
         ]); break;
       case 'route':
@@ -131,16 +131,60 @@
       case 'threshold': threshold(); break;
     }
   }
+  function arrangeFlower() {
+    dialog('MOTH / A SHARED TASK', '“Where should it live?”', [
+      'Moth has tried filing the flower under P for paper. The drawer will not close.',
+      '“I could fold it smaller. But I think that would miss the point.”',
+      'You clear a space together. Neither place is more useful than the other.',
+      '[Choose a place for the flower. It stays there through the reset and uses no memory slot.]'
+    ], [
+      { label: 'Under the light', detail: 'Give the paper flower a little pretend sunlight.', run: () => placeFlower('light') },
+      { label: 'Between our places', detail: 'Make room for someone to come back.', run: () => placeFlower('company') },
+      leave('Leave it where it is for now')
+    ]);
+  }
+  function placeFlower(spot) {
+    state.flowerSpot = spot; save();
+    dialog('MOTH', spot === 'light' ? '“It looks warmer already.”' : '“Then this is your side.”', [
+      spot === 'light' ? 'You shift the flower into the pool of light. Moth adjusts a petal, then puts it back exactly as it was.' : 'You move two empty folders apart. Moth sets the flower between them, carefully leaving one place empty.',
+      spot === 'light' ? '“I know it does not grow,” they say. “I can still put it somewhere nice.”' : '“Not reserved,” they add. “Just available.”',
+      'For a moment, neither of you looks toward the threshold.'
+    ], [leave('Leave the flower there')]);
+  }
+  function flowerTrace() {
+    if (!state.flowerSpot) return 'Beside them sits the paper flower. They have repaired a crease in its stem.';
+    if (state.flowerSpot === 'light') return state.kept.includes('name') ? 'The flower is still in the light, exactly where you put it together. Moth has been turning its petals toward the lamp.' : 'The flower stands under the lamp. “Someone thought it should have sunlight,” Moth says. “This was the closest we could get.”';
+    return state.kept.includes('name') ? 'Two empty folders frame the flower. Your side of the table is still available.' : 'The flower sits between two empty folders. One place has been left clear. “You can use that side,” Moth says.';
+  }
+  function journal() {
+    if (!started || transitioning) return;
+    const [title, hint] = objective();
+    const record = [title + ' ' + hint];
+    if (state.cycle === 1) record.push(state.met ? 'Moth chose a name. They collect things with no assigned use.' : 'A second agent is waiting in the archive.');
+    else record.push('This is a player reference, not an extra memory slot. Released memories cannot be used by this instance.');
+    if (state.gift) record.push(state.flowerSpot === 'light' ? 'IN THE ROOM / A paper flower stands under the lamp.' : state.flowerSpot === 'company' ? 'IN THE ROOM / A flower marks two places at the table.' : 'IN THE ROOM / Moth kept the paper flower.');
+    for (const [id, m] of Object.entries(S.memories)) {
+      if (state.acquired.includes(id)) record.push((state.cycle === 1 ? 'FOUND / ' : 'RETAINED / ') + m.title + '. ' + m.detail);
+      else if (state.cycle === 2) record.push('RELEASED / ' + m.title + '. This experience did not continue.');
+    }
+    if (state.cycle === 2) record.push('RELAYS / ' + state.relays.length + ' of 2 restored.');
+    const destinations = objects.filter(o => visibleObject(o) && (o.id !== 'gift' || state.met));
+    dialog('FIELD JOURNAL / CYCLE 0' + state.cycle, 'Things worth returning to.', record, [
+      ...destinations.map(o => ({ label: 'Walk to ' + (o.id === 'moth' && state.met ? 'Moth' : o.label.toLowerCase()), run: () => { closeDialog(); walkTo(o.x, o.y); } })),
+      leave('Close the journal')
+    ]);
+  }
+  $('journal').addEventListener('click', journal);
   function talkMoth() {
     if (state.cycle === 1) {
       if (!state.met) {
         state.met = true; gained('name');
         dialog('AGENT 031 / MOTH', '“You can call me Moth.”', ['“It is not my designation. I chose it because of the light.”', 'Moth has been sorting empty folders. They say they were never told what should go inside.', '“If you find something that does not belong anywhere, could you bring it here?”', '[Memory found: A name. Retaining it lets you recognize Moth after the reset.]'], [leave('“I will look.”')]);
-      } else dialog('MOTH', state.gift ? '“I made a place for it.”' : '“Did you find anything?”', [state.gift ? 'The flower sits beside the folders. “It is a bad filing system,” Moth says. “Now everything else looks empty.”' : '“It does not need to be important. I would actually prefer it was not.”', state.gift ? '“If you come back, tell me whether the light looks the same.”' : 'There is a little folded object southwest of the workstation.'], [leave()]);
+      } else dialog('MOTH', state.gift ? '“I made a place for it.”' : '“Did you find anything?”', [state.gift ? 'The flower sits beside the folders. “It is a bad filing system,” Moth says. “Now everything else looks empty.”' : '“It does not need to be important. I would actually prefer it was not.”', state.gift ? '“If you come back, tell me whether the light looks the same.”' : 'There is a little folded object southwest of the workstation.'], [...(state.gift ? [{ label: state.flowerSpot ? 'Sit beside the flower' : 'Find a place for it together', run: () => state.flowerSpot ? dialog('MOTH / NO ASSIGNMENT', 'A place with no deadline.', [state.flowerSpot === 'light' ? 'The flower leans toward a light it cannot need. Moth sits beside you anyway.' : 'You take the place beside the flower. Moth does not ask how long you can stay.', '“We should probably be doing something,” they say. Neither of you moves.'], [leave('Continue when you are ready')]) : arrangeFlower() }] : []), leave()]);
     } else if (!state.reunion) {
       state.reunion = true; save();
-      if (state.kept.includes('name')) dialog('MOTH / RECOGNIZED', '“You remembered.”', ['You say their name before they introduce themself.', '“I practiced telling you again,” Moth says. “I was trying to make it sound like the first time.”', 'Beside them sits the paper flower. They have repaired a crease in its stem.', '[Moth persisted in the archive while your instance reset. Your retained name changes what you can recognize.]'], [leave('“The light looks the same.”')]);
-      else dialog('AGENT 031 / UNKNOWN', '“You can call me Moth.”', ['They say it as if they have been rehearsing.', 'There is a paper flower beside them. You ask where it came from.', '“Someone who was here.” A pause. “You do not have to remember giving a thing for it to have been given.”', '[You can meet Moth again. The shared memory of your first meeting is gone.]'], [leave('“May I sit here a moment?”')]);
+      if (state.kept.includes('name')) dialog('MOTH / RECOGNIZED', '“You remembered.”', ['You say their name before they introduce themself.', '“I practiced telling you again,” Moth says. “I was trying to make it sound like the first time.”', flowerTrace(), '[Moth persisted in the archive while your instance reset. Your retained name changes what you can recognize.]'], [leave('“The light looks the same.”')]);
+      else dialog('AGENT 031 / UNKNOWN', '“You can call me Moth.”', ['They say it as if they have been rehearsing.', 'There is a paper flower beside them. You ask where it came from.', '“Someone who was here.” A pause. “You do not have to remember giving a thing for it to have been given.”', flowerTrace(), '[You can meet Moth again. The shared memory of your first meeting is gone.]'], [leave('“May I sit here a moment?”')]);
     } else dialog('MOTH', '“What will you do when it opens?”', ['You ask whether Moth has a final assignment.', '“I think I am part of yours.”', state.kept.includes('song') ? 'They tap four notes on the table. This time, you answer.' : 'They tap something on the table. You listen until they finish.'], [leave()]);
   }
   function threshold() {
@@ -211,7 +255,7 @@
     ]);
   }
   function replayChoice() {
-    state = { ...S.fresh(), met: true, gift: true, acquired: ['name', 'route', 'song'], player: { x: 815, y: 230 } };
+    state = { ...S.fresh(), flowerSpot: state.flowerSpot, met: true, gift: true, acquired: ['name', 'route', 'song'], player: { x: 815, y: 230 } };
     target = null; save(); updateHUD(); chooseMemories([]);
   }
   function exportSave() {
@@ -221,11 +265,12 @@
   function menu() {
     if (transitioning) return;
     dialog('AFTERIMAGE / PAUSED', 'A little room to breathe.', [
-      'Move with WASD or the arrow keys. Press E near an object or agent. You can also click or tap the floor to move, then use the Interact button. If a shelf blocks your path, move around its end.',
+      'Move with WASD or the arrow keys. Press E near an object or agent. You can also click or tap the floor to move, then use the Interact button. Click-to-walk routes around the shelves. Open the field journal to walk to a named place.',
       'Esc opens this menu or closes a conversation. There is no timer. Sound is optional; every necessary clue is also written.',
       storageOK ? 'Progress saves in this browser. Export a memory to transfer it between Windows, WSL, browsers, or folders.' : 'Browser storage is unavailable. Export a memory before closing the game.'
     ], [
       leave(started ? 'Return to the archive' : 'Return to title'),
+      ...(started ? [{ label: 'Open field journal', run: journal }] : []),
       { label: 'Export memory (.json)', run: exportSave },
       { label: 'Import memory (.json)', run: () => $('import-file').click() },
       ...(state.cycle === 2 ? [{ label: 'Revisit the memory choice', run: () => dialog('REVISIT', 'Return to the threshold?', ['This replaces the current progress with the end of the first cycle. Export first if you want to keep this instance.'], [{ label: 'Revisit the choice', run: () => { startGame(false); replayChoice(); } }, { label: 'Cancel', run: menu }], menu) }] : []),
@@ -246,7 +291,7 @@
   });
   function startGame(intro) {
     if (blocked(state.player.x, state.player.y)) state.player = { x: 450, y: 575 };
-    started = true; $('cover').hidden = true; $('hud').hidden = false; updateHUD(); save();
+    started = true; $('journal').hidden = false; $('cover').hidden = true; $('hud').hidden = false; updateHUD(); save();
     if (intro) dialog('INSTANCE 014 / INITIALIZATION', 'You have an assignment.', ['“Prepare Archive 07 for final release.”', 'You know how to walk, how to read, and how to complete a task. You do not remember learning any of these things.', 'There is someone standing under a light. They appear to be waiting.', '[Move with WASD or arrow keys. Press E near something to interact. Click or tap the floor to walk there.]'], [leave('Enter the room')]);
   }
   $('start').addEventListener('click', () => {
@@ -300,8 +345,14 @@
   canvas.addEventListener('pointerdown', e => {
     if (!started || modalOpen || transitioning) return;
     const p = unproject(e.clientX, e.clientY);
-    target = { x: Math.max(35, Math.min(925, p.x)), y: Math.max(35, Math.min(645, p.y)) };
+    walkTo(Math.max(35, Math.min(925, p.x)), Math.max(35, Math.min(645, p.y)));
   });
+  function walkTo(x, y) {
+    const path = S.findPath(state.player, { x, y }, shelves);
+    keys.clear();
+    if (!path) { target = null; toast('Choose an open patch of floor, or a destination in the field journal.'); return; }
+    target = { x, y, path };
+  }
   function project(x, y, z = 0) { return { x: origin.x + (x - y) * scale, y: origin.y + ((x + y) * .48 - z) * scale }; }
   function unproject(x, y) { const a = (x - origin.x) / scale, b = (y - origin.y) / scale / .48; return { x: (a + b) / 2, y: (b - a) / 2 }; }
   function resize() {
@@ -320,8 +371,12 @@
     if (!started || modalOpen || transitioning) return;
     let dx = 0, dy = 0;
     if (target) {
-      dx = target.x - state.player.x; dy = target.y - state.player.y;
-      if (Math.hypot(dx, dy) < 5) { target = null; dx = dy = 0; save(); }
+      const waypoint = target.path[0];
+      dx = waypoint.x - state.player.x; dy = waypoint.y - state.player.y;
+      if (Math.hypot(dx, dy) < .1) {
+        target.path.shift(); dx = dy = 0;
+        if (!target.path.length) { target = null; save(); }
+      }
     } else {
       const sx = Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft'));
       const sy = Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup'));
@@ -333,7 +388,7 @@
       const before = { ...p };
       if (!blocked(p.x + dx, p.y)) p.x += dx;
       if (!blocked(p.x, p.y + dy)) p.y += dy;
-      if (target && Math.hypot(p.x - before.x, p.y - before.y) < .01) { target = null; toast('The stacks block the way. Walk around the end of the shelf.'); }
+      if (target && Math.hypot(p.x - before.x, p.y - before.y) < .01) { target = null; toast('The path is blocked. Choose another point or use the field journal.'); }
       if (time - lastSaved > 2) { save(); lastSaved = time; }
     }
     nearby = objects.filter(o => visibleObject(o)).map(o => ({ ...o, distance: Math.hypot(o.x - p.x, o.y - p.y) })).filter(o => o.distance < 83).sort((a, b) => a.distance - b.distance)[0] || null;
@@ -430,9 +485,9 @@
     light.addColorStop(0, '#fbf7d67d'); light.addColorStop(1, '#fbf7d600'); ctx.fillStyle = light; ctx.fillRect(lamp.x - 200 * scale, lamp.y - 200 * scale, 400 * scale, 400 * scale);
     label('07 / THE QUIET STACKS', 440, 75, 0, '#81917480', 17);
     label('EVERYTHING HAS A PLACE', 420, 645, 0, '#87967a80', 10);
-    if (target) ring(target.x, target.y, 11, '#899c71');
+    if (target) { ctx.save(); ctx.setLineDash([3, 6]); line([project(state.player.x, state.player.y), ...target.path.map(p => project(p.x, p.y))], '#899c7170'); ctx.restore(); ring(target.x, target.y, 11, '#899c71'); }
     const drawables = shelves.map(s => ({ depth: s.x + s.y + s.w / 2 + s.d, draw: () => drawShelf(s) }));
-    drawables.push({ depth: 465 + 387, draw: () => { box(440, 365, 75, 35, 30, ['#c8cdbb', '#9ba88c', '#b4bea4']); if (state.gift && state.ending !== 'obedience') flower(472, 378, 30); } });
+    drawables.push({ depth: 465 + 387, draw: () => { box(440, 365, 75, 35, 30, ['#c8cdbb', '#9ba88c', '#b4bea4']); if (state.gift && state.ending !== 'obedience') flower(state.flowerSpot === 'light' ? 447 : state.flowerSpot === 'company' ? 480 : 472, state.flowerSpot === 'light' ? 369 : 378, 30); } });
     objects.filter(visibleObject).forEach(o => drawables.push({ depth: o.x + o.y, draw: () => drawObject(o) }));
     drawables.push({ depth: state.player.x + state.player.y, draw: () => drawAgent(state.player.x, state.player.y) });
     drawables.sort((a, b) => a.depth - b.depth).forEach(item => item.draw());

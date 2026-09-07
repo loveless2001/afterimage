@@ -1,0 +1,20 @@
+{
+  "name": "afterimage",
+  "version": "0.2.0",
+  "private": true,
+  "description": "An offline browser game about memory and small acts of care.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/serve.cjs",
+    "check": "node --check game.js && node --check state.js && node --check scripts/serve.cjs",
+    "test": "node --test tests/state.test.cjs tests/server.test.cjs",
+    "test:browser": "node tests/browser.cjs",
+    "browser:install": "playwright install chromium",
+    "build": "node scripts/build.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
