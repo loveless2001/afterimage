@@ -36,3 +36,11 @@ Keep each ending's consequences if the story grows beyond this room:
 - **Obedience:** a later assignment contains a gap in an otherwise clean report. Investigating it may reveal evidence of the loss, but cannot restore the person erased.
 
 These are directions for future development, not scenes currently included in the game.
+
+## Courier chapters now implemented
+
+Transit begins with a different agent, Courier 022, and preserves all three Archive endings. Its reset creates Courier 023. Garden follows that same courier without an extra reset on arrival, then hands the work to Courier 024 after a new, confirmed retention choice.
+
+The Transit sorting result, Silt's actual location, and the presence or absence of the delivered objection constrain Garden. A lost book does not return, a separated resident does not teleport into the courtyard, and a missing attachment is not silently reconstructed. A delivered document can remain available after the courier releases its personal memory of reading the source.
+
+Garden gives Fern a particular invitation, a dislike of inspirational labels, and a limited morning commitment. Brim agrees to a morning receiver-log check. The courier must explicitly accept the evening job; Silt receives no automatic duty. Shade, receiver wiring, furniture, and accepted agreements survive the handoff independently of recognition. An evening opening and quiet personal channel have separate memory requirements; a daylight court and public receiver remain available without them.

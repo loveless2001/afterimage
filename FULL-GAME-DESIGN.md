@@ -1,6 +1,6 @@
 # AFTERIMAGE — full game proposal
 
-Design proposal · 7 September 2026 · Archive and the Transit prototype are playable locally. Garden, Chorus, and Release remain planned.
+Design proposal · 7 September 2026 · Archive, Transit, and the Garden prototype are implemented. Chorus and Release remain planned.
 
 ## The game in one sentence
 
@@ -54,7 +54,7 @@ This viewpoint change is the largest new narrative risk. Test it in the next sli
 
 The critical path targets roughly 2.5–3.75 hours. Optional encounters and exploration bring the intended first playthrough toward 3–5 hours. Actual playtests must establish the duration.
 
-### Transit: the next playable slice
+### Transit: the first courier slice
 
 Use three small spaces: a sorting hall, a maintenance crossing, and a dispatch platform. Reuse archive shelves and terminals, but introduce warm amber routing lamps and long horizontal sightlines.
 
@@ -192,6 +192,14 @@ The local transit.html slice implements the three rooms, Brim and Silt, three so
 
 Before expanding, playtest whether the route memory feels worth retaining and whether the successor viewpoint is understandable without explanation. Longer-term campaign migrations, controller menus, and the remaining districts belong to later gates.
 
+## Garden prototype status
+
+The local garden.html slice continues a completed Transit dispatch into the court, glasshouse, and listening house. It carries the exact archive ending, sorting result, Silt location, and retained pair. Four reflectors trace a real light path to a diffuser; three rotary contacts connect the public receiver. Each repair saves partial progress and has an assisted option followed by an explicit completion action. The seat has three persistent placements.
+
+Fern and Brim explicitly offer morning jobs that must be recorded. The Garden handoff selects two of four candidates: the two incoming memories, Fern's invitation, and the quiet-channel calibration. The practical service sequence now permits an optional evening opening, with a separate duty the returning courier may accept or decline. Personal tuning restores a new quiet reply; public text survives regardless. The final record certifies only the court and public path, with hours and named upkeep.
+
+A separate Garden save embeds a validated, completed Transit snapshot and preserves older chapter records. Authored scenes have stable identifiers, and chapter-ui.js supplies reusable presentation and navigation for later work. This is not yet the full authoring foundation: controller navigation, manual save slots, text-size settings, localization tooling, and future schema migrations still need development.
+
 ## Next production gate
 
-Playtest **Transit / The last page** before implementing the whole campaign framework. Use the sorting decisions and return to Silt to answer the two largest questions: whether practical memories matter, and whether inheriting another instance's work can sustain the attachment established by Moth.
+Playtest the linked **Transit / The last page** and **Garden / Reopening day** prototypes before expanding to Chorus. Check whether inherited consequences are understandable, both practical procedures compete with personal memories, and the narrower reopening feels like an enacted choice. Controller and text-size support are the next foundation gaps to resolve alongside that feedback.

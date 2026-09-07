@@ -15,6 +15,8 @@ This is an offline Canvas 2D browser game. Keep the runtime independent of Node,
 
 - state.js owns save validation, memory/reset rules, and the current navigation helper.
 - transit-state.js owns the separate courier save and chapter rules; transit-story.js owns its scenes; transit.js owns its rooms and browser integration.
+- garden-state.js owns the separate Garden save, inherited Transit snapshot, repair rules, and handoff; garden-story.js owns identified authored scenes; garden.js owns its rooms and interactions.
+- chapter-ui.js supplies Garden and future chapters with shared presentation, navigation, modal controls, and optional audio. Earlier chapters retain their established runtime.
 - game.js owns encounters, input, Canvas rendering, and browser integration.
 - index.html and style.css own the interface.
 - scripts/serve.cjs serves an explicit allowlist. Update it when shipping a new runtime asset.

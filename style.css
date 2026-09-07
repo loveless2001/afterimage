@@ -27,3 +27,18 @@
 .shelf-workbench button.selected{border-color:#728565;background:#d9e0ce}
 #dialog-body .shelf-status{font-size:12px;line-height:1.5;margin:4px 0}
 @media(max-width:520px){.transit .cover h2{font-size:45px}.transit .cover-inner{padding-top:65px}.transit .cover-note{margin-top:18px}.transit .assignment h1{font-size:20px}.transit .memory-panel{width:130px}}
+
+.garden-workbench{margin:20px 0 4px;padding:12px;border:1px solid var(--line);background:#e1e7d4}
+.garden-workbench svg{display:block;width:100%;height:auto;max-height:300px;overflow:visible}
+.garden-svg-label{fill:#536347;font:10px monospace}
+.light-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.light-controls button,.garden-receiver-controls button{text-align:left;min-height:44px;font:12px/1.5 monospace;padding:10px}
+.garden-receiver-controls{display:flex;flex-direction:column;gap:8px}
+#dialog-body .garden-repair-status{font:12px/1.6 Arial,sans-serif;margin:12px 0 0}
+.garden .memory{padding:10px 0}
+@media(max-width:520px){.garden .cover h2{font-size:49px}.garden .cover-inner{padding-top:65px}.garden .cover-note{margin-top:18px}.garden .assignment h1{font-size:20px}.garden .memory-panel{width:130px}.garden .memory{padding:8px 0}.garden .memory small{letter-spacing:.5px}.garden-workbench{padding:10px 8px}.light-controls{gap:6px}.light-controls button{font-size:11px;padding:8px}.garden-workbench svg{max-height:235px}}
+/* Keep completion and assistance controls in view while a repair board scrolls. */
+.garden .dialog:has(.garden-workbench){display:flex;flex-direction:column;overflow:hidden}
+.garden .dialog:has(.garden-workbench)>.eyebrow,.garden .dialog:has(.garden-workbench)>h2,.garden .dialog:has(.garden-workbench)>#choices{flex-shrink:0}
+.garden .dialog:has(.garden-workbench)>#dialog-body{min-height:0;overflow:auto;padding-right:4px;scrollbar-width:thin}
+.garden .dialog:has(.garden-workbench)>#choices{margin-top:16px}

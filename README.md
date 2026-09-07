@@ -1,6 +1,6 @@
 # AFTERIMAGE
 
-A small browser game about an archive agent, a companion named Moth, and choosing which two memories survive a reset. Two cycles, three memory combinations, three endings.
+An offline browser game about memory, unfinished work, and small acts of care. The Archive prologue leads into playable Transit and Garden prototypes. Only two personal memories survive each courier reset.
 
 ## Play
 
@@ -18,9 +18,19 @@ Talk to Moth again after giving the flower to discuss your goodbye. You can ask 
 
 Open transit.html or choose Transit / chapter preview on the prologue title. A completed prologue ending becomes a dispatch for Courier 022; standalone previews support all three endings. The original agent and Moth keep their ending.
 
-Explore the sorting hall, maintenance crossing, and dispatch platform. Meet Brim and Silt, protect a book or ledger or repair a shelf for both, and retain two of three memories. After resetting, revisit the people and consequences, reconnect the bridge if you kept its sequence, and review the outgoing dispatch. The public detour always allows completion. This is one playable chapter slice; Garden and the remaining campaign are still planned.
+Explore the sorting hall, maintenance crossing, and dispatch platform. Meet Brim and Silt, protect a book or ledger or repair a shelf for both, and retain two of three memories. After resetting, revisit the people and consequences, reconnect the bridge if you kept its sequence, and review the outgoing dispatch. The public detour always allows completion. The completed dispatch now continues into Garden. Chorus and Release remain planned.
 
 The shelf has three adjustable fittings and an assisted alignment option. Sorting, reset, replacement saves, and final delivery require explicit confirmation. Transit uses its own afterimage.transit.v1 save and accepts exported prologue endings or campaign saves from Menu / help. Importing never replaces the original prologue save.
+
+## Garden: Reopening day
+
+Choose Continue to Garden on a Transit receipt, use Garden chapter / preview in the Transit menu, or open garden.html directly. A completed Transit save carries its exact consequences forward. The arriving character is still Courier 023; entering Garden does not cause an additional reset.
+
+Explore the courtyard, glasshouse, and listening house. Meet Fern, direct four real reflectors to a diffuser, connect a three-contact receiver circuit, and place a seat without assigning anyone a task. Both workbenches save partial progress and offer assisted alignment; completing a repair is a separate action.
+
+Ask Fern and Brim to record the morning upkeep they offer. Then retain two of four candidates: two memories brought from Transit and two Garden experiences. After the reset, the physical repairs, seat, incoming documents, and other people's commitments remain. The service sequence permits an evening opening only if the courier accepts its dusk check. The new tuning memory restores a quiet personal channel. Daylight opening and public messages always remain possible.
+
+Garden uses afterimage.garden.v1 and includes a validated snapshot of the completed Transit dispatch. Importing either a completed Transit save or a Garden record requires a replacement preview; earlier saves remain untouched. Revisit controls for earlier chapters open those saved chapter records. Future chapters and the full 3–5 hour campaign remain a design target, not a claim about these prototypes.
 
 ## Development on Windows or WSL
 
@@ -50,7 +60,7 @@ Keep a Windows checkout on the Windows filesystem and a separate WSL checkout on
 
 Progress saves automatically in the browser when available. File URLs, ports, browsers, and machines may have separate saves. Use Menu / help → Export memory and Import memory to transfer a save. Older v1 saves remain supported. Storage-denied environments can still play and export manually.
 
-The development server exposes only the game files. For a portable game release, include index.html, style.css, state.js, game.js, transit.html, transit-state.js, transit-story.js, transit.js, and optionally the launch scripts. No tests, dependencies, or repository metadata are needed by players.
+The development server exposes only the game files. For a portable game release, include index.html, style.css, state.js, game.js, transit.html, transit-state.js, transit-story.js, transit.js, garden.html, garden-state.js, garden-story.js, chapter-ui.js, garden.js, and optionally the launch scripts. No tests, dependencies, or repository metadata are needed by players.
 
 ## Online demo
 

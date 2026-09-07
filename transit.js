@@ -112,7 +112,7 @@
       'Returning to the prologue opens its original save. Starting or importing a courier never replaces that prologue save.'
     ], [leave(started ? 'Return to Transit' : 'Return to title'), ...(started ? [{ label: 'Open field journal', run: journal }] : []),
       { label: 'Export campaign (.json)', disabled: !started && !saved, run: exportCampaign },
-      { label: 'Import a prologue or campaign save', run: () => $('import-file').click() }, { label: 'Start another courier', run: chooseBeginning },
+      { label: 'Import a prologue or campaign save', run: () => $('import-file').click() }, { label: 'Start another courier', run: chooseBeginning }, { label: 'Garden chapter / preview', run: () => { save(); location.href = 'garden.html'; } },
       { label: 'Return to the prologue', run: () => { save(); location.href = 'index.html'; } }
     ]);
   }
@@ -202,7 +202,7 @@
           { label: 'Reconsider', run: () => chooseMemories(selected) }], () => chooseMemories(selected));
       } }, leave('Not yet')]);
   }
-  function receipt() { show(Story.receipt(s), [leave('Revisit the station'), { label: 'Export this campaign', run: exportCampaign }, { label: 'Return to the prologue', run: () => { save(); location.href = 'index.html'; } }]); }
+  function receipt() { show(Story.receipt(s), [leave('Revisit the station'), { label: 'Continue to Garden', primary: true, run: () => { save(); location.href = 'garden.html'; } }, { label: 'Export this campaign', run: exportCampaign }, { label: 'Return to the prologue', run: () => { save(); location.href = 'index.html'; } }]); }
   function outgoing() {
     if (s.delivered) return receipt();
     if (s.cycle === 1) { if (!C.ready(s)) return say('OUTGOING TERMINAL', 'The station is not ready to reset.', ['Meet Brim, settle the sorting plan, speak to Silt, read the service diagram, and read the dispatch board.'], [leave()]); return chooseMemories(); }

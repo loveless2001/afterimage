@@ -55,7 +55,7 @@
       s.siltReturned ? 'Silt crossed back with the drawing. The station’s resident field now names an occupied place beside Brim.' : 'Silt remains on the far platform, with light and supplies. The receipt records the separation instead of calling the platform empty.',
       s.kept.includes('message') ? 'The objection travels onward in its own attachment. The next district will have to read it alongside the official counts.' : 'The attachment is marked: “Objection not retained; wording unavailable.” The gap is part of the record.',
       s.origin === 'obedience' ? 'Archive 07’s closure report continues with the dispatch. No one has been brought back by describing the loss.' : s.origin === 'witness' ? 'Moth’s chosen name remains in the incoming record. The courier has added a delivery to it, not an answer to everything it asks.' : 'The occupied archive is still waiting for a reply. You can report that its message reached another inhabited room.',
-      '[End of the playable Transit slice. Garden is a future chapter. You can revisit the station, export this campaign, or return to the standalone prologue.]'
+      '[The Transit dispatch is complete. Continue to Garden to see where the delivery arrives, revisit the station, or export this campaign. Your earlier chapter saves stay intact.]'
     ])
   };
   root.AfterimageTransitStory = api;
