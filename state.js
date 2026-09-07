@@ -43,11 +43,11 @@
     s.relays.push(id);
     return true;
   }
-  const fresh = () => ({ version: 1, cycle: 1, acquired: [], kept: [], met: false, gift: false, flowerSpot: null, relays: [], relayContacts: { west: [...relayLayouts.west.initial], east: [...relayLayouts.east.initial] }, gate: false, reunion: false, ending: null, player: { x: 450, y: 575 } });
+  const fresh = () => ({ version: 1, cycle: 1, acquired: [], kept: [], met: false, gift: false, flowerSpot: null, mothGreeting: null, relays: [], relayContacts: { west: [...relayLayouts.west.initial], east: [...relayLayouts.east.initial] }, gate: false, reunion: false, ending: null, player: { x: 450, y: 575 } });
   function acquire(s, key) { if (s.cycle !== 1 || !memories[key]) return; if (!s.acquired.includes(key)) s.acquired.push(key); }
   function reset(s, kept) {
     if (s.cycle !== 1 || !s.gift || s.acquired.length !== 3 || kept.length !== 2 || new Set(kept).size !== 2 || kept.some(k => !s.acquired.includes(k))) throw new Error('Choose two acquired memories after giving the gift.');
-    return { ...fresh(), cycle: 2, acquired: [...kept], kept: [...kept], gift: true, met: true, flowerSpot: s.flowerSpot || null };
+    return { ...fresh(), cycle: 2, acquired: [...kept], kept: [...kept], gift: true, met: true, flowerSpot: s.flowerSpot || null, mothGreeting: s.mothGreeting || null };
   }
   function validate(value) {
     if (!value || value.version !== 1 || ![1, 2].includes(value.cycle)) throw new Error('This is not an AFTERIMAGE v1 save.');
@@ -73,6 +73,9 @@
     if (value.flowerSpot !== undefined && ![null, 'light', 'company'].includes(value.flowerSpot)) throw new Error('Invalid flower placement.');
     s.flowerSpot = value.flowerSpot || null;
     if (s.flowerSpot && !s.gift) throw new Error('The flower has not been given.');
+    if (value.mothGreeting !== undefined && ![null, 'introduce', 'space'].includes(value.mothGreeting)) throw new Error('Invalid agreement with Moth.');
+    s.mothGreeting = value.mothGreeting || null;
+    if (s.mothGreeting && (!s.met || !s.gift)) throw new Error('You have not made an agreement with Moth.');
     s.cycle = value.cycle;
     if (s.cycle === 1 && (s.kept.length || s.gate || s.reunion)) throw new Error('Invalid first cycle.');
     if (s.cycle === 2 && (s.kept.length !== 2 || !s.gift || !s.met || s.acquired.length !== 2 || s.acquired.some(k => !s.kept.includes(k)))) throw new Error('Incomplete reset.');

@@ -12,6 +12,8 @@ After bringing Moth the flower, choose its place together. Its placement survive
 
 Without the route memory, restore the two relays by shifting three contacts into a continuous circuit. Follow the lit path from IN to OUT, then choose Connect relay. Each relay has different wiring. Progress saves between visits; Align contacts for me provides an untimed assisted path with the same story outcome.
 
+Talk to Moth again after giving the flower to discuss your goodbye. You can ask for a new introduction or room to approach after the reset. Moth remembers the agreement; your two memory slots still determine what you recognize. Before the final choice, ask what Moth wants. After staying or sending the signal, visit them for an aftermath scene.
+
 ## Development on Windows or WSL
 
 The reference Node version is 22.19.0, matching the Windows development installation at setup. The game itself does not require Node. Install dependencies separately in each OS checkout:

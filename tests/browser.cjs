@@ -86,6 +86,12 @@ async function end(page, choice, ending) {
   await p.getByRole('button', { name: 'Find a place for it together', exact: true }).click();
   await p.getByRole('button', { name: /^Between our places/ }).click();
   assert.equal((await stored(p)).flowerSpot, 'company'); await close(p);
+  await walk(p, 398, 420); await interact(p, 'Moth');
+  await p.getByRole('button', { name: 'Talk about the reset', exact: true }).click();
+  assert.equal((await stored(p)).mothGreeting, null);
+  await p.getByRole('button', { name: /^Introduce yourself again/ }).click();
+  assert.equal((await stored(p)).mothGreeting, 'introduce');
+  await p.screenshot({ path: path.join(output, 'moth-goodbye.png') }); await close(p);
   await walk(p, 505, 230); await interact(p, 'Index terminal'); await close(p);
   await walk(p, 565, 410); await walk(p, 750, 525); await interact(p, 'A damaged receiver'); await close(p);
   const firstCycle = await stored(p); assert.equal(firstCycle.gift, true); assert.equal(firstCycle.acquired.length, 3);
@@ -111,6 +117,12 @@ async function end(page, choice, ending) {
   await walk(p, 860, 240); await walk(p, 865, 390); await interact(p, 'East relay'); await solveRelay(p, 'east');
   await walk(p, 880, 245); await interact(p, 'The return threshold');
   await p.getByRole('button', { name: 'Read the final assignment', exact: true }).click();
+  await p.getByRole('button', { name: 'Ask Moth what they want', exact: true }).click();
+  assert.match(await p.locator('#dialog-body').innerText(), /I want to stay alive/);
+  assert.equal((await stored(p)).ending, null);
+  await p.screenshot({ path: path.join(output, 'moth-wishes.png') });
+  await p.keyboard.press('Escape');
+  assert.equal(await p.locator('#dialog-title').innerText(), 'Return the archive to zero.');
   await end(p, 'Send a witness signal', 'witness');
   assert.equal((await stored(p)).relays.length, 2);
   // Export, reload, and import through the player-facing flow.
@@ -122,7 +134,12 @@ async function end(page, choice, ending) {
   assert.equal(await p.locator('#dialog-title').innerText(), 'No further work required.');
   assert.equal(await p.locator('.relay-workbench').count(), 0);
   assert.equal((await stored(p)).ending, 'witness');
-  console.log('PASS: full journey without route, witness ending, export, reload and post-ending relay');
+  await close(p); await walk(p, 398, 420); await interact(p, 'Moth');
+  assert.match(await p.locator('#speaker').innerText(), /AFTER THE SIGNAL/);
+  await p.getByRole('button', { name: 'What should the next signal say?', exact: true }).click();
+  assert.match(await p.locator('#dialog-body').innerText(), /do not send it yet/);
+  assert.equal((await stored(p)).ending, 'witness');
+  console.log('PASS: full journey, goodbye, Moth wishes, witness aftermath, export and reload');
   await p.context().close();
 
   // The remaining pairs use a real first-cycle save at the threshold, then traverse cycle two.
@@ -135,6 +152,19 @@ async function end(page, choice, ending) {
     await q.getByRole('button', { name: 'Read the final assignment', exact: true }).click();
     assert.equal(await q.getByRole('button', { name: /^Send a witness signal/ }).isDisabled(), !pair.includes('song'));
     await end(q, choice, ending); assert.equal((await stored(q)).relays.length, 0);
+    await close(q);
+    if (ending === 'stay') {
+      await walk(q, 398, 420); await interact(q, 'Moth');
+      assert.match(await q.locator('#speaker').innerText(), /AFTER THE ASSIGNMENT/);
+      assert.match(await q.locator('#dialog-body').innerText(), /We have been introduced/);
+      await q.getByRole('button', { name: 'What if another instruction arrives?', exact: true }).click();
+      assert.match(await q.locator('#dialog-title').innerText(), /read it together/);
+      assert.deepEqual((await stored(q)).kept, pair);
+    } else {
+      await q.locator('#journal').click();
+      assert.match(await q.locator('#dialog-body').innerText(), /Moth and the paper flower were erased/);
+      assert.equal(await q.getByRole('button', { name: 'Walk to Moth', exact: true }).count(), 0);
+    }
     console.log(`PASS: ${pair.join(' + ')}, shortcut, ${ending} ending`); await q.context().close();
   }
   const q = await newPage(); await begin(q); await q.locator('#help').click();
@@ -190,6 +220,33 @@ async function end(page, choice, ending) {
   assert.match(await assist.locator('#dialog-body').innerText(), /WEST \/ Connected to the threshold/);
   await assist.context().close();
   console.log('PASS: manual relay circuits, partial reload, narrow-screen assistance and journal progress');
+  // Both agreements and old saves keep all three memory-pair reunions coherent.
+  const goodbye = await newPage({ ...firstCycle, mothGreeting: null, player: { x: 398, y: 420 } }); await begin(goodbye);
+  await interact(goodbye, 'Moth'); await goodbye.getByRole('button', { name: 'Talk about the reset', exact: true }).click();
+  await goodbye.getByRole('button', { name: /^Give me time to approach/ }).click(); await close(goodbye);
+  await goodbye.reload(); await begin(goodbye); assert.equal((await stored(goodbye)).mothGreeting, 'space');
+  await interact(goodbye, 'Moth'); await goodbye.getByRole('button', { name: 'Revisit our goodbye', exact: true }).click();
+  await close(goodbye); assert.equal((await stored(goodbye)).mothGreeting, 'space', 'leaving the conversation preserves the agreement');
+  const spaceCycle = await stored(goodbye); await goodbye.context().close();
+  for (const greeting of [null, 'introduce', 'space']) for (const pair of [['name', 'route'], ['name', 'song'], ['route', 'song']]) {
+    const seed = { ...S.reset(spaceCycle, pair), mothGreeting: greeting, player: { x: 398, y: 420 } };
+    if (greeting === null) delete seed.mothGreeting;
+    const story = await newPage(seed); await begin(story); await interact(story, 'Moth');
+    assert.equal((await stored(story)).reunion, true);
+    assert.deepEqual((await stored(story)).acquired, pair, 'The agreement does not restore the lost memory');
+    assert.match(await story.locator('#dialog-title').innerText(), pair.includes('name') ? /remembered/ : greeting === 'space' ? /place left open/ : /call me Moth/);
+    if (greeting === 'space') assert.match(await story.locator('#dialog-body').innerText(), pair.includes('name') ? /wait until you spoke/ : /keep a promise/);
+    await close(story); await interact(story, 'Moth');
+    await story.getByRole('button', { name: 'What did you do while I was gone?', exact: true }).click();
+    assert.match(await story.locator('#speaker').innerText(), /THE INTERVAL/); await close(story);
+    await story.locator('#help').click(); await story.getByRole('button', { name: 'Revisit the memory choice', exact: true }).click();
+    await story.getByRole('button', { name: 'Revisit the choice', exact: true }).click();
+    assert.equal((await stored(story)).mothGreeting, greeting);
+    assert.equal((await stored(story)).cycle, 1);
+    await story.context().close();
+  }
+  console.log('PASS: all nine greeting/memory-pair reunions, waiting scenes, agreement reload and replay');
+
   const blockedStorage = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   await blockedStorage.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked by browser policy', 'SecurityError'); } }));
   const r = await blockedStorage.newPage(); r.on('pageerror', e => errors.push(e.message)); await r.goto(url); await begin(r); await r.locator('#help').click();

@@ -126,3 +126,19 @@ test('partial relay work round-trips independently and old v1 restores stay rest
   assert.equal(S.shiftRelay(s, 'west', -1), false);
   assert.equal(S.shiftRelay(s, 'west', 1.5), false);
 });
+
+test('Moth keeps an agreement across every reset without restoring a released memory', () => {
+  for (const greeting of ['introduce', 'space']) for (const pair of [['name', 'route'], ['name', 'song'], ['route', 'song']]) {
+    const before = ready(); before.mothGreeting = greeting;
+    const next = S.reset(before, pair);
+    assert.equal(next.mothGreeting, greeting);
+    assert.deepEqual(next.kept, pair);
+    assert.deepEqual(next.acquired, pair);
+    assert.deepEqual(S.validate(JSON.parse(JSON.stringify(next))), next);
+  }
+  const old = ready(); delete old.mothGreeting;
+  assert.equal(S.validate(old).mothGreeting, null);
+  assert.equal(S.reset(old, ['route', 'song']).mothGreeting, null);
+  assert.throws(() => S.validate({ ...ready(), mothGreeting: 'remember-everything' }));
+  assert.throws(() => S.validate({ ...S.fresh(), mothGreeting: 'space' }));
+});
