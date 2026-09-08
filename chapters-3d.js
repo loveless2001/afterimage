@@ -285,6 +285,8 @@
       return scene(id,'A PLACE TO SIT','For a moment.',lines,o?[choice('Sit down','$sit',o.seat,i===2&&s.phase!=='finished'&&s.flags.fern&&s.flags.seat&&!s.flags.sit?{stateAction:'sit'}:{})]:[],{kind:'seat',seat:o&&o.seat});
     }
     const sceneResult=[archiveEncounter,transitEncounter,gardenEncounter,chorusEncounter,releaseEncounter][chapterIndex(s)](s,id)||scene(id,'THE ROOM','Something left in place.',['There is nothing further to operate here.']);
+    const repairs={prologue:['relayA','relayB'],transit:['lift'],garden:['shade','receiver'],chorus:[],release:[]};
+    if(repairs[s.chapter].includes(id))sceneResult.puzzle={id,readOnly:Boolean(s.flags[id]||s.phase==='finished')};
     if(s.phase==='finished') sceneResult.choices=sceneResult.choices.filter(c=>c.action.startsWith('$'));
     else if(!root.Afterimage3DState.canFinish(s)) sceneResult.choices=sceneResult.choices.map(c=>c.action==='finish'?{...c,disabled:true,detail:root.Afterimage3DState.objective(s).step}:c);
     return sceneResult;

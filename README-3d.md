@@ -13,7 +13,7 @@ This is a compact, first-person adaptation with five playable chapters, volumetr
 - Escape releases the mouse. Escape again opens the menu.
 - Touch screens have movement buttons, a drag-to-look area, and an interaction button.
 
-Your current assignment and next step stay visible. Sound is optional and remembers its setting. You can change it inside conversations; the Archive receiver can replay Moth’s tune while that memory remains available. Later chapters have their own ambient sound. Repairs are untimed and include an assisted alignment button; securing the repair remains a separate decision.
+Your current assignment and next step stay visible. Sound is optional and remembers its setting. You can change it inside conversations; the Archive receiver can replay Moth’s tune while that memory remains available. Later chapters have their own ambient sound. Each repair shows its source contact plate above a live diagram of your current controls, with explicit open/closed and match/change labels. Diagrams remain available after repairs. Repairs are untimed and include an assisted alignment button; securing the repair remains a separate decision.
 
 ## Choices and saves
 

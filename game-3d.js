@@ -23,17 +23,50 @@
   function refreshWorld(useStatePosition = false) { const p = useStatePosition ? s.position : engine.getPosition(); engine.load(Story.world(s),p); s.position = engine.getPosition(); hud(); updateTracking(); }
   function closePanel() { panelOpen=false; $('panel').hidden=true; $('panel').classList.remove('menu'); document.body.classList.remove('reading'); $('hud').inert=false; $('cover').inert=false; escapeAction=null; if(active)engine.pause(false); if(active)$('world').focus();else if(focusReturn?.isConnected)focusReturn.focus(); focusReturn=null; updateFocus(focus); }
   function show(scene, choices, options={}) {
-    if(!panelOpen)focusReturn=document.activeElement; panelOpen=true; engine.pause(true); updateFocus(null); document.body.classList.add('reading'); $('hud').inert=true; $('cover').inert=true; $('panel').hidden=false; $('panel').classList.toggle('menu',Boolean(options.menu)); $('panel').dataset.scene=scene.id||'';
+    if(!panelOpen)focusReturn=document.activeElement; panelOpen=true; engine.pause(true); updateFocus(null); document.body.classList.add('reading'); $('hud').inert=true; $('cover').inert=true; $('panel').hidden=false; $('panel').classList.toggle('menu',Boolean(options.menu)); $('panel').dataset.scene=scene.id||''; $('panel').classList.toggle('has-diagram',Boolean(scene.puzzle));
     $('speaker').textContent=scene.speaker||names[s.chapter]; $('dialog-title').textContent=scene.title||''; $('lines').replaceChildren(); for(const line of scene.lines||scene.paragraphs||[]){const p=document.createElement('p');p.textContent=line.startsWith('[')?line.slice(1,-1):line;if(line.startsWith('['))p.className='note';$('lines').append(p);}
     $('puzzle').replaceChildren();$('puzzle').hidden=true; $('choices').replaceChildren(); $('choices').classList.toggle('compact',Boolean(options.compact)); for(const choice of choices||[]){const button=document.createElement('button');button.textContent=choice.label;button.disabled=Boolean(choice.disabled);if(choice.primary)button.classList.add('primary');if(choice.danger)button.classList.add('danger');if(choice.selected!==undefined)button.setAttribute('aria-pressed',String(choice.selected));if(choice.detail){const d=document.createElement('small');d.textContent=choice.detail;button.append(d);}button.addEventListener('click',()=>{try{choice.run?choice.run():execute(choice);}catch(e){toast(e.message);}});$('choices').append(button);}
-    escapeAction=options.escape||closePanel; document.querySelector('.dialog').scrollTop=0; $('choices').querySelector('button:not(:disabled)')?.focus();
+    escapeAction=options.escape||closePanel; document.querySelector('.dialog').scrollTop=0; $('choices').querySelector('button:not(:disabled)')?.focus({preventScroll:true});
   }
   const leave=(label='Step away')=>({label,run:closePanel});
   function encounter(id, feedback=[]) { currentObject=id; const scene=Story.encounter(s,id); if(!scene)return toast('Nothing to use here yet.');const choices=[...(scene.choices||[])];if(!choices.some(c=>c.action==='$close'))choices.push(leave(scene.kind==='ending'?'Keep exploring':'Step away'));show({...scene,lines:[...(scene.lines||[]),...feedback]},choices);if(scene.puzzle)renderPuzzle(scene.puzzle,id); }
+  function contactDiagram(key, config, bits, labels) {
+    const ns='http://www.w3.org/2000/svg', node=(tag,attrs={},text)=>{const el=document.createElementNS(ns,tag);for(const [name,value] of Object.entries(attrs))el.setAttribute(name,String(value));if(text!==undefined)el.textContent=text;return el;};
+    const describe=value=>labels.map((label,i)=>label+' '+(value&(1<<i)?'on (closed)':'off (open)')).join(', ');
+    const svg=node('svg',{viewBox:'0 0 360 208',class:'contact-diagram',role:'img','aria-labelledby':'contact-title contact-description','data-puzzle':key,'data-target':config.target,'data-current':bits});
+    svg.append(node('title',{id:'contact-title'},config.title+' contact diagram'),node('desc',{id:'contact-description'},'Source plate: '+describe(config.target)+'. Your controls: '+describe(bits)+'. Match each control to the source plate.'));
+    svg.append(node('rect',{x:1,y:1,width:358,height:206,rx:5,class:'diagram-frame'}),node('line',{x1:12,y1:104,x2:348,y2:104,class:'diagram-divider'}));
+    for(const [row,value,heading] of [['source',config.target,'SOURCE PLATE'],['current',bits,'YOUR CONTROLS']]){
+      const top=row==='source'?0:104, group=node('g',{'data-row':row});svg.append(group);
+      group.append(node('text',{x:14,y:top+20,class:'diagram-heading'},heading));
+      labels.forEach((label,i)=>{
+        const x=60+i*120,y=top+64,on=Boolean(value&(1<<i)),matches=Boolean(bits&(1<<i))===Boolean(config.target&(1<<i));
+        const contact=node('g',{'data-contact':i,'data-on':on,'data-matched':row==='source'||matches,class:row==='source'?'diagram-source':matches?'diagram-matched':'diagram-unmatched'});group.append(contact);
+        contact.append(node('text',{x,y:top+42,'text-anchor':'middle',class:'diagram-label'},label));
+        contact.append(node('line',{x1:x-37,y1:y,x2:x-23,y2:y,class:'diagram-wire'}),node('line',{x1:x+23,y1:y,x2:x+37,y2:y,class:'diagram-wire'}));
+        contact.append(node('line',{x1:x-23,y1:y,x2:on?x+23:x+14,y2:on?y:y-17,class:'diagram-wire diagram-switch'}));
+        for(const cx of [x-23,x+23])contact.append(node('circle',{cx,cy:y,r:4,class:'diagram-terminal'}));
+        contact.append(node('text',{x,y:top+91,'text-anchor':'middle',class:'diagram-state'},row==='source'?(on?'ON / closed':'OFF / open'):(on?'ON':'OFF')+' / '+(matches?'match':'change')));
+      });
+    }
+    return svg;
+  }
   function renderPuzzle(puzzle,id) {
-    const key = puzzle.id || puzzle, config = M.puzzles?.[key] || {}, bits = s.flags[key+'Circuit'] || 0; $('puzzle').hidden=false; const clue=document.createElement('p');clue.className='puzzle-clue';const target=Number.isInteger(config.target)?config.target:5;const labels=config.labels||['Left','Middle','Right'];clue.textContent=puzzle.hint||config.hint||('The plate shows: '+labels.map((label,i)=>label+' '+((target>>i)&1?'on':'off')).join(', ')+'.');$('puzzle').append(clue);
-    const row=document.createElement('div');row.className='switches';row.setAttribute('role','group');row.setAttribute('aria-label','Repair switches');for(let i=0;i<3;i++){const button=document.createElement('button');button.setAttribute('aria-pressed',String(Boolean(bits&(1<<i))));button.textContent=labels[i]||'Switch '+(i+1);const value=document.createElement('span');value.textContent=bits&(1<<i)?'●':'○';button.append(value);const status=document.createElement('small');status.textContent=bits&(1<<i)?'ON':'OFF';button.append(status);button.addEventListener('click',()=>{try{s=M.act(s,'turn',{id:key,index:i});save();refreshWorld();encounter(id);$('puzzle').querySelectorAll('.switches button')[i]?.focus();}catch(e){toast(e.message);}});row.append(button);} $('puzzle').append(row);
-    const status=document.createElement('p');status.className='circuit-status';status.setAttribute('role','status');status.textContent=bits===target?'The controls match. Confirm the repair below.':'Match the controls to the plate, then confirm the repair.';$('puzzle').append(status);const help=document.createElement('button');help.textContent='Set the controls for me';help.addEventListener('click',()=>{try{for(let i=0;i<3;i++)if(Boolean(s.flags[key+'Circuit']&(1<<i))!==Boolean(target&(1<<i)))s=M.act(s,'turn',{id:key,index:i});save();refreshWorld();encounter(id);}catch(e){toast(e.message);}});$('puzzle').append(help);
+    const key=puzzle.id||puzzle,config=M.puzzles[key],target=config.target,bits=s.flags[key+'Circuit']||0,labels=config.labels||['Left','Middle','Right'],readOnly=Boolean(puzzle.readOnly);
+    $('puzzle').hidden=false;$('puzzle').append(contactDiagram(key,config,bits,labels));
+    const clue=document.createElement('p');clue.className='puzzle-clue';clue.textContent=puzzle.hint||config.hint;$('puzzle').append(clue);
+    const status=document.createElement('p');status.className='circuit-status';status.setAttribute('role','status');
+    if(readOnly){status.textContent=key==='lift'&&s.world.liftSpent?'These contact positions were secured before the component became a shelf. The parcel lift is off.':s.flags[key]?'Repair secured. These contact positions stay in place through the handoff.':'Recorded contact positions. This chapter is finished.';$('puzzle').append(status);return;}
+    const redraw=(index,change)=>{const scroll=document.querySelector('.dialog').scrollTop;try{change();save();refreshWorld();encounter(id);document.querySelector('.dialog').scrollTop=scroll;const button=index===null?$('puzzle').querySelector('.diagram-assist'):$('puzzle').querySelectorAll('.switches button')[index];button?.focus({preventScroll:true});}catch(e){toast(e.message);}};
+    const row=document.createElement('div');row.className='switches';row.setAttribute('role','group');row.setAttribute('aria-label','Repair switches');
+    for(let i=0;i<3;i++){
+      const button=document.createElement('button');button.setAttribute('aria-pressed',String(Boolean(bits&(1<<i))));button.textContent=labels[i];
+      const value=document.createElement('span');value.textContent=bits&(1<<i)?'●':'○';button.append(value);
+      const label=document.createElement('small');label.textContent=bits&(1<<i)?'ON':'OFF';button.append(label);
+      button.addEventListener('click',()=>redraw(i,()=>{s=M.act(s,'turn',{id:key,index:i});}));row.append(button);
+    }
+    $('puzzle').append(row);status.textContent=bits===target?'The controls match. Confirm the repair below.':'Match the controls to the source plate, then confirm the repair.';$('puzzle').append(status);
+    const help=document.createElement('button');help.className='diagram-assist';help.textContent='Set the controls for me';help.addEventListener('click',()=>redraw(null,()=>{for(let i=0;i<3;i++)if(Boolean(s.flags[key+'Circuit']&(1<<i))!==Boolean(target&(1<<i)))s=M.act(s,'turn',{id:key,index:i});}));$('puzzle').append(help);
   }
   function execute(choice, confirmed=false) {
     if(choice.confirm&&!confirmed){const c=choice.confirm;show({id:'review-'+choice.action,speaker:'REVIEW YOUR DECISION',title:c.title||'Confirm this choice?',lines:c.lines||[]},[{label:c.label||'Confirm this choice',primary:true,danger:choice.danger,run:()=>execute(choice,true)},{label:'Reconsider',run:()=>encounter(currentObject)}],{menu:true,escape:()=>encounter(currentObject)});return;}
