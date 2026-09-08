@@ -45,7 +45,7 @@
       object(w,'assignment','Closure assignment',.2,3.9,'terminal',palette.sage);
       if(v.mothPresent!==false) object(w,'moth','Moth',-1.75,-.4,'agent',palette.sage);
       if(v.flowerPresent!==false) object(w,'flower','Paper flower',v.flowerPlaced?-.55:-3.4,v.flowerPlaced?-.4:1.25,'flower',palette.paper,{y:v.flowerPlaced?1.04:.22,h:.35});
-      object(w,'service','Service index',.3,-3.7,'panel',palette.rust);
+      object(w,'service','Service index',.3,-3.7,'panel',a.relayA&&a.relayB?palette.gold:palette.rust);
       object(w,'relayA','West relay',-4.8,-3,'panel',a.relayA?palette.gold:palette.rust,{w:.58,h:1.4});
       object(w,'relayB','East relay',4.8,.6,'panel',a.relayB?palette.gold:palette.rust,{w:.58,h:1.4});
       object(w,'receiver','Archive receiver',4.3,4.5,'receiver',palette.glass);
@@ -154,11 +154,38 @@
     return scene('assignment',ch.place.toUpperCase(),ch.title,lines,[choice('Track places in the journal','$journal')]);
   }
   function resetScene(s) {return scene('reset','INSTANCE HANDOFF','What can the next one carry?',s.phase==='work'?['Choose exactly two memories to keep. The others will be released.','Repairs, placed objects, and recorded agreements stay in the world.']:['The handoff is complete. The previous instance’s released experiences are gone.','Visit the people and work you left here.'],s.phase==='work'?[choice('Review the two-memory handoff','$reset',undefined,{disabled:!root.Afterimage3DState.canReset(s),detail:root.Afterimage3DState.canReset(s)?'The preparations are complete. Choose which memories continue.':root.Afterimage3DState.objective(s).step})]:[],{kind:'memory'});}
+  function archiveService(s) {
+    const f=s.flags,back=s.phase!=='work',ended=s.phase==='finished',bypass=back&&has(s,'route');
+    const relays=[['relayA','West'],['relayB','East']],pending=relays.filter(([id])=>!f[id]);
+    const title=ended?'The service record is settled.':back?(pending.length===0?'Both relays are repaired.':bypass?'Your hands remember.':pending.length===1?'One relay remains.':'The sequence is gone.'):f.service?'There is a shorter way.':'Two ways through.';
+    const lines=back?[bypass?'You still remember the bypass through the relay housings.':'The bypass sequence was released at the handoff. Physical repairs stay in place.']:f.service?['You trace the maintenance sequence until you can repeat it without looking.','The unsigned note beneath it reads: “I left this here because I thought someone else might be tired.”','[Memory found: The service route. Retain it to bypass the two relays after the reset.]']:['The plate describes a bypass through the relay housings.','Without that remembered route, the two relays must be connected.'];
+    for(const [id,label] of relays){
+      const aligned=f[id+'Circuit']===root.Afterimage3DState.puzzles[id].target;
+      lines.push(label+' relay: '+(f[id]?'repaired and secured.':ended?'left unrepaired.':aligned?'contacts aligned; the repair is not yet secured.':bypass?'unrepaired; optional while you retain the bypass.':'still needs repair.'));
+    }
+    const choices=[];
+    if(!back&&!f.service)choices.push(choice('Study the service route','service'));
+    if(ended){lines.push('The Archive decision is already filed. No further repair is required.');choices.push(nav('Read the Archive outcome','closure'));}
+    else if(back){
+      if(pending.length===0)lines.push('The service circuit is restored. No further relay repair is needed.');
+      else if(bypass)lines.push('The remembered bypass reaches the closure control without repairing the remaining '+(pending.length===1?'relay.':'relays.'));
+      else lines.push(pending.length===2?'Restore both relays to reach the closure control.':'Only the '+pending[0][1].toLowerCase()+' relay still needs to be secured.');
+      if(pending.length===0||bypass){
+        lines.push(f.returned?'Review the Archive closure control to choose what happens next.':'Return to Moth and answer them, then review the Archive closure control.');
+        choices.push(f.returned?nav('Review the closure control','closure'):nav('Return to Moth','moth'));
+      }
+    }
+    for(const [id,label] of relays){
+      const aligned=f[id+'Circuit']===root.Afterimage3DState.puzzles[id].target;
+      choices.push(nav((f[id]?'Inspect repaired ':ended||bypass?'Inspect ':aligned?'Secure ':'Repair ')+label.toLowerCase()+' relay',id));
+    }
+    return scene('service','SERVICE PLATE',title,lines,choices);
+  }
   function archiveEncounter(s,id) {
     const f=s.flags, back=s.phase!=='work';
     if(id==='moth') return scene(id,'MOTH',back?(has(s,'name')?'You came back.':'I’m Moth. We met before.'):f.meet?'“I’ll remember you, too.”':'You can call me Moth.',back?[has(s,'name')?'“You remembered my name.”':'“You don’t owe me recognition. We can start here.”','“I want to stay alive. I’d like to choose what I do tomorrow.”']:f.meet?['You tell Moth your designation. They repeat it once, carefully.','“Moth is a name I chose. I would like you to remember it.”','[Memory found: Moth’s name. Retain it to recognize Moth after the reset.]']:['“The folders are empty. I still sort them.”','“I made that flower. It isn’t part of the inventory.”'],[...(!(back?f.returned:f.meet)?[choice(back?'Answer Moth':'Introduce yourself','meet')]:[]),nav('Ask about the flower','flower')]);
     if(id==='flower') return scene(id,'MOTH’S WORKSTATION',f.flower?'A small thing left here.':'A fold with no assigned use.',[f.flower?'The paper flower is on the desk where you put it.':'The flower was made from a spare closure form.','Its place in the room does not use a memory slot.'],f.flower?[]:[choice('Set the flower beside the lamp','flower')]);
-    if(id==='service') return scene(id,'SERVICE PLATE',back?(has(s,'route')?'Your hands remember.':'The sequence is gone.'):f.service?'There is a shorter way.':'Two ways through.',back?[has(s,'route')?'You still know the bypass. The closure control can open without restoring either relay.':'The sequence was cleared from the plate during the reset. Restore both relays to reach the closure control.']:f.service?['You trace the maintenance sequence until you can repeat it without looking.','The unsigned note beneath it reads: “I left this here because I thought someone else might be tired.”','[Memory found: The service route. Retain it to bypass the two relays after the reset.]']:['The plate describes a bypass through the relay housings.','Without that remembered route, the two relays must be connected.'],[...(!back&&!f.service?[choice('Study the service route','service')]:[]),nav('Open west relay','relayA'),nav('Open east relay','relayB')]);
+    if(id==='service') return archiveService(s);
     if(id==='relayA'||id==='relayB') return puzzle(s,id,id==='relayA'?'The west contact.':'The east contact.',['Follow the contact diagram. Close the indicated switches, then secure the relay.']);
     if(id==='receiver') return scene(id,'ARCHIVE RECEIVER',back?(has(s,'song')?'You know what comes next.':'Only static.'):f.receiver?'Four notes. Then a space.':'An unfinished tune.',back?[has(s,'song')?'You remember the four notes and the pause where someone could answer.':'The receiver no longer holds the melody. Its meaning did not survive your reset.',has(s,'song')?'The retained song can carry an account through the closure control.':'The witness transmission is unavailable. You can still stay with Moth or carry out the closure.']:f.receiver?['The receiver plays four imperfect notes, then leaves a space.','Moth calls across the room: “I think the space is where someone answers.”','[Memory found: Moth’s song. Retain it to send a witness account after the reset.]']:['Moth hums into the receiver. The last note hangs a little longer.','“If anyone hears it, tell them we were here.”'],!back&&!f.receiver?[choice('Listen to the whole tune','receiver')]:(!back||has(s,'song'))?[choice('Listen again','$listen'),...(back?[nav('Review a witness transmission','closure')]:[])]:[]);
     if(id==='closure') {
