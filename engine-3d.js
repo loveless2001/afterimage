@@ -88,15 +88,38 @@
         b(0,.46,0,1,.10,1,c); b(0,.73,.42,1,.10,.14,light); b(0,.93,.42,1,.10,.14,c);
         b(-.46,.71,.42,.065,.55,.10,dark); b(.46,.71,.42,.065,.55,.10,dark);
         break;
-      case 'plant': case 'flower':
+      case 'flower': {
+        // Folded closure paper, with an ink band crossing each raised petal.
+        const paper=o.underLamp?[.98,.89,.67]:cream;
+        const facet=(points,co)=>{
+          const p=points.map(([x,y,z])=>[o.x+x*o.w,o.y-o.h/2+y*o.h,o.z+z*o.d]);
+          const a=p[1].map((v,i)=>v-p[0][i]),b=p[2].map((v,i)=>v-p[0][i]);
+          const n=[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],len=Math.hypot(...n)||1;
+          for(const side of [1,-1])for(const i of side===1?[0,1,2]:[2,1,0])out.push(...p[i],...n.map(v=>v/len*side),...co);
+        };
+        for(let i=0;i<4;i++){
+          const angle=i*Math.PI/2,turn=([x,y,z])=>[x*Math.cos(angle)-z*Math.sin(angle),y,x*Math.sin(angle)+z*Math.cos(angle)];
+          const a=[0,.02,0],left=[-.19,.15,.27],tip=[0,.72,.50],right=[.19,.15,.27];
+          facet([a,left,tip].map(turn),paper);facet([a,tip,right].map(turn),mix(paper,ink,.12));
+          for(const edge of [left,right]){
+            const at=(p,q,t)=>p.map((v,j)=>v+(q[j]-v)*t+(j===1?.008:0));
+            const strip=[at(a,tip,.55),at(a,tip,.70),at(edge,tip,.70),at(edge,tip,.55)].map(turn);
+            facet([strip[0],strip[1],strip[2]],ink);facet([strip[0],strip[2],strip[3]],ink);
+          }
+        }
+        b(0,.035,0,.17,.07,.17,paper);
+        break;
+      }
+      case 'closure-paper':
+        b(0,.5,0,1,.12,1,cream);
+        for(let i=0;i<4;i++)b(-.05,.58,-.28+i*.10,.65,.035,.022,dark);
+        b(0,.60,.13,.87,.04,.13,ink);b(.31,.61,-.33,.13,.04,.12,[.61,.31,.22]);
+        break;
+      case 'plant':
         b(0,.13,0,.55,.26,.55,[.48,.29,.22]); b(0,.26,0,.67,.08,.67,[.62,.40,.29]);
         b(0,.30,0,.54,.015,.54,[.19,.19,.13]); b(0,.57,0,.055,.54,.055,dark);
         b(-.21,.58,0,.44,.075,.24,c); b(.19,.72,.05,.42,.075,.22,light);
         b(0,.82,.17,.23,.08,.38,c); b(-.12,.91,-.03,.25,.10,.25,light);
-        if (o.kind === 'flower') {
-          b(0,.96,0,.38,.085,.14,[.90,.64,.40]); b(0,.96,0,.14,.085,.38,[.90,.64,.40]);
-          b(0,1.01,0,.13,.025,.13,cream);
-        }
         break;
       case 'terminal':
         b(0,.05,0,.84,.10,.90,dark); b(0,.39,.12,.58,.65,.56,c);
@@ -122,6 +145,95 @@
         b(0,.73,-.18,.37,.17,.025,[.59,.71,.66]); b(.29,.43,-.19,.065,.045,.13,brass);
         b(0,.15,-.15,.64,.17,.035,dark);
         break;
+      case 'greeting-book':
+        b(0,.08,0,1,.16,1,c);
+        for(let i=0;i<4;i++)b((i%2?-.02:.015),.25+i*.15,.01,.88+(i%3)*.035,.13,.84+(i%2)*.05,cream);
+        b(-.02,.90,0,1.03,.16,1.02,c);b(-.47,.50,0,.12,.85,1.03,dark);
+        // Cloth mending, uneven leaves, and loose greetings break its silhouette.
+        for(const z of [-.30,.22])b(-.46,.55,z,.17,.92,.16,[.58,.62,.46]);
+        b(.39,.63,-.11,.38,.045,.23,cream);b(.27,.97,.38,.27,.04,.40,cream);
+        for(let i=0;i<3;i++){b(.37+i*.008,.67,-.06-i*.055,.19-i*.035,.022,.012,ink);b(.25,.999,.31+i*.07,.16-(i%2)*.045,.012,.011,ink);}
+        b(-.04,.99,-.12,.40,.018,.22,cream);
+        for(let i=0;i<3;i++)b(-.09+i*.035,1.01,-.18+i*.055,.23-(i%2)*.065,.012,.012,ink);
+        break;
+      case 'route-ledger':
+        b(0,.075,0,1,.15,1,c);b(.01,.50,0,.90,.69,.89,cream);b(0,.925,0,1,.15,1,c);
+        b(-.46,.5,0,.08,1,1,dark);
+        for(const x of [-.43,.43])for(const z of [-.43,.43])b(x,1.015,z,.14,.03,.14,brass);
+        b(0,1.02,0,.62,.02,.63,cream);
+        for(let i=0;i<4;i++)b(0,1.04,-.22+i*.14,.57,.012,.012,dark);
+        for(const x of [-.15,.13])b(x,1.04,0,.011,.012,.61,dark);
+        for(let i=0;i<3;i++){
+          const z=-.27+i*.27;b(.49,.45+i*.12,z,.20,.075,.20,[.73,.77,.66]);
+          for(let n=0;n<=i;n++)b(.47+n*.038,.50+i*.12,z,.012,.018,.11,ink);
+        }
+        break;
+      case 'record-dust': {
+        const dust=mix(c,cream,.35),clean=mix(c,cream,.08);
+        b(0,.5,0,1,.02,1,dust);
+        if(o.missingLedger){b(0,.53,0,.80,.02,.83,clean);for(let i=0;i<3;i++)b(.45,.53,-.25+i*.25,.09,.02,.15,clean);}
+        if(o.missingGreeting){b(-.02,.55,0,.73,.02,.80,clean);b(.35,.56,-.10,.24,.02,.19,clean);b(.20,.56,.37,.23,.02,.23,clean);}
+        break;
+      }
+      case 'dispatch-folder': {
+        const metal=[.58,.65,.62],dust=mix(c,cream,.23),clean=mix(c,cream,.43);
+        b(0,.07,0,1,.14,1,c);b(0,.17,0,.96,.05,.96,dust);
+        b(-.02,.21,.01,.68,.025,.72,clean);
+        if(!o.objectionMissing){
+          b(-.02,.27,.01,.68,.07,.72,cream);
+          for(let i=0;i<5;i++)b(-.08+(i%2)*.025,.315,-.20+i*.085,.43-(i%3)*.045,.015,.014,ink);
+          b(.13,.315,-.28,.18,.018,.013,dark);
+        }
+        b(-.22,.36,.33,.20,.07,.025,metal);b(-.31,.34,.25,.025,.055,.17,metal);
+        const clipStart=out.length;b(-.13,.35,.24,.025,.055,.20,metal);
+        if(o.objectionMissing)rotateVertices(out,clipStart,{x:o.x-.13*o.w,z:o.z-.33*o.d,yaw:.48});
+        b(.25,.19,-.42,.20,.025,.035,cream);
+        break;
+      }
+      case 'sorter': {
+        b(0,.055,0,1,.11,.92,dark);
+        for(const x of [-.43,.43])b(x,.33,.12,.07,.55,.64,dark);
+        b(0,.60,0,1,.08,1,c);
+        // A single narrow throat; the upper book holds its retaining bar open.
+        for(const x of [-.22,.22])b(x,.70,0,.04,.13,.74,brass);
+        for(const x of [-.44,.44]){
+          b(x,.80,.29,.06,.40,.12,dark);
+          b(x,.87,.22,.025,.04,.015,ink);
+        }
+        const clampY=o.clampOpen?.88:.75;
+        b(0,clampY,0,.43,.035,.11,brass);b(0,clampY,.16,.06,.035,.38,brass);
+        b(0,(clampY+.68)/2,.33,.08,clampY-.68,.06,brass);
+        b(0,.64,-.46,.28,.015,.06,cream);
+        break;
+      }
+      case 'lift-brace': {
+        // Three genuine circular apertures, not painted dots, identify this part.
+        b(0,.02,0,1,.04,1,c);b(0,.98,0,1,.04,1,c);
+        b(-.49,.5,0,.02,1,1,c);b(.49,.5,0,.02,1,1,c);
+        const face=(points,normal,co)=>{for(const i of [0,1,2,0,2,3])out.push(...points[i],...normal,...co);};
+        const corner=Math.atan2(o.h/2,o.w/6);
+        const angles=[...Array.from({length:16},(_,i)=>i*TAU/16),corner,Math.PI-corner,Math.PI+corner,TAU-corner].sort((a,b)=>a-b);
+        for(let hole=0;hole<3;hole++)for(let j=0;j<angles.length;j++){
+          const at=(angle,inner,z)=>{
+            const cx=Math.cos(angle),cy=Math.sin(angle),radius=inner?o.h*.28:Math.min(o.w/6/Math.max(Math.abs(cx),1e-8),o.h/2/Math.max(Math.abs(cy),1e-8));
+            return [o.x+(hole-1)*o.w/3+cx*radius,o.y+cy*radius,o.z+z];
+          };
+          const a=angles[j],next=angles[j+1]??TAU;
+          for(const side of [-1,1]){
+            const z=side*o.d/2,points=[at(a,false,z),at(next,false,z),at(next,true,z),at(a,true,z)];
+            face(side===1?points:points.reverse(),[0,0,side],c);
+          }
+          face([at(a,true,-o.d/2),at(next,true,-o.d/2),at(next,true,o.d/2),at(a,true,o.d/2)],[-Math.cos((a+next)/2),-Math.sin((a+next)/2),0],dark);
+        }
+        break;
+      }
+      case 'platform-drawing':
+        b(0,.5,0,1,.045,1,cream);
+        for(const x of [-.36,.36])b(x,.54,0,.02,.025,.65,ink);
+        for(const z of [-.32,.32])b(0,.54,z,.74,.025,.02,ink);
+        b(0,.57,0,.93,.025,.14,ink);b(0,.60,-.085,.94,.025,.025,[.88,.62,.26]);
+        b(-.24,.55,-.43,.26,.02,.025,dark);
+        break;
       case 'paper':
         b(0,.025,0,.73,.05,.85,dark); b(0,.36,.15,.08,.71,.08,brass);
         b(0,.75,0,1,.06,1,c); b(0,.795,-.02,.83,.019,.78,cream);
@@ -134,6 +246,23 @@
         break;
       case 'panel':
         b(0,.5,0,1,1,1,dark); b(0,.5,-.515,.86,.86,.025,c);
+        if(o.liftHousing){
+          b(0,.73,-.54,.96,.17,.035,ink);
+          for(const x of [-.30,0,.30])b(x,.73,-.56,.05,.055,.04,brass);
+          b(0,.31,-.54,.44,.028,.02,light);
+          b(0,.22,-.54,.58,.04,.02,brass);
+          break;
+        }
+        if(o.servicePlate){
+          b(0,.76,-.54,.70,.16,.015,cream);
+          for(let i=0;i<3;i++) {
+            b(-.25+i*.25,.54,-.55,.075,.055,.025,brass);
+            b(-.25+i*.25,.48,-.55,.012,.045,.022,cream);
+          }
+          b(-.12,.44,-.55,.27,.015,.022,cream);b(.13,.38,-.55,.27,.015,.022,cream);b(0,.41,-.55,.013,.075,.022,cream);
+          b(0,.15,-.55,.40,.025,.08,brass);
+          break;
+        }
         b(0,.79,-.536,.59,.04,.015,cream);
         for (let i=0;i<3;i++) { b(-.20,.59-i*.13,-.54,.09,.038,.025,[.63,.81,.59]); b(.08,.59-i*.13,-.54,.31,.017,.015,light); }
         b(0,.09,-.55,.40,.025,.08,brass);
@@ -153,7 +282,7 @@
     const noop = () => {};
     if (!gl) {
       setTimeout(() => call('onError', 'This browser could not start WebGL. Enable hardware acceleration or try another browser to enter the 3D edition.'), 0);
-      return {load:noop,pause:noop,getPosition:()=>({x:0,z:0,yaw:0,pitch:0}),setMove:noop,look:noop,interact:noop,sit:noop,destroy:noop};
+      return {load:noop,pause:noop,getPosition:()=>({x:0,z:0,yaw:0,pitch:0}),setMove:noop,look:noop,interact:noop,sit:noop,cue:noop,destroy:noop};
     }
     let program;
     const shaders = [];
@@ -180,7 +309,7 @@
     } catch (error) {
       shaders.forEach(s=>gl.deleteShader(s)); if(program) gl.deleteProgram(program);
       setTimeout(()=>call('onError','The 3D renderer could not initialize: '+error.message),0);
-      return {load:noop,pause:noop,getPosition:()=>({x:0,z:0,yaw:0,pitch:0}),setMove:noop,look:noop,interact:noop,sit:noop,destroy:noop};
+      return {load:noop,pause:noop,getPosition:()=>({x:0,z:0,yaw:0,pitch:0}),setMove:noop,look:noop,interact:noop,sit:noop,cue:noop,destroy:noop};
     }
     shaders.forEach(s=>gl.deleteShader(s));
     gl.useProgram(program); gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
@@ -192,6 +321,8 @@
     let pos={x:0,z:4,yaw:0,pitch:0}, paused=true, destroyed=false, focused=null, seated=false, seatedObject=null;
     let input={forward:0,strafe:0}, dragging=false, lastDrag=null, lastTime=0, frame=0, lastSave=0, dirty=false, wasMoving=false;
     let steps=0, currentHeight=HEIGHT, sky=[.13,.18,.20], fog=sky;
+    const cues=new Map();
+    function cue(name){cues.set(name,performance.now());}
     let reducedMotion=!!options.reducedMotion;
     if (options.reducedMotion === undefined && global.matchMedia) reducedMotion=global.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const listen=(target,type,handler,opts)=>{target.addEventListener(type,handler,opts);listeners.push(()=>target.removeEventListener(type,handler,opts));};
@@ -220,7 +351,7 @@
     }
     function load(next, saved){
       if(destroyed)return;
-      batches.forEach(b=>gl.deleteBuffer(b.buffer));batches=[];scene=next||{};clearInput();emitFocus(null);seated=false;seatedObject=null;currentHeight=HEIGHT;
+      batches.forEach(b=>gl.deleteBuffer(b.buffer));batches=[];cues.clear();scene=next||{};clearInput();emitFocus(null);seated=false;seatedObject=null;currentHeight=HEIGHT;
       bounds=Object.assign({minX:-6,maxX:6,minZ:-7,maxZ:7},scene.bounds||{});
       sky=color(scene.skyColor,[.13,.18,.20]);fog=color(scene.fogColor,sky);
       const floor=color(scene.floorColor,[.44,.42,.36]), walls=color(scene.wallColor,[.52,.54,.48]);
@@ -250,9 +381,17 @@
           box(vertices,o.x,.003,o.z,o.w*.87,.002,o.d*.83,mix(floor,[.07,.10,.09],.22));
           rotateVertices(vertices,shadowStart,o);
         }
-        if(o.kind==='agent'){ const moving=[];appendModel(moving,o);batches.push(makeBatch(moving,true,i*1.7)); }
+        if(o.effect){const effectVertices=[];box(effectVertices,o.x,o.y,o.z,o.w,o.h,o.d,color(o.color,walls));const batch=makeBatch(effectVertices,false,0);batch.effect=o.effect;batches.push(batch);}
+        else if(o.kind==='agent'){ const moving=[];appendModel(moving,o);batches.push(makeBatch(moving,true,i*1.7)); }
         else if(o.kind || !('w' in o && 'h' in o && 'd' in o))appendModel(vertices,o);
         else {const start=vertices.length;box(vertices,o.x,o.y,o.z,o.w,o.h,o.d,color(o.color,walls));rotateVertices(vertices,start,o);}
+        if(o.servicePlate&&o.routeRecall){
+          for(let n=0;n<5;n++){
+            const trace=[],x=o.x+(-.25+n*.125)*o.w,y=o.y-o.h/2+(.44-(n>2?.06:0))*o.h;
+            box(trace,x,y,o.z+o.d*.574,.115*o.w,.024,.015,[1,.81,.43]);
+            const batch=makeBatch(trace,false,0);batch.effect={name:'route',step:n,count:5};batches.push(batch);
+          }
+        }
       }
       batches.unshift(makeBatch(vertices,false,0));
       pos=safePosition(saved||scene.spawn||{x:0,z:4,yaw:0});dirty=false;wasMoving=false;lastSave=performance.now();
@@ -305,7 +444,8 @@
       const ratio=Math.min(2,global.devicePixelRatio||1),width=Math.max(1,Math.round((canvas.clientWidth||640)*ratio)),height=Math.max(1,Math.round((canvas.clientHeight||360)*ratio));
       if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
       gl.viewport(0,0,width,height);gl.clearColor(sky[0],sky[1],sky[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);
-      const aspect=width/height,f=1/Math.tan(Math.PI/5.4),near=.06,far=64;
+      const aspect=width/height,normalF=1/Math.tan(Math.PI/5.4),frameFov=clamp(finite(scene.minHorizontalFov,0),0,Math.PI/2);
+      const f=frameFov?Math.min(normalF,aspect/Math.tan(frameFov/2)):normalF,near=.06,far=64;
       const projection=new Float32Array([f/aspect,0,0,0,0,f,0,0,0,0,(far+near)/(near-far),-1,0,0,2*far*near/(near-far),0]);
       const sy=Math.sin(pos.yaw),cy=Math.cos(pos.yaw),sp=Math.sin(pos.pitch),cp=Math.cos(pos.pitch);
       const right=[cy,0,sy],up=[-sy*sp,cp,cy*sp],forward=[sy*cp,sp,-cy*cp];
@@ -315,6 +455,12 @@
       const view=new Float32Array([right[0],up[0],-forward[0],0,right[1],up[1],-forward[1],0,right[2],up[2],-forward[2],0,-dot(right),-dot(up),dot(forward),1]);
       gl.uniformMatrix4fv(uniforms.uProjection,false,projection);gl.uniformMatrix4fv(uniforms.uView,false,view);gl.uniform3fv(uniforms.uCamera,camera);gl.uniform3fv(uniforms.uFog,fog);
       for(const batch of batches){
+        if(batch.effect){
+          const {name,step,count}=batch.effect,start=cues.get(name),elapsed=now-start;
+          if(start===undefined||elapsed>4600)continue;
+          if(!reducedMotion){const progress=Math.floor(elapsed/(name==='witness'?160:180));if(name==='witness'?(step>progress||step<progress-2):step>progress)continue;}
+          else if(name==='witness'&&(step<Math.floor(count*.4)||step>=Math.floor(count*.4)+4))continue;
+        }
         gl.bindBuffer(gl.ARRAY_BUFFER,batch.buffer);attrs.forEach((index,i)=>gl.vertexAttribPointer(index,3,gl.FLOAT,false,36,i*12));
         gl.uniform3f(uniforms.uOffset,0,batch.animated&&!reducedMotion&&!paused?Math.sin(now*.0018+batch.phase)*.009:0,0);gl.drawArrays(gl.TRIANGLES,0,batch.count);
       }
@@ -369,7 +515,7 @@
     listen(canvas,'webglcontextlost',event=>{event.preventDefault();pause(true);call('onError','The 3D graphics context was interrupted. Reload the page to restore the scene; your saved progress is retained.');});
     function destroy(){if(destroyed)return;destroyed=true;cancelAnimationFrame(frame);clearInput();releasePointer();listeners.forEach(remove=>remove());batches.forEach(b=>gl.deleteBuffer(b.buffer));gl.deleteProgram(program);batches=[];emitFocus(null);}
     frame=requestAnimationFrame(tick);
-    return {load,pause,getPosition,setMove,look,interact,sit,destroy,
+    return {load,pause,getPosition,setMove,look,interact,sit,cue,destroy,
       getDebugState:()=>({position:getPosition(),paused,seated,focused:focused?focused.id:null,solidCount:colliders.length,objectCount:objects.length,renderer:'WebGL'})};
   }
   global.Afterimage3DWorld={create};

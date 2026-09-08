@@ -5,3 +5,32 @@
 #panel.has-diagram .dialog{max-height:90vh}#panel.has-diagram #lines p{margin:7px 0}.contact-diagram{display:block;width:100%;height:auto;max-height:270px;overflow:visible;color:var(--ink)}.diagram-frame{fill:#0d1e18;stroke:#91a88a66}.diagram-divider{stroke:#91a88a55}.diagram-heading{fill:#c5d1b9;font:600 12px system-ui;letter-spacing:1px}.diagram-label{fill:#e1e6d5;font:13px system-ui}.diagram-state{fill:currentColor;font:12px system-ui}.diagram-source{color:#e0bf7a}.diagram-matched{color:#b7d7aa}.diagram-unmatched{color:#f2b396}.diagram-wire{stroke:currentColor;stroke-width:3;stroke-linecap:round}.diagram-terminal{fill:#0d1e18;stroke:currentColor;stroke-width:2}.diagram-assist{width:100%}@media(max-width:650px){#panel.has-diagram .dialog{padding:16px;max-height:94vh}.contact-diagram{max-height:none}}
 
 @media(max-width:650px){.contact-diagram .diagram-state,.contact-diagram .diagram-label{font-size:16px}.contact-diagram .diagram-heading{font-size:13px}}
+
+/* Touch already has a dedicated interaction button beside the movement pad. */
+#toast{pointer-events:none}
+@media(pointer:coarse){#interact{display:none}#toast{bottom:190px}}
+
+.exhibit{display:block;width:100%;height:auto;max-height:220px;margin:12px 0;color:var(--accent);font-family:system-ui,sans-serif}
+#panel.has-exhibit .dialog{max-height:90vh}
+.source-paper{background:#e5dfc9;color:#344039;border:1px solid #bbb59e;border-radius:3px;padding:8px;max-height:240px}
+.stamp-ink{fill:#8f4935}
+.scene-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:16px 0}
+.scene-facts>div{padding:10px 12px;border-left:2px solid var(--line);background:#ffffff05}
+.scene-facts dt{font-size:.7rem;color:var(--muted);margin-bottom:3px}
+.scene-facts dd{margin:0;font-size:.84rem;line-height:1.45;overflow-wrap:anywhere}
+.scene-record{margin:12px 0;font-size:.83rem}.scene-record summary{cursor:pointer;color:var(--accent);padding:9px 0}.scene-record summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+#choices.source-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#choices.source-grid>button:not(.source-card){grid-column:1/-1}
+#choices .source-card{padding:9px;font-size:.78rem;line-height:1.3}
+.source-card .exhibit{height:55px;margin:0 0 7px;padding:2px}.source-card small{margin-top:3px;font-size:.67rem}
+@media(max-width:650px){.scene-facts{gap:6px}.scene-facts>div{padding:8px}.scene-facts dd{font-size:.78rem}.source-paper{padding:3px}.scene-record{font-size:.8rem}}
+
+/* Keep the workstation visible while reviewing the handoff and its outcomes. */
+#panel.composition{justify-content:flex-end;align-items:center;background:linear-gradient(90deg,transparent 48%,#06110a66);backdrop-filter:none}
+#panel.composition .dialog{width:min(350px,31vw);max-height:88vh;padding:20px}
+#panel.composition.composition-left{justify-content:flex-start;background:linear-gradient(90deg,#06110a66,transparent 52%)}
+@media(max-width:750px){#panel.composition.composition-left{background:linear-gradient(transparent 45%,#06110a66)}}
+#panel.composition h2{font-size:27px}
+body.reading:has(#panel.composition:not([hidden])) #task{opacity:.28}
+body.reading #stand{visibility:hidden}
+@media(max-width:750px){#panel.composition{align-items:flex-end;justify-content:center;background:linear-gradient(transparent 45%,#06110a66)}#panel.composition .dialog{width:100%;max-height:44vh;padding:15px 18px}#panel.composition h2{font-size:23px;margin:7px 0}#panel.composition #lines{font-size:.8rem}#panel.composition #choices{margin-top:10px}#panel.composition #choices button{padding:9px 11px}}

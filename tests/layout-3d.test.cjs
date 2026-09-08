@@ -119,6 +119,45 @@ test('Transit displays the actual sorted book and ledger, and Silt returns besid
   assert.ok(Math.abs(drawing.y-silt.h*.35)<.08&&distance(drawing,silt)<.45,'The drawing should meet Silt’s lowered hand rather than float at chest level');
 });
 
+test('Every Transit memory pair preserves the single clamp and the cost of its extra shelf',()=>{
+  let initial=State.preview('transit');for(const action of ['brim','ledger'])initial=State.act(initial,action);
+  for(let index=0;index<3;index++)if(State.puzzles.lift.target&(1<<index))initial=State.act(initial,'turn',{id:'lift',index});
+  initial=State.act(initial,'lift');
+  const before=Chapters.world(initial),part=before.decor.find(o=>o.id==='lift-support');
+  const lamp=before.decor.find(o=>o.id==='silt-reading-lamp');
+  assert.equal(object(before,'sort').clampOpen,true);
+  for(let a=0;a<initial.acquired.length;a++)for(let b=a+1;b<initial.acquired.length;b++)for(const ending of ['book','ledger','both','omit']){
+    let s=State.reset(initial,[initial.acquired[a],initial.acquired[b]]);s=State.act(s,'deliver');s=State.act(s,'finish',ending);
+    const room=Chapters.world(s),support=room.decor.filter(o=>o.id==='lift-support');
+    assert.equal(support.length,1,'There must be only one reusable component');
+    assert.deepEqual([support[0].kind,support[0].w,support[0].h,support[0].d],[part.kind,part.w,part.h,part.d],'The shelf must use the same recognizable part');
+    assert.equal(support[0].z===part.z,ending!=='both','Only the extra shelf removes the lift support');
+    assert.equal(object(room,'sort').clampOpen,false);
+    const books=room.decor.filter(o=>['greeting-book','route-ledger'].includes(o.id));
+    assert.equal(books.length,ending==='both'?2:ending==='omit'?0:1);
+    if(ending==='both')assert.ok(Math.abs(books[0].y-books[1].y)>.3,'Both records need separate shelves');
+    assert.equal(room.decor.find(o=>o.id==='parcel-lift-platform').y<.2,ending==='both');
+    assert.deepEqual(room.decor.find(o=>o.id==='silt-reading-lamp'),lamp,'Finishing a dispatch must not extinguish the occupied platform');
+    assert.equal(object(room,'silt').x,object(before,'silt').x,'Keeping records does not bring Silt across');
+  }
+});
+
+test('Transit preserves the removed warning and depicts every lost record without restoring it',()=>{
+  let s=State.preview('transit');for(const action of ['brim','ledger','omitWarning'])s=State.act(s,action);
+  const folder=state=>Chapters.world(state).objects.find(o=>o.id==='objection');
+  assert.equal(folder(s).objectionMissing,true);s=State.reset(s,['greeting','sequence']);
+  assert.equal(folder(State.validate(JSON.parse(JSON.stringify(s)))).objectionMissing,true,'The empty clip must survive handoff and reload');
+  s=State.act(s,'deliver');
+  for(const ending of ['book','ledger','omit']){
+    const done=State.act(s,'finish',ending),room=Chapters.world(done),outline=room.decor.find(o=>o.id==='missing-record-outline');
+    assert.equal(folder(done).objectionMissing,true);
+    assert.equal(outline.missingGreeting,ending!=='book');assert.equal(outline.missingLedger,ending!=='ledger');
+    assert.equal(room.decor.some(o=>o.kind==='greeting-book'),ending==='book');
+    assert.equal(room.decor.some(o=>o.kind==='route-ledger'),ending==='ledger');
+    if(ending==='omit')assert.match(Chapters.encounter(done,'sort').lines[0],/Both records were discarded/);
+  }
+});
+
 test('Release preserves the shaded garden and its receiver through service retirement',()=>{
   const s=State.preview('release'),w=Chapters.world(s),seat=object(w,'seat');
   const shade=w.decor.filter(o=>String(o.id||'').startsWith('garden-shade-'));

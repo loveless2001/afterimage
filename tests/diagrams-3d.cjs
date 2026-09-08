@@ -20,7 +20,8 @@ async function check(page,id,bits){
  browser=await chromium.launch({headless:true});
  for(const viewport of [{width:1280,height:800},{width:390,height:844},{width:320,height:740},{width:844,height:390}])for(const [chapter,id] of cases){
   const context=await browser.newContext({viewport,reducedMotion:'reduce'});await context.addInitScript(()=>{let api;Object.defineProperty(window,'Afterimage3DWorld',{configurable:true,get:()=>api,set:value=>{api=value;const create=value.create;value.create=(canvas,options)=>{window.openTestEncounter=options.onInteract;return create(canvas,options);};}});});
-  const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(new URL((chapter==='prologue'?'index':chapter)+'-3d.html',base).href);await p.evaluate(([key,seed])=>localStorage.setItem(key,JSON.stringify(seed)),[M.key,M.preview(chapter)]);await p.reload();await p.locator('#start').click();await open(p,id);await check(p,id,0);
+  const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(new URL((chapter==='prologue'?'index':chapter)+'-3d.html',base).href);await p.evaluate(([key,seed])=>localStorage.setItem(key,JSON.stringify(seed)),[M.key,M.preview(chapter)]);await p.reload();await p.locator('#start').click();await open(p,id);await check(p,id,0);assert.equal(await p.getByRole('button',{name:/^Secure the repair/}).getAttribute('aria-describedby'),'puzzle-status');assert.match(await p.locator('#puzzle-status').innerText(),/Match the controls/);
+  if(viewport.width===1280)assert.equal(await p.locator('.dialog').evaluate(el=>el.scrollHeight<=el.clientHeight+1),true,'desktop repair fits without scrolling');
   const initial=await p.locator('.contact-diagram').boundingBox();const frame=await p.locator('.dialog').boundingBox();assert.ok(initial.y>=frame.y&&initial.y<frame.y+frame.height,'diagram starts in visible panel');
   // Source plate must not change while controls move through all eight possible states.
   const source=await p.locator('[data-row=source]').innerHTML();let previous=0;
@@ -30,7 +31,7 @@ async function check(page,id,bits){
   if(viewport.height>=600)await p.locator('.dialog').evaluate(el=>el.scrollTop=0);await p.screenshot({path:path.join(output,id+'-'+viewport.width+'x'+viewport.height+'.png')});
   await p.locator('.switches button').nth(1).click();await p.reload();await p.locator('#start').click();await open(p,id);await check(p,id,2);
   await p.getByRole('button',{name:'Set the controls for me',exact:true}).click();await check(p,id,M.puzzles[id].target);assert.equal(await p.evaluate(key=>JSON.parse(localStorage.getItem(key)).flags[document.querySelector('.contact-diagram').dataset.puzzle],M.key),false);
-  await p.getByRole('button',{name:/^Secure the repair/}).click();await check(p,id,M.puzzles[id].target);assert.equal(await p.locator('.switches button').count(),0);assert.match(await p.locator('.circuit-status').innerText(),/Repair secured/);assert.ok(M.validate(await p.evaluate(key=>JSON.parse(localStorage.getItem(key)),M.key)));
+  await p.getByRole('button',{name:/^Secure the repair/}).click();assert.equal(await p.locator('#panel').isVisible(),false,'securing a repair reveals the changed room');await open(p,id);await check(p,id,M.puzzles[id].target);assert.equal(await p.locator('.switches button').count(),0);assert.match(await p.locator('.circuit-status').innerText(),/Repair secured/);assert.ok(M.validate(await p.evaluate(key=>JSON.parse(localStorage.getItem(key)),M.key)));
   await p.locator('.dialog').evaluate(el=>el.scrollTop=0);if(viewport.width===390)await p.screenshot({path:path.join(output,id+'-secured-mobile.png')});await context.close();
  }
  // Audit every chapter object: unrelated scenes must never inherit a stale diagram.

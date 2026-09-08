@@ -31,7 +31,15 @@ async function visit(p,id){
  await p.locator('#panel').waitFor({state:'visible'});
 }
 async function click(p,label){await p.getByRole('button',{name:new RegExp('^'+label)}).click();}
-async function act(p,id,label){await visit(p,id);await click(p,label);}
+async function act(p,id,label){
+ if(id==='flower'||id==='seat'||id==='seat-placement'){
+  await close(p);await p.evaluate(id=>test3D.options.onInteract(id),id);
+  assert.equal(await p.locator('#panel').isVisible(),false,'small actions stay in the room');
+  if(id==='flower')assert.equal((await stored(p)).world.flowerPlaced,true);
+  else if(id==='seat-placement')assert.equal((await stored(p)).flags.seat,true);
+  else assert.equal(await p.evaluate(()=>test3D.engine.getDebugState().seated),true);
+ }else{await visit(p,id);await click(p,label);}
+}
 async function repair(p,id){await visit(p,id);await click(p,'Set the controls for me');assert.equal((await stored(p)).flags[id],false);await click(p,'Secure the repair');assert.equal((await stored(p)).flags[id],true);}
 async function reset(p,pair){await visit(p,'reset');await click(p,'Review the two-memory handoff');for(const id of pair)await p.getByRole('button',{name:new RegExp('^'+S.memories[id].title)}).click();await click(p,'Review what you will lose');await click(p,'Keep these two and reset');await p.waitForFunction(k=>JSON.parse(localStorage.getItem(k)).phase==='return',S.key);assert.deepEqual((await stored(p)).kept,pair);}
 async function finish(p,id,label,confirm,expected){await visit(p,id);const before=await stored(p);await click(p,label);assert.deepEqual(await stored(p),before,'review does not enact the ending');await click(p,confirm);assert.equal((await stored(p)).ending,expected);assert.equal(await p.locator('#panel').getAttribute('data-scene'),'chapter-outcome');assert.doesNotMatch(await p.locator('#lines').innerText(),/archiveCleared|dispatchDelivered|networkClosed|falseClearance/);}
@@ -50,7 +58,7 @@ async function advance(p,name){await click(p,'Continue to '+name);await p.waitFo
  await act(p,'seat','Sit down');assert.equal(await p.evaluate(()=>test3D.engine.getDebugState().seated),true);await click(p,'Stand up');
  await reset(p,['greeting','sequence']);assert.equal((await stored(p)).flags.shade,true);await visit(p,'fern');assert.match(await p.locator('#lines').innerText(),/I’m Fern/);await act(p,'certify','Inspect the court and public path');
  await finish(p,'certify','Certify the court only','Certify the court','court');await advance(p,'Chorus');
- await act(p,'counter','Listen to Counter’s explanation');await act(p,'receiver','Listen to the unaddressed voice');await visit(p,'sources');await click(p,'The morning sheet');assert.match(await p.locator('#lines').innerText(),/Seven residents/);await click(p,'Return to the source drawer');for(const title of ['A line outside the frame','Returned without a number','The rain gauge','The gap in the trace','Before anyone opened it']){await visit(p,'sources');await click(p,title);}await visit(p,'sources');await click(p,'Record this evidence review');
+ await act(p,'counter','Listen to Counter’s explanation');await act(p,'receiver','Listen to the unaddressed voice');await visit(p,'sources');await click(p,'The morning sheet');await p.locator('.scene-record summary').click();assert.match(await p.locator('#lines').innerText(),/Seven residents/);await click(p,'Return to the source drawer');for(const title of ['A line outside the frame','Returned without a number','The rain gauge','The gap in the trace','Before anyone opened it']){await visit(p,'sources');await click(p,title);}await visit(p,'sources');await click(p,'Record this evidence review');
  await act(p,'route','Keep three local copies');for(const id of ['residents','maintenance','dispatch-reply'])await act(p,id,'Record this approval');await reset(p,['counter','address']);for(const id of ['residents','maintenance','dispatch-reply'])await act(p,id,'Record this approval');
  await finish(p,'report','Record the cause as undetermined','File the supported report','uncertain');await advance(p,'Release');
  await act(p,'records','Record the archive and dispatch review');await act(p,'fern','Inspect the inhabited court');await act(p,'plan','Inspect the service yard and its controls');await act(p,'counter','Record Counter’s offered route check');

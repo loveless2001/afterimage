@@ -15,7 +15,7 @@ test('enabled story actions are executable at each campaign preparation step',()
   if(chapter==='release')for(let i=0;i<3;i++)act('inspect',i);
  }
  for(const s of scenarios)for(const object of Story.world(s).objects){for(const c of Story.encounter(s,object.id).choices||[]){
-  if(c.disabled){assert.ok(c.detail||c.action==='voice',s.chapter+'/'+object.id+': unavailable choice needs an explanation');continue;}
+  if(c.disabled){assert.ok(c.detail||c.describedBy==='puzzle-status'||c.action==='voice',s.chapter+'/'+object.id+': unavailable choice needs an explanation');continue;}
   if(c.action==='$reset')assert.equal(S.canReset(s),true);
   if(!c.action||c.action.startsWith('$'))continue;
   assert.doesNotThrow(()=>S.act(s,c.action,c.value),s.chapter+'/'+s.phase+'/'+object.id+'/'+c.label);
@@ -25,7 +25,7 @@ test('enabled story actions are executable at each campaign preparation step',()
 test('acquisition choices change their scene and cannot silently repeat',()=>{
  for(const [id,action] of [['moth','meet'],['service','service'],['receiver','receiver']]){
   const before=S.fresh(),after=S.act(before,action),initial=Story.encounter(before,id),result=Story.encounter(after,id);
-  assert.notEqual(result.title,initial.title);assert.ok(result.lines.some(l=>l.includes('Memory found:')));
+  assert.notEqual(result.title,initial.title);assert.equal(after.acquired.length,before.acquired.length+1);assert.equal(result.lines.some(l=>l.includes('Memory found:')),false);
   assert.equal(result.choices.some(c=>c.action===action),false);
  }
 });

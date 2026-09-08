@@ -39,13 +39,34 @@ async function advance(p,name){await click(p,'Continue to '+name);await p.waitFo
 
 (async()=>{
  browser=await chromium.launch({headless:true});
+ // E and touch act on ordinary objects without a second confirmation panel.
+ for(const mobile of [false,true]){
+  const seed=S.fresh();seed.position={x:-3.4,z:2.55,yaw:0,pitch:-.80};
+  const page=await makePage('prologue',mobile,seed);
+  await page.waitForFunction(()=>test3D.engine.getDebugState().focused==='flower');
+  assert.match(await page.locator('#focus-label').innerText(),/Set flower beside lamp/);
+  if(mobile)await page.locator('#touch-interact').tap();else await page.keyboard.press('KeyE');
+  assert.equal(await page.locator('#panel').isVisible(),false);
+  const placed=await stored(page);assert.equal(placed.world.flowerPlaced,true);assert.deepEqual(placed.acquired,[]);
+  assert.equal(await page.locator('#tension').isVisible(),false);
+  await page.locator('#journal').click();assert.equal(await page.locator('#panel').getAttribute('data-scene'),'field-journal');await close(page);
+  await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem(Afterimage3DState.key));test3D.engine.load(Afterimage3DChapters.world(s),{x:-1.75,z:2.5,yaw:0,pitch:-.7});});
+  await page.waitForFunction(()=>test3D.engine.getDebugState().focused==='seat');
+  if(mobile)await page.locator('#touch-interact').tap();else await page.keyboard.press('KeyE');
+  assert.equal(await page.locator('#panel').isVisible(),false);assert.equal(await page.evaluate(()=>test3D.engine.getDebugState().seated),true);
+  await page.screenshot({path:path.join(output,'quiet-prologue-'+(mobile?'mobile':'desktop')+'.png')});
+  await page.getByRole('button',{name:'Stand up',exact:true}).click();assert.equal(await page.evaluate(()=>test3D.engine.getDebugState().seated),false);
+  await page.reload();await page.locator('#start').click();assert.equal((await stored(page)).world.flowerPlaced,true);
+  await page.locator('#journal').click();assert.match(await page.locator('#lines').innerText(),/closure order|Moth wants/);
+  await page.context().close();
+ }
  for(const pair of [['name','song'],['name','route'],['song','route']])for(const ending of ['clear','witness','stay']){
   if(ending==='witness'&&!pair.includes('song'))continue;
   let seed=S.fresh();for(const a of ['meet','flower','service','receiver'])seed=S.act(seed,a);
   const p=await makePage('prologue',false,seed);
-  await reset(p,pair);assert.match(await p.locator('#tracked').innerText(),/Moth/);
+  await reset(p,pair);assert.match(await p.locator('#tracked').innerText(),pair.includes('name')?/Moth/:/Someone at the table/);
   await visit(p,'closure');assert.equal(await p.getByRole('button',{name:/^Clear Archive 07/}).isDisabled(),true);
-  await click(p,'Go to Moth');assert.equal(await p.locator('#panel').isVisible(),false);assert.match(await p.locator('#tracked').innerText(),/Moth/);
+  await click(p,pair.includes('name')?'Go to Moth':'Go to Someone at the table');assert.equal(await p.locator('#panel').isVisible(),false);assert.match(await p.locator('#tracked').innerText(),pair.includes('name')?/Moth/:/Someone at the table/);
   await act(p,'moth','Answer Moth');
   if(!pair.includes('route')){await repair(p,'relayA');await repair(p,'relayB');}
   // Simulate arriving at the closure cabinet, so unloading must not carry its
