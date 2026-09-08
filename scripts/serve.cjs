@@ -22,6 +22,9 @@ const files = new Map([
   ['/release-state.js', ['release-state.js', 'text/javascript; charset=utf-8']],
   ['/release-story.js', ['release-story.js', 'text/javascript; charset=utf-8']],
   ['/release.js', ['release.js', 'text/javascript; charset=utf-8']],
+  ...['index-3d.html','transit-3d.html','garden-3d.html','chorus-3d.html','release-3d.html'].map(name => ['/' + name, [name, 'text/html; charset=utf-8']]),
+  ...['engine-3d.js','state-3d.js','chapters-3d.js','game-3d.js'].map(name => ['/' + name, [name, 'text/javascript; charset=utf-8']]),
+  ['/style-3d.css', ['style-3d.css', 'text/css; charset=utf-8']],
   ['/game.js', ['game.js', 'text/javascript; charset=utf-8']]
 ]);
 

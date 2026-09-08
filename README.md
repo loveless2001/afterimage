@@ -2,6 +2,8 @@
 
 An offline browser game about memory, unfinished work, and small acts of care. The Archive prologue now leads through playable Transit, Garden, Chorus, and Release prototypes. Only two personal memories survive each courier reset.
 
+For the parallel first-person edition, open `index-3d.html`. See [README-3d.md](README-3d.md) for controls, chapters, and its separate campaign save.
+
 ## Play
 
 Open index.html in a modern browser, or double-click launch-windows.cmd on Windows. No installation, build step, or network connection is required to play.
@@ -74,7 +76,7 @@ Keep a Windows checkout on the Windows filesystem and a separate WSL checkout on
 
 Progress saves automatically in the browser when available. File URLs, ports, browsers, and machines may have separate saves. Use Menu / help → Export memory and Import memory to transfer a save. Older v1 saves remain supported. Storage-denied environments can still play and export manually.
 
-The development server exposes only the game files. For a portable game release, use the 22 runtime files copied by npm run build into dist/, plus the optional launch scripts. No tests, dependencies, or repository metadata are needed by players.
+The development server exposes only the game files. For a portable game release, use the 32 runtime files for both editions copied by npm run build into dist/, plus the optional launch scripts. No tests, dependencies, or repository metadata are needed by players.
 
 ## Online demo
 

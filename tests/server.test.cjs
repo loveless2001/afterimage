@@ -18,7 +18,7 @@ test('local server serves game assets and excludes repository files', async () =
     for (const url of ['/research/README.md', '/transit-state.test.cjs', '/.git/config', '/package.json', '/tests/state.test.cjs', '/%2e%2e%2fpackage.json']) {
       assert.equal((await fetch(base + url)).status, 404);
     }
-    for (const asset of ['transit.html', 'transit.js', 'transit-state.js', 'transit-story.js', 'garden.html', 'garden.js', 'garden-state.js', 'garden-story.js', 'chapter-ui.js', 'chapter-flow.js', 'chorus.html', 'chorus.js', 'chorus-state.js', 'chorus-story.js', 'release.html', 'release.js', 'release-state.js', 'release-story.js']) assert.equal((await fetch(base + '/' + asset)).status, 200);
+    for (const asset of ['transit.html', 'transit.js', 'transit-state.js', 'transit-story.js', 'garden.html', 'garden.js', 'garden-state.js', 'garden-story.js', 'chapter-ui.js', 'chapter-flow.js', 'chorus.html', 'chorus.js', 'chorus-state.js', 'chorus-story.js', 'release.html', 'release.js', 'release-state.js', 'release-story.js','index-3d.html','transit-3d.html','garden-3d.html','chorus-3d.html','release-3d.html','engine-3d.js','state-3d.js','chapters-3d.js','game-3d.js','style-3d.css']) assert.equal((await fetch(base + '/' + asset)).status, 200);
     assert.equal((await fetch(base, { method: 'POST' })).status, 405);
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 });
