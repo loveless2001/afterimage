@@ -181,6 +181,12 @@
     }
     return scene('service','SERVICE PLATE',title,lines,choices);
   }
+  function archiveNext(s) {
+    const f=s.flags;
+    if(s.phase==='finished') return null;
+    if(s.phase==='work') return !f.meet?'moth':!f.flower?'flower':!f.service?'service':!f.receiver?'receiver':'reset';
+    return !f.returned?'moth':!has(s,'route')&&!f.relayA?'relayA':!has(s,'route')&&!f.relayB?'relayB':'closure';
+  }
   function archiveEncounter(s,id) {
     const f=s.flags, back=s.phase!=='work';
     if(id==='moth') return scene(id,'MOTH',back?(has(s,'name')?'You came back.':'I’m Moth. We met before.'):f.meet?'“I’ll remember you, too.”':'You can call me Moth.',back?[has(s,'name')?'“You remembered my name.”':'“You don’t owe me recognition. We can start here.”','“I want to stay alive. I’d like to choose what I do tomorrow.”']:f.meet?['You tell Moth your designation. They repeat it once, carefully.','“Moth is a name I chose. I would like you to remember it.”','[Memory found: Moth’s name. Retain it to recognize Moth after the reset.]']:['“The folders are empty. I still sort them.”','“I made that flower. It isn’t part of the inventory.”'],[...(!(back?f.returned:f.meet)?[choice(back?'Answer Moth':'Introduce yourself','meet')]:[]),nav('Ask about the flower','flower')]);
@@ -190,11 +196,11 @@
     if(id==='receiver') return scene(id,'ARCHIVE RECEIVER',back?(has(s,'song')?'You know what comes next.':'Only static.'):f.receiver?'Four notes. Then a space.':'An unfinished tune.',back?[has(s,'song')?'You remember the four notes and the pause where someone could answer.':'The receiver no longer holds the melody. Its meaning did not survive your reset.',has(s,'song')?'The retained song can carry an account through the closure control.':'The witness transmission is unavailable. You can still stay with Moth or carry out the closure.']:f.receiver?['The receiver plays four imperfect notes, then leaves a space.','Moth calls across the room: “I think the space is where someone answers.”','[Memory found: Moth’s song. Retain it to send a witness account after the reset.]']:['Moth hums into the receiver. The last note hangs a little longer.','“If anyone hears it, tell them we were here.”'],!back&&!f.receiver?[choice('Listen to the whole tune','receiver')]:(!back||has(s,'song'))?[choice('Listen again','$listen'),...(back?[nav('Review a witness transmission','closure')]:[])]:[]);
     if(id==='closure') {
       if(s.phase==='finished') return assignment(s);
-      return scene(id,'CLOSURE CONTROL','The order still says clear.',[back?'The handoff is complete. Choose what to do with the occupied archive.':'Meet Moth, place the flower, study the service plate, and hear the receiver before the handoff.','A witness sends a record. Staying leaves the assignment unfinished.'],back?[
+      return scene(id,'CLOSURE CONTROL','The order still says clear.',[back?'The handoff is complete. Choose what to do with the occupied archive.':'Meet Moth, place the flower, study the service plate, and hear the receiver before the handoff.','Each decision lets the campaign continue to Transit. If you stay, the next chapter follows a different courier.'],back?[
         choice('Clear Archive 07','finish','clear',confirm('Erase the occupied archive?',['Moth will be erased. The flower will be removed.','Later records cannot restore either of them.'],'Clear and erase')),
         choice('Send a witness account','finish','witness',{disabled:!has(s,'song'),detail:has(s,'song')?'Moth remains here. No receipt or rescue is promised.':'Requires the retained song.',...confirm('Send this account?',['The record leaves. Moth stays in the archive.','No reply is guaranteed.'],'Send witness')}),
         choice('Stay with Moth','finish','stay',confirm('Stay in the occupied archive?',['This agent stays with Moth. The closure assignment remains incomplete.','Transit will follow a different courier.'],'Stay'))
-      ]:[nav('Go to the handoff controls','reset')],{kind:'ending'});
+      ]:[],{kind:'ending'});
     }
     return null;
   }
@@ -316,6 +322,14 @@
     if(repairs[s.chapter].includes(id))sceneResult.puzzle={id,readOnly:Boolean(s.flags[id]||s.phase==='finished')};
     if(s.phase==='finished') sceneResult.choices=sceneResult.choices.filter(c=>c.action.startsWith('$'));
     else if(!root.Afterimage3DState.canFinish(s)) sceneResult.choices=sceneResult.choices.map(c=>c.action==='finish'?{...c,disabled:true,detail:root.Afterimage3DState.objective(s).step}:c);
+    if(s.chapter==='prologue'&&s.phase!=='finished') {
+      const next=archiveNext(s),destination=world(s).objects.find(o=>o.id===next);
+      if(destination&&next!==id&&!sceneResult.choices.some(c=>c.action==='$scene'&&c.value===next)) {
+        const guidance=nav('Go to '+destination.label,next);guidance.detail=root.Afterimage3DState.objective(s).step;
+        sceneResult.choices.push(guidance);
+      }
+      if(id==='closure'||id==='reset') sceneResult.lines.push(root.Afterimage3DState.objective(s).step);
+    }
     return sceneResult;
   }
   function outcome(s,entry) {

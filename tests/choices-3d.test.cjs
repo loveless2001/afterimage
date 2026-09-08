@@ -65,3 +65,21 @@ test('an aligned but unsecured relay is not reported as repaired',()=>{
  for(const i of [0,2])s=S.act(s,'turn',{id:'relayA',index:i});
  const panel=Story.encounter(s,'service');assert.match(panel.lines.join(' '),/West relay: contacts aligned; the repair is not yet secured/);assert.equal(panel.choices.find(c=>c.value==='relayA').label,'Secure west relay');assert.equal(s.flags.relayA,false);
 });
+
+test('every prologue preparation and return step offers a concrete next destination',()=>{
+ let work=S.fresh();
+ for(const [action,next] of [[null,'moth'],['meet','flower'],['flower','service'],['service','receiver'],['receiver','reset']]){
+  if(action)work=S.act(work,action);
+  assert.ok(Story.encounter(work,'closure').choices.some(c=>c.action==='$scene'&&c.value===next));
+ }
+ for(const pair of [['name','song'],['name','route'],['song','route']]){
+  let s=S.reset(work,pair);assert.ok(Story.encounter(s,'closure').choices.some(c=>c.value==='moth'));
+  s=S.act(s,'meet');
+  for(const id of ['relayA','relayB']){
+   if(!pair.includes('route'))assert.ok(Story.encounter(s,'closure').choices.some(c=>c.value===id));
+   for(let i=0;i<3;i++)if(S.puzzles[id].target&(1<<i))s=S.act(s,'turn',{id,index:i});s=S.act(s,id);
+  }
+  assert.equal(S.canFinish(s),true);assert.ok(Story.encounter(s,'moth').choices.some(c=>c.value==='closure'));
+  for(const c of Story.encounter(s,'closure').choices.filter(c=>c.action==='finish'))assert.equal(Boolean(c.disabled),c.value==='witness'&&!pair.includes('song'));
+ }
+});
