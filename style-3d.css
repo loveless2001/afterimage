@@ -7,6 +7,9 @@
 @media(max-width:650px){.contact-diagram .diagram-state,.contact-diagram .diagram-label{font-size:16px}.contact-diagram .diagram-heading{font-size:13px}}
 
 /* Touch already has a dedicated interaction button beside the movement pad. */
+#mobile,#mobile *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#move-pad button{display:grid;place-items:center}
+#move-pad svg{display:block;width:22px;height:22px;fill:currentColor;pointer-events:none}
 #toast{pointer-events:none}
 @media(pointer:coarse){#interact{display:none}#toast{bottom:190px}}
 

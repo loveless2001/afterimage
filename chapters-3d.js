@@ -41,6 +41,12 @@
       // flower southwest, index north, receiver southeast, threshold northeast.
       shelf(w,-4.6,-6.2,2);shelf(w,0,-6.2,2);shelf(w,4.6,-6.2,2);shelf(w,-4.9,4.7,1.7);
       desk(w,0,-.4,1.8);
+      // The room keeps the same light through a memory handoff and every ending.
+      // Only physical furniture occludes the lamp; no memory flag changes the atmosphere.
+      w.lighting={ambient:[.48,.55,.62],key:[.20,.21,.22],lamp:[.5,1.37,-.4,4.6],lampColor:[1.95,1.25,.58],
+        blockers:w.solids.filter(b=>b.role==='tabletop'||(b.h===2.6&&b.d===.23)),
+        shelves:w.solids.filter(b=>b.h===2.2&&b.d===.55)};
+      w.skyColor='#202c35';w.fogColor='#293943';
       w.decor.push({id:'desk-lamp',kind:'lamp',x:.5,y:1.17,z:-.4,w:.4,h:.7,d:.4,color:palette.gold,solid:false,interactive:false});
       object(w,'assignment','Closure assignment',.2,3.9,'terminal',palette.sage);
       const recognized=s.phase==='work'||s.kept.includes('name')||f.returned;

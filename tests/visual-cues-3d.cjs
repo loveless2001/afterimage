@@ -70,9 +70,31 @@ async function viewpoint(p,position){await p.evaluate(position=>{const state=JSO
   await p.waitForTimeout(4700);assert.deepEqual(await canvas(p),plain,'Recall must fade without changing the physical scratches');await p.context().close();
  }
  const detail=await pageFor(prepared);await viewpoint(detail,{x:-.65,z:.72,yaw:.16,pitch:-.59});await capture(detail,'flower-and-closure-form');await detail.context().close();
+ // The desk lamp illuminates geometry, and its shader settings cannot leak into another chapter.
+ for(const width of [1280,390,320]){
+  const p=await pageFor(prepared,width);await viewpoint(p,Story.archiveView());
+  if(await p.locator('#panel').isVisible())await p.keyboard.press('Escape');
+  await capture(p,'archive-lighting-'+width);
+  const check=await p.evaluate(()=>{
+   const engine=cueTest.engine,scene=Afterimage3DChapters.world(JSON.parse(localStorage.getItem(Afterimage3DState.key))),position=Afterimage3DChapters.archiveView();
+   const gl=document.getElementById('world').getContext('webgl');
+   const pixels=world=>{engine.load(world,position);const data=new Uint8Array(gl.drawingBufferWidth*gl.drawingBufferHeight*4);gl.readPixels(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight,gl.RGBA,gl.UNSIGNED_BYTE,data);return data;};
+   const lit=pixels(scene),unlit=pixels({...scene,lighting:{...scene.lighting,lampColor:[0,0,0]}});
+   let illuminated=0;for(let i=0;i<lit.length;i+=4)if(lit[i]-unlit[i]>12&&lit[i]-unlit[i]>lit[i+2]-unlit[i+2])illuminated++;
+   const changed=[];
+   for(const chapter of ['transit','garden','chorus','release']){
+    const other=Afterimage3DChapters.world(Afterimage3DState.preview(chapter)),before=pixels(other);
+    pixels(scene);const after=pixels(other);if(before.some((value,index)=>value!==after[index]))changed.push(chapter);
+   }
+   return {illuminated,changed,error:gl.getError()};
+  });
+  assert.ok(check.illuminated>500,'The desk lamp must cast visibly warm light across nearby surfaces');
+  assert.deepEqual(check.changed,[],'Loading the Archive must not change other chapters’ lighting');
+  assert.equal(check.error,0,'The lighting shader must render without WebGL errors');await p.context().close();
+ }
  // Animated outgoing signal is one-way and expires; reopening the record does not resend it.
  let ready=M.reset(prepared,['song','route']);ready=M.act(ready,'meet');
  const motion=await pageFor(ready,1280,'no-preference');await visit(motion,'closure');await motion.getByRole('button',{name:/^Send a witness account/}).click();await click(motion,'Send witness');
  await motion.waitForTimeout(1600);await capture(motion,'witness-in-flight');await motion.waitForTimeout(3200);await capture(motion,'witness-waiting');await motion.context().close();
- assert.deepEqual(errors,[]);console.log('VISUAL CUES PASS: identical handoffs, all three endings, route loss/recall, keyboard/touch layouts, reloads, and optional motion.');
+ assert.deepEqual(errors,[]);console.log('VISUAL CUES PASS: identical handoffs, all three endings, route loss/recall, keyboard/touch layouts, reloads, optional motion, warm desk illumination, and chapter lighting isolation.');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>browser?.close());

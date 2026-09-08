@@ -297,13 +297,51 @@
         attribute vec3 aPosition; attribute vec3 aNormal; attribute vec3 aColor;
         uniform mat4 uProjection; uniform mat4 uView; uniform vec3 uOffset;
         uniform vec3 uCamera; varying vec3 vColor; varying float vDistance;
+        varying vec3 vPosition; varying vec3 vNormal; varying vec3 vMaterial;
         void main(){ vec3 p=aPosition+uOffset; vec3 light=normalize(vec3(-0.42,0.86,0.37));
           float diffuse=max(dot(aNormal,light),0.0); float hemisphere=0.08*aNormal.y;
           vColor=aColor*(0.70+0.27*diffuse+hemisphere); vDistance=distance(p,uCamera);
+          vPosition=p; vNormal=aNormal; vMaterial=aColor;
           gl_Position=uProjection*uView*vec4(p,1.0); }`));
       gl.attachShader(program,shader(gl.FRAGMENT_SHADER, `
         precision mediump float; varying vec3 vColor; varying float vDistance; uniform vec3 uFog;
-        void main(){ float fog=smoothstep(8.0,28.0,vDistance); gl_FragColor=vec4(mix(vColor,uFog,fog*0.88),1.0); }`));
+        varying vec3 vPosition; varying vec3 vNormal; varying vec3 vMaterial;
+        uniform float uLighting; uniform vec3 uAmbient; uniform vec3 uKey;
+        uniform vec4 uLamp; uniform vec3 uLampColor;
+        uniform vec3 uBlockMin[3]; uniform vec3 uBlockMax[3]; uniform vec4 uShelves[4];
+        float blocked(vec3 origin,vec3 ray,vec3 low,vec3 high){
+          vec3 safeRay=mix(vec3(0.0001),ray,step(vec3(0.0001),abs(ray)));
+          vec3 a=(low-origin)/safeRay,b=(high-origin)/safeRay;
+          vec3 near=min(a,b),far=max(a,b);
+          float enter=max(max(near.x,near.y),near.z),leave=min(min(far.x,far.y),far.z);
+          return step(max(enter,0.002),min(leave,0.998));
+        }
+        void main(){
+          vec3 lit=vColor;
+          if(uLighting>0.5){
+            vec3 n=normalize(vNormal),delta=uLamp.xyz-vPosition;
+            float d=length(delta),reach=1.0-smoothstep(0.0,uLamp.w,d);
+            // Static room occluders keep the desk light above its tabletop and inside its bay.
+            float shade=1.0;
+            for(int i=0;i<3;i++)shade*=1.0-blocked(vPosition+n*0.012,delta,uBlockMin[i],uBlockMax[i]);
+            float contact=0.0;
+            for(int i=0;i<4;i++){
+              vec2 edge=max(abs(vPosition.xz-uShelves[i].xy)-uShelves[i].zw,vec2(0.0));
+              contact=max(contact,1.0-smoothstep(0.0,0.75,length(edge)));
+            }
+            contact*=1.0-smoothstep(0.05,0.55,vPosition.y);
+            float facing=max(dot(n,delta/max(d,0.001)),0.0);
+            float key=max(dot(n,normalize(vec3(-0.42,0.86,0.37))),0.0);
+            // A broad shade lets a little warm light reach a face beside the desk.
+            float hood=mix(0.28,1.0,1.0-smoothstep(uLamp.y-0.04,uLamp.y+0.35,vPosition.y));
+            vec3 illumination=uAmbient*(1.0-contact*0.34)+uKey*key;
+            illumination+=uLampColor*reach*reach*(0.12+facing*0.88)*shade*hood;
+            illumination+=uLampColor*(1.0-smoothstep(0.035,0.12,d))*0.55;
+            lit=vMaterial*illumination;
+          }
+          float fog=smoothstep(8.0,28.0,vDistance);
+          gl_FragColor=vec4(mix(lit,uFog,fog*0.88),1.0);
+        }`));
       gl.linkProgram(program);
       if (!gl.getProgramParameter(program,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
     } catch (error) {
@@ -313,7 +351,7 @@
     }
     shaders.forEach(s=>gl.deleteShader(s));
     gl.useProgram(program); gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK);
-    const uniforms={}; for(const name of ['uProjection','uView','uOffset','uCamera','uFog']) uniforms[name]=gl.getUniformLocation(program,name);
+    const uniforms={}; for(const name of ['uProjection','uView','uOffset','uCamera','uFog','uLighting','uAmbient','uKey','uLamp','uLampColor','uBlockMin[0]','uBlockMax[0]','uShelves[0]']) uniforms[name]=gl.getUniformLocation(program,name);
     const attrs=['aPosition','aNormal','aColor'].map(name=>gl.getAttribLocation(program,name));
     attrs.forEach(index=>gl.enableVertexAttribArray(index));
     const listeners=[]; const keys=new Set();
@@ -354,6 +392,15 @@
       batches.forEach(b=>gl.deleteBuffer(b.buffer));batches=[];cues.clear();scene=next||{};clearInput();emitFocus(null);seated=false;seatedObject=null;currentHeight=HEIGHT;
       bounds=Object.assign({minX:-6,maxX:6,minZ:-7,maxZ:7},scene.bounds||{});
       sky=color(scene.skyColor,[.13,.18,.20]);fog=color(scene.fogColor,sky);
+      const lighting=scene.lighting;
+      gl.useProgram(program);gl.uniform1f(uniforms.uLighting,lighting?1:0);
+      if(lighting){
+        gl.uniform3fv(uniforms.uAmbient,lighting.ambient);gl.uniform3fv(uniforms.uKey,lighting.key);
+        gl.uniform4fv(uniforms.uLamp,lighting.lamp);gl.uniform3fv(uniforms.uLampColor,lighting.lampColor);
+        gl.uniform3fv(uniforms['uBlockMin[0]'],lighting.blockers.flatMap(b=>[b.x-b.w/2,b.y-b.h/2,b.z-b.d/2]));
+        gl.uniform3fv(uniforms['uBlockMax[0]'],lighting.blockers.flatMap(b=>[b.x+b.w/2,b.y+b.h/2,b.z+b.d/2]));
+        gl.uniform4fv(uniforms['uShelves[0]'],lighting.shelves.flatMap(b=>[b.x,b.z,b.w/2,b.d/2]));
+      }
       const floor=color(scene.floorColor,[.44,.42,.36]), walls=color(scene.wallColor,[.52,.54,.48]);
       const vertices=[];
       // Shallow floor slabs keep seams and feet grounded without textures or network assets.

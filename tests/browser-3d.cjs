@@ -44,8 +44,30 @@ async function repair(p,id){await visit(p,id);await click(p,'Set the controls fo
 async function reset(p,pair){await visit(p,'reset');await click(p,'Review the two-memory handoff');for(const id of pair)await p.getByRole('button',{name:new RegExp('^'+S.memories[id].title)}).click();await click(p,'Review what you will lose');await click(p,'Keep these two and reset');await p.waitForFunction(k=>JSON.parse(localStorage.getItem(k)).phase==='return',S.key);assert.deepEqual((await stored(p)).kept,pair);}
 async function finish(p,id,label,confirm,expected){await visit(p,id);const before=await stored(p);await click(p,label);assert.deepEqual(await stored(p),before,'review does not enact the ending');await click(p,confirm);assert.equal((await stored(p)).ending,expected);assert.equal(await p.locator('#panel').getAttribute('data-scene'),'chapter-outcome');assert.doesNotMatch(await p.locator('#lines').innerText(),/archiveCleared|dispatchDelivered|networkClosed|falseClearance/);}
 async function advance(p,name){await click(p,'Continue to '+name);await p.waitForURL(new RegExp(name.toLowerCase()+'-3d.html'));await click(p,'Continue '+name);await close(p);}
+async function mobileControls(){
+ const mobile=await makePage('garden',true);assert.equal(await mobile.locator('#mobile').isVisible(),true);
+ await mobile.locator('#journal').click();await mobile.screenshot({path:path.join(output,'garden-journal-mobile-3d.png')});
+ assert.equal(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await close(mobile);
+ assert.equal(await mobile.evaluate(()=>document.activeElement.id),'world');
+ const controls=await mobile.locator('#move-pad button').evaluateAll(buttons=>buttons.map(button=>({text:button.textContent,icon:button.querySelectorAll('svg').length,label:button.getAttribute('aria-label'),selection:getComputedStyle(button).userSelect})));
+ assert.equal(controls.length,4);for(const control of controls){assert.equal(control.text,'');assert.equal(control.icon,1);assert.ok(control.label);assert.equal(control.selection,'none');}
+ const touch=await mobile.context().newCDPSession(mobile),origin=await mobile.evaluate(()=>test3D.engine.getPosition());
+ for(const direction of ['forward','left','right','back']){
+  await mobile.evaluate(origin=>test3D.engine.load(Afterimage3DChapters.world(JSON.parse(localStorage.getItem(Afterimage3DState.key))),origin),origin);
+  const button=mobile.locator('[data-move='+direction+']'),pad=await button.boundingBox();
+  await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:pad.x+pad.width/2,y:pad.y+pad.height/2}]});
+  await mobile.waitForTimeout(1100);
+  for(const type of ['contextmenu','selectstart','dragstart'])assert.equal(await button.evaluate((el,type)=>el.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})),type),false);
+  assert.equal(await mobile.evaluate(()=>getSelection().toString()),'');
+  await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  const after=await mobile.evaluate(()=>test3D.engine.getPosition());assert.ok(Math.hypot(after.x-origin.x,after.z-origin.z)>.2,direction+' must move while held');
+  await mobile.waitForTimeout(200);assert.deepEqual(await mobile.evaluate(()=>test3D.engine.getPosition()),after,'Releasing '+direction+' must stop movement');
+ }
+ await mobile.screenshot({path:path.join(output,'movement-icons-mobile-3d.png')});await mobile.context().close();
+}
 (async()=>{
  browser=await chromium.launch({headless:true});
+ if(process.argv.includes('--mobile-only')){await mobileControls();assert.deepEqual(errors,[]);console.log('Mobile controls: SVG icons, long touch holds, selection/menu suppression, and release-to-stop passed.');return;}
  const p=await makePage();
  await p.screenshot({path:path.join(output,'prologue-3d.png')});
  await act(p,'moth','Introduce yourself');await act(p,'flower','Set the flower beside the lamp');await act(p,'service','Study the service route');await act(p,'receiver','Listen to the whole tune');
@@ -71,6 +93,6 @@ async function advance(p,name){await click(p,'Continue to '+name);await p.waitFo
  const bad=await makePage('prologue');for(const [id,label] of [['moth','Introduce yourself'],['flower','Set the flower beside the lamp'],['service','Study the service route'],['receiver','Listen to the whole tune']])await act(bad,id,label);await reset(bad,['name','route']);await act(bad,'moth','Answer Moth');await finish(bad,'closure','Clear Archive 07','Clear and erase','clear');assert.equal((await stored(bad)).world.mothPresent,false);assert.equal(await bad.evaluate(k=>Afterimage3DChapters.world(JSON.parse(localStorage.getItem(k))).objects.some(o=>o.id==='moth'),S.key),false);await bad.context().close();
  const garden=await makePage('garden');for(const [id,label] of [['fern','Accept Fern’s invitation']])await act(garden,id,label);await repair(garden,'shade');await act(garden,'fern','Record Fern’s morning shade check');await repair(garden,'receiver');await act(garden,'receiver','Listen between the public signals');await act(garden,'brim','Record Brim’s morning receiver check');await act(garden,'seat-placement','Place the chair under the shade');await reset(garden,['fern','tuning']);await act(garden,'certify','Inspect the court and public path');await finish(garden,'certify','Certify the whole district','File district certificate','district');assert.equal((await stored(garden)).world.falseClearance,true);await garden.context().close();
  const final=await makePage('release');await act(final,'records','Record the archive and dispatch review');await act(final,'fern','Inspect the inhabited court');await act(final,'plan','Inspect the service yard and its controls');await finish(final,'close-all','Enact literal closure','Close all and erase residents','closeall');assert.equal((await stored(final)).world.residentsErased,true);await final.context().close();
- const mobile=await makePage('garden',true);assert.equal(await mobile.locator('#mobile').isVisible(),true);await mobile.locator('#journal').click();await mobile.screenshot({path:path.join(output,'garden-journal-mobile-3d.png')});assert.equal(await mobile.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await close(mobile);assert.equal(await mobile.evaluate(()=>document.activeElement.id),'world');const before=await mobile.evaluate(()=>test3D.engine.getPosition());const pad=await mobile.locator('[data-move=left]').boundingBox();await mobile.mouse.move(pad.x+pad.width/2,pad.y+pad.height/2);await mobile.mouse.down();await mobile.waitForTimeout(500);await mobile.mouse.up();const after=await mobile.evaluate(()=>test3D.engine.getPosition());assert.ok(Math.hypot(after.x-before.x,after.z-before.z)>.2);await mobile.context().close();
+ await mobileControls();
  assert.deepEqual(errors,[]);console.log('3D browser: full five-chapter UI campaign, memories, puzzles, persistence, bad endings, mobile and export passed.');
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();});

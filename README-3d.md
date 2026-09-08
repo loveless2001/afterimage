@@ -4,6 +4,8 @@ Open `index-3d.html` to play from the prologue through Transit, Garden, Chorus, 
 
 This is a compact, first-person adaptation with five playable chapters, volumetric WebGL rooms, collision, physical workstations, people, seats, and persistent consequences. It is an alternative prototype, with simplified contact puzzles and shorter conversations than the original edition.
 
+Archive 07 has cool ambient light and a warm desk lamp that illuminates the table, paperwork, flower, and nearby surfaces. The tabletop and bay walls block the lamp, and shelf bases cast soft contact shadows. This lighting stays physically unchanged through memory handoffs and endings. It uses the offline renderer, with no external assets or post-processing effects.
+
 ## Controls
 
 - WASD moves. Arrow keys move forward/back and turn.
