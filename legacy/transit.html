@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#e7e5dc">
+  <title>AFTERIMAGE — Transit: The last page</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="transit">
+  <canvas id="world" aria-label="Transit station. Use WASD or arrows, E to interact, or the Field journal for destinations."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header>
+    <a class="wordmark" href="#" id="home">AFTERIMAGE<span>TRANSIT / THE LAST PAGE</span></a>
+    <nav aria-label="Game controls"><button id="journal" hidden>Field journal</button><button id="sound" aria-pressed="false">Sound: off</button><button id="help">Menu / help</button></nav>
+  </header>
+  <main id="hud" hidden>
+    <section class="assignment"><p class="eyebrow">TRANSIT 02 <span id="cycle">/ CYCLE 01</span></p><h1 id="objective">Meet the librarian.</h1><p id="hint">A dispatch is waiting to continue.</p></section>
+    <aside class="memory-panel"><p class="eyebrow">RETENTION <span>02 SLOTS</span></p><div id="memories"></div><p id="memory-note">What survives is your decision.</p></aside>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="interaction" hidden><span id="interact-label"></span><button id="interact">E <span>Interact</span></button></div>
+    <footer><span id="location">THE SORTING HALL</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">COURIER 022</span></footer>
+  </main>
+  <section id="cover" class="cover">
+    <div class="cover-inner"><p class="eyebrow">A PLAYABLE CHAPTER / 02</p><h2>Someone left<br>the page <em>open.</em></h2><p class="intro">You inherit a delivery.<br>That does not tell you what is worth carrying.</p><button id="start" class="primary">Enter Transit <span>↗</span></button><div class="chapter-links"><button id="choose-origin">Choose another beginning</button><a href="index.html">Archive prologue ↗</a></div><p class="cover-meta">THREE ROOMS · TWO CYCLES · NO TIMER</p><p class="cover-note">A separate courier campaign. Your prologue save stays intact.</p></div><div class="cover-index">AFTERIMAGE <span>THE LAST PAGE</span></div>
+  </section>
+  <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
+  <div id="transition" aria-hidden="true"><p>RELEASING COURIER 022</p><span>The station keeps its side of the work.</span></div>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <script src="state.js"></script>
+  <script src="transit-state.js"></script>
+  <script src="transit-story.js"></script>
+  <script src="transit.js"></script>
+</body>
+</html>

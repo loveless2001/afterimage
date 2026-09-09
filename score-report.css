@@ -1,0 +1,122 @@
+/* A working paper record, scoped to the report surface. No external assets. */
+#panel.report-view{justify-content:center;padding:18px;background:#0c1e18b8}
+#panel.report-view .dialog{width:min(940px,96vw);max-height:94vh;padding:22px;background:#183129;border-color:#b7b99b;scrollbar-color:#c9bb91 #183129}
+#panel.report-view>.dialog>#speaker,#panel.report-view>.dialog>#dialog-title{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;padding:0;margin:-1px;border:0}
+#panel.report-view #choices{grid-template-columns:1fr 1fr}
+#panel.report-view #choices button{min-height:44px}
+.report-sheet{--report-ink:#26352e;--report-muted:#5f6557;--report-rule:#afa98f;--report-red:#874b36;color-scheme:light;position:relative;width:100%;min-width:0;background:#e8e0c8;color:var(--report-ink);padding:30px 34px 22px;border:1px solid #c5bc9e;box-shadow:0 3px 0 #a69f86,0 8px 24px #0002;font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;overflow-wrap:anywhere}
+.report-sheet *{box-sizing:border-box}
+.report-sheet p{color:inherit}
+.report-sheet .report-kicker{display:flex;justify-content:space-between;gap:18px;font-size:10px;font-weight:700;letter-spacing:.13em;line-height:1.6;color:var(--report-muted)}
+.report-sheet .report-id{white-space:nowrap;letter-spacing:.06em}
+.report-sheet .report-title-line{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:15px 0 7px}
+.report-sheet .report-title{font:400 clamp(28px,3vw,38px)/1.08 Georgia,serif;margin:0;letter-spacing:-.025em}
+.report-sheet .report-stamp{flex:none;max-width:42%;border:2px solid #946747;padding:7px 10px;color:#714b33;font-size:10px;font-weight:800;line-height:1.4;letter-spacing:.11em;text-transform:uppercase;text-align:center;transform:rotate(-3deg)}
+.report-sheet .report-stamp[data-kind=ready]{border-color:#506e57;color:#375c43}
+.report-sheet .report-subtitle{font-size:13px;color:var(--report-muted);margin:8px 0 16px}
+.report-sheet .report-assignment{border-block:1px solid var(--report-ink);padding:12px 0;margin-top:18px}
+.report-sheet .report-label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--report-muted)}
+.report-sheet .report-assignment p{font-family:Georgia,serif;font-size:18px;line-height:1.45;margin:5px 0 0}
+.report-sheet .report-summary{padding:13px 15px;margin:16px 0 4px;background:#ddd0b5;border-left:3px solid #97694b}
+.report-sheet .report-summary[data-ready=true]{background:#d6dcc4;border-left-color:#526f51}
+.report-sheet .report-summary strong{font-size:13px}
+.report-sheet .report-summary p{font-size:12px;margin:3px 0 0}
+.report-sheet .report-section{margin-top:25px}
+.report-sheet .report-section-heading{display:flex;gap:10px;align-items:baseline;font-size:16px;line-height:1.3;font-weight:700;margin:0;border-bottom:1px solid var(--report-rule);padding:0 0 8px}
+.report-sheet .report-section-number{font-size:10px;letter-spacing:.07em;color:var(--report-muted);font-weight:500}
+.report-sheet .report-section-note{font-size:12px;color:var(--report-muted);margin:7px 0 11px}
+.report-sheet .report-requirements{list-style:none;padding:0;margin:0;border-top:1px solid #beb69a}
+.report-sheet .report-requirement{display:flex;align-items:center;gap:12px;padding:12px 10px;border-bottom:1px solid #beb69a;min-height:58px}
+.report-sheet .report-requirement[data-status=missing]{background:#d7b59825}
+.report-sheet .report-check{display:grid;place-items:center;flex:none;align-self:flex-start;width:21px;height:21px;border:1px solid #6f7e66;color:#365a3b;font-size:16px;line-height:1;margin-top:2px}
+.report-sheet [data-status=missing] .report-check{border-style:dashed;border-color:#a27b60;color:#895f44}
+.report-sheet .report-requirement-copy{min-width:0;flex:1}
+.report-sheet .report-requirement-copy strong{font-size:13px}
+.report-sheet .report-row-status{display:inline-block;font-size:10px;line-height:1.4;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#536747;margin-left:10px}
+.report-sheet [data-status=missing] .report-row-status{color:var(--report-red)}
+.report-sheet .report-detail{font-size:12px;line-height:1.5;color:#565e50;margin:4px 0 0}
+.report-sheet .report-track{flex:none;min-height:40px;border:1px solid #8c957b;color:#344d3c;background:transparent;padding:8px 10px;font-size:11px;line-height:1.3;text-align:center}
+.report-sheet button:hover{background:#ced3b9;border-color:#5d795e}
+.report-sheet button:focus-visible,.report-sheet input:focus-visible,.report-sheet summary:focus-visible{outline:2px solid #345e46;outline-offset:3px}
+.report-sheet .report-fields{margin:0}
+.report-sheet .report-field{display:grid;grid-template-columns:minmax(115px,28%) minmax(0,1fr);gap:16px;border-bottom:1px solid #c3baa0;padding:10px 0}
+.report-sheet .report-field dt{font-size:12px;color:var(--report-muted)}
+.report-sheet .report-field dd{margin:0;font-size:13px;min-width:0}
+.report-sheet .report-field-value{white-space:pre-line}
+.report-sheet .report-provenance{display:block;color:#686b59;font-size:10px;line-height:1.5;margin-top:4px}
+.report-sheet .report-trial-ledger{margin-top:16px;border:1px solid #b5ad91;padding:10px 12px}
+.report-sheet .report-trial-ledger>summary{cursor:pointer;font-size:12px;font-weight:600;min-height:27px;padding:2px 0}
+.report-sheet .report-trials{width:100%;border-collapse:collapse;table-layout:fixed;margin:5px 0 0;text-align:left;font-size:11px}
+.report-sheet .report-trials caption{text-align:left;font-size:10px;color:var(--report-muted);padding:0 0 8px}
+.report-sheet .report-trials th,.report-sheet .report-trials td{padding:8px 8px 8px 0;border-top:1px solid #bfb69d;vertical-align:top}
+.report-sheet .report-trials thead th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--report-muted);font-weight:500}
+.report-sheet .report-trials th:first-child{width:9%;font-weight:500}
+.report-sheet .report-trials th:nth-child(2){width:29%}
+.report-sheet .report-run-outcome strong{font-size:11px;font-weight:600}
+.report-sheet .report-trial-detail{font-size:10px;line-height:1.5;margin:4px 0 0}
+.report-sheet .report-route{display:block;width:100%;height:auto;max-width:174px;margin-top:3px;overflow:visible}
+.report-sheet .report-route-track{fill:none;stroke:#b8b7a0;stroke-width:2}
+.report-sheet .report-route-selected{fill:none;stroke:#40634b;stroke-width:3}
+.report-sheet .report-route-target{fill:#866744}
+.report-sheet .report-route-missing{fill:none;stroke:#9e5639;stroke-width:2}
+.report-sheet .report-verdict{border:0;padding:0;margin:0;min-width:0;display:grid;gap:7px}
+.report-sheet .report-option{display:flex;gap:11px;align-items:flex-start;border:1px solid #b0ac93;padding:12px 13px;font-size:13px;cursor:pointer;min-height:46px;background:#eee8d733}
+.report-sheet .report-option:has(input:checked){border-color:#456850;background:#d3dcc33d;box-shadow:inset 3px 0 #456850}
+.report-sheet input[type=radio],.report-sheet input[type=checkbox]{appearance:auto;accent-color:#45694e;flex:none;width:17px;height:17px;margin:2px 0 0;cursor:pointer}
+.report-sheet input:disabled{cursor:not-allowed}
+.report-sheet .report-issue{font-size:12px;padding:9px 12px;border-left:2px solid var(--report-red);color:var(--report-red);background:#dfb69c22;margin:3px 0 0}
+.report-sheet .report-readonly-conclusion{font:18px/1.5 Georgia,serif;border-bottom:1px solid var(--report-rule);padding:7px 0 12px;margin:0}
+.report-sheet .report-attachments{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.report-sheet .report-attachment{padding:13px 14px;border:1px dashed #a7a38a;background:#f5efdc33;min-width:0}
+.report-sheet .report-attachment[data-classification=unverified]{border-color:#a67851;background:#e4c8a530}
+.report-sheet .report-attachment[data-classification=out-of-scope]{border-color:#9b877c;background:#e0d0c133}
+.report-sheet .report-attachment-choice{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.report-sheet .report-attachment-choice strong{font-size:12px;line-height:1.5}
+.report-sheet .report-attachment-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 6px 27px}
+.report-sheet .report-extra-tag,.report-sheet .report-classification{border:1px solid #b4ad92;padding:2px 5px;font-size:9px;line-height:1.4;color:#636a55;text-transform:uppercase;letter-spacing:.035em}
+.report-sheet [data-classification=unverified] .report-classification{color:#845732;border-color:#a9845d}
+.report-sheet [data-classification=out-of-scope] .report-classification{color:#76615b;border-color:#9b877c}
+.report-sheet .report-unavailable{font-size:10px;color:var(--report-muted);font-style:italic}
+.report-sheet .report-empty{font-size:12px;color:var(--report-muted);font-style:italic;margin:12px 0}
+.report-sheet .report-footer{display:flex;justify-content:space-between;gap:18px;border-top:1px solid var(--report-rule);margin-top:27px;padding-top:11px;font-size:9px;line-height:1.6;letter-spacing:.04em;color:var(--report-muted)}
+.report-sheet .report-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.report-sheet.report-fragment{background:#e0d6b9;padding-bottom:37px;clip-path:polygon(0 0,100% 0,100% 99%,97% 98%,94% 100%,90% 98.7%,85% 100%,81% 98.5%,76% 99.4%,70% 98.6%,66% 100%,60% 98.8%,56% 99.6%,51% 98.4%,45% 100%,41% 98.7%,35% 100%,29% 98.8%,23% 99.6%,18% 98.6%,13% 100%,8% 98.6%,4% 99.5%,0 98.5%)}
+.report-sheet .report-fragment-author{font-size:13px;margin:13px 0 3px}
+.report-sheet .report-fragment-fields{margin-top:21px;border-top:1px solid var(--report-rule)}
+.report-sheet .report-fragment-missing{margin-top:20px;border:1px dashed #9c7758;padding:12px 15px;background:#d7bc942e}
+.report-sheet .report-fragment-missing h4,.report-sheet .report-fragment-remarks h4{font-size:12px;margin:0 0 8px}
+.report-sheet .report-fragment-missing ul{margin:0;padding-left:19px;font-size:12px;line-height:1.7}
+.report-sheet .report-fragment-assessment{padding:15px 0;margin-top:16px;border-block:1px solid var(--report-rule)}
+.report-sheet .report-fragment-assessment p{font-size:13px;margin:5px 0 0}
+.report-sheet .report-fragment-remarks{margin-top:18px}
+.report-sheet .report-fragment-remarks p{font:16px/1.55 Georgia,serif;border-left:2px solid #a9a183;padding-left:12px;margin:11px 0}
+@media(max-width:700px){
+  #panel.report-view{padding:10px;align-items:center}
+  #panel.report-view .dialog{width:100%;max-height:94vh;padding:13px;overscroll-behavior:contain}
+  #panel.report-view #dialog-title{font-size:23px;margin:8px 0 14px}
+  #panel.report-view #choices{grid-template-columns:1fr}
+  .report-sheet{padding:19px 17px 18px;font-size:13px}
+  .report-sheet .report-kicker{font-size:8px;gap:8px;letter-spacing:.07em}
+  .report-sheet .report-title-line{display:block;margin-top:13px}
+  .report-sheet .report-title{font-size:28px}
+  .report-sheet .report-stamp{display:inline-block;max-width:100%;margin-top:13px;padding:5px 8px;font-size:9px;transform:rotate(-2deg)}
+  .report-sheet .report-assignment p{font-size:16px}
+  .report-sheet .report-summary{padding:11px 12px}
+  .report-sheet .report-section{margin-top:22px}
+  .report-sheet .report-section-heading{font-size:15px}
+  .report-sheet .report-requirement{flex-wrap:wrap;gap:8px;padding:11px 4px}
+  .report-sheet .report-requirement-copy{flex-basis:calc(100% - 34px)}
+  .report-sheet .report-track{margin-left:29px;min-height:40px}
+  .report-sheet .report-row-status{display:block;margin:3px 0 0}
+  .report-sheet .report-field{grid-template-columns:1fr;gap:3px;padding:10px 0}
+  .report-sheet .report-field dt{font-size:10px}
+  .report-sheet .report-trial-ledger{padding:9px}
+  .report-sheet .report-trials th:first-child{width:11%}
+  .report-sheet .report-trials th:nth-child(2){width:30%}
+  .report-sheet .report-trials th,.report-sheet .report-trials td{padding-right:5px}
+  .report-sheet .report-run-outcome strong{font-size:10px}
+  .report-sheet .report-trial-detail{font-size:10px}
+  .report-sheet .report-attachments{grid-template-columns:1fr}
+  .report-sheet .report-footer{display:block;font-size:9px}
+  .report-sheet .report-footer span{display:block;margin-bottom:4px}
+}

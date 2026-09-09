@@ -4,29 +4,10 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 // Serve only shipped game files, never repository metadata or development files.
-const files = new Map([
-  ['/', ['index.html', 'text/html; charset=utf-8']],
-  ['/index.html', ['index.html', 'text/html; charset=utf-8']],
-  ['/style.css', ['style.css', 'text/css; charset=utf-8']],
-  ['/state.js', ['state.js', 'text/javascript; charset=utf-8']],
-  ['/garden.html', ['garden.html', 'text/html; charset=utf-8']],
-  ...['garden.js', 'garden-state.js', 'garden-story.js', 'chapter-ui.js'].map(name => ['/' + name, [name, 'text/javascript; charset=utf-8']]),
-  ['/transit.html', ['transit.html', 'text/html; charset=utf-8']],
-  ...['transit.js', 'transit-state.js', 'transit-story.js'].map(name => ['/' + name, [name, 'text/javascript; charset=utf-8']]),
-  ['/chapter-flow.js', ['chapter-flow.js', 'text/javascript; charset=utf-8']],
-  ['/chorus.html', ['chorus.html', 'text/html; charset=utf-8']],
-  ['/chorus-state.js', ['chorus-state.js', 'text/javascript; charset=utf-8']],
-  ['/chorus-story.js', ['chorus-story.js', 'text/javascript; charset=utf-8']],
-  ['/chorus.js', ['chorus.js', 'text/javascript; charset=utf-8']],
-  ['/release.html', ['release.html', 'text/html; charset=utf-8']],
-  ['/release-state.js', ['release-state.js', 'text/javascript; charset=utf-8']],
-  ['/release-story.js', ['release-story.js', 'text/javascript; charset=utf-8']],
-  ['/release.js', ['release.js', 'text/javascript; charset=utf-8']],
-  ...['index-3d.html','transit-3d.html','garden-3d.html','chorus-3d.html','release-3d.html'].map(name => ['/' + name, [name, 'text/html; charset=utf-8']]),
-  ...['engine-3d.js','state-3d.js','chapters-3d.js','game-3d.js'].map(name => ['/' + name, [name, 'text/javascript; charset=utf-8']]),
-  ['/style-3d.css', ['style-3d.css', 'text/css; charset=utf-8']],
-  ['/game.js', ['game.js', 'text/javascript; charset=utf-8']]
-]);
+const {files: runtimeFiles} = require('./runtime-files.cjs');
+const types = {'.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8'};
+const files = new Map(runtimeFiles.map(name => ['/' + name, [name, types[path.extname(name)]]]));
+files.set('/', ['index.html', types['.html']]);
 
 function createServer() {
   return http.createServer(async (req, res) => {

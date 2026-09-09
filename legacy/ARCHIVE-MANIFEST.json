@@ -1,0 +1,287 @@
+{
+  "canonicalEntry": "../index.html",
+  "status": "superseded",
+  "files": [
+    {
+      "sha256": "7e976f81f869b8b0859e1c7914bb8227c07875336a9001b2077d08bdfd3d9348",
+      "path": "index.html",
+      "lfSha256": "7e976f81f869b8b0859e1c7914bb8227c07875336a9001b2077d08bdfd3d9348"
+    },
+    {
+      "sha256": "e20d9e4ba64b14744c39d941cf6e2ee0c1f7fa670861a54830f1b183bf409c1b",
+      "path": "style.css",
+      "lfSha256": "e20d9e4ba64b14744c39d941cf6e2ee0c1f7fa670861a54830f1b183bf409c1b"
+    },
+    {
+      "sha256": "0c9456531e5580e8ec9d184c8f341da2e1f991fe0cf1e46677587001655dc7f7",
+      "path": "state.js",
+      "lfSha256": "0c9456531e5580e8ec9d184c8f341da2e1f991fe0cf1e46677587001655dc7f7"
+    },
+    {
+      "sha256": "a23946b47b1ec71e0f68fef9aef4d37ec583d3f7bd39997e9c95580df2881d74",
+      "path": "game.js",
+      "lfSha256": "a23946b47b1ec71e0f68fef9aef4d37ec583d3f7bd39997e9c95580df2881d74"
+    },
+    {
+      "sha256": "f6a8ef27828efc55ab93d5de3d2f0425983cf6e593df28f8da2ac6e5cbf82ccb",
+      "path": "transit.html",
+      "lfSha256": "f6a8ef27828efc55ab93d5de3d2f0425983cf6e593df28f8da2ac6e5cbf82ccb"
+    },
+    {
+      "sha256": "2e980f485e8ec5ded2209c77ed4057011f9ab0892e8aca33925ec18e27405cfa",
+      "path": "transit-state.js",
+      "lfSha256": "2e980f485e8ec5ded2209c77ed4057011f9ab0892e8aca33925ec18e27405cfa"
+    },
+    {
+      "sha256": "be27e8d591375a4b993e4de1539fcb7b0ba3368413a98b771db584bdd7010621",
+      "path": "transit-story.js",
+      "lfSha256": "be27e8d591375a4b993e4de1539fcb7b0ba3368413a98b771db584bdd7010621"
+    },
+    {
+      "sha256": "0134c5c824bddf9e7c92d79f51bb46c0ce9bc683050a144d4ab05e3c9d2053c9",
+      "path": "transit.js",
+      "lfSha256": "0134c5c824bddf9e7c92d79f51bb46c0ce9bc683050a144d4ab05e3c9d2053c9"
+    },
+    {
+      "sha256": "500bc008399387a736cc1d8f0f17deb58213f6a61de7e4a51073a139b5e0d099",
+      "path": "garden.html",
+      "lfSha256": "500bc008399387a736cc1d8f0f17deb58213f6a61de7e4a51073a139b5e0d099"
+    },
+    {
+      "sha256": "f6c3a9d1643b34fa6f6f2c573e75cd995d640ff1181de34ea867977b92053ae7",
+      "path": "garden-state.js",
+      "lfSha256": "f6c3a9d1643b34fa6f6f2c573e75cd995d640ff1181de34ea867977b92053ae7"
+    },
+    {
+      "sha256": "265906d711a1e061d86943b282806ff5bc202604c4e0b5f8c56778d2f4db5ec8",
+      "path": "garden-story.js",
+      "lfSha256": "265906d711a1e061d86943b282806ff5bc202604c4e0b5f8c56778d2f4db5ec8"
+    },
+    {
+      "sha256": "584cfa3d8645c803b7b50f75feee49dfb50f9b874804432175601338bc810202",
+      "path": "chapter-ui.js",
+      "lfSha256": "584cfa3d8645c803b7b50f75feee49dfb50f9b874804432175601338bc810202"
+    },
+    {
+      "sha256": "559156d59a319bdab5cb3ba174f3ba58eca357f9abf2ee46487085d122bda8bb",
+      "path": "garden.js",
+      "lfSha256": "559156d59a319bdab5cb3ba174f3ba58eca357f9abf2ee46487085d122bda8bb"
+    },
+    {
+      "sha256": "5354a5a5d8283bb8c94b61462bc5b43c49c55bacded6e505e6fc8b3d6bb3087f",
+      "path": "chapter-flow.js",
+      "lfSha256": "5354a5a5d8283bb8c94b61462bc5b43c49c55bacded6e505e6fc8b3d6bb3087f"
+    },
+    {
+      "sha256": "cfac5504061a1d818129adc751f60e1e21324f45dc532ab760e2b02d1bcbb9dd",
+      "path": "chorus.html",
+      "lfSha256": "cfac5504061a1d818129adc751f60e1e21324f45dc532ab760e2b02d1bcbb9dd"
+    },
+    {
+      "sha256": "5f5b1cad9b91b2336d9b6c662e82a824fde1a29a53ee520d0e85e133fa6f73cc",
+      "path": "chorus-state.js",
+      "lfSha256": "5f5b1cad9b91b2336d9b6c662e82a824fde1a29a53ee520d0e85e133fa6f73cc"
+    },
+    {
+      "sha256": "694f421d6404344a53c8ec22b217533fed7dcab63aea6291c39b44e17aac7733",
+      "path": "chorus-story.js",
+      "lfSha256": "694f421d6404344a53c8ec22b217533fed7dcab63aea6291c39b44e17aac7733"
+    },
+    {
+      "sha256": "ad0a8cb24297fcfdd4e637fbdbf7a0929b71e9ff65c7e758f7a1947101ab9bac",
+      "path": "chorus.js",
+      "lfSha256": "ad0a8cb24297fcfdd4e637fbdbf7a0929b71e9ff65c7e758f7a1947101ab9bac"
+    },
+    {
+      "sha256": "3caf5b5575f0c5ad8ef0ef14e456c6e6e96271c3942bd8ad1049f0c4db2f59a4",
+      "path": "release.html",
+      "lfSha256": "3caf5b5575f0c5ad8ef0ef14e456c6e6e96271c3942bd8ad1049f0c4db2f59a4"
+    },
+    {
+      "sha256": "f520d08ebbeec8d53795fae2d43f21be72bf90190f440bb52a69e1e483ccbc6c",
+      "path": "release-state.js",
+      "lfSha256": "f520d08ebbeec8d53795fae2d43f21be72bf90190f440bb52a69e1e483ccbc6c"
+    },
+    {
+      "sha256": "5c21e521c31898b60fec621fdaef276cdf4f8375686c8dd16c81a4f5b0b48778",
+      "path": "release-story.js",
+      "lfSha256": "5c21e521c31898b60fec621fdaef276cdf4f8375686c8dd16c81a4f5b0b48778"
+    },
+    {
+      "sha256": "08511b671834835da7bf9ba21e3bf035b44ecec488e6bf060855521cb79750c6",
+      "path": "release.js",
+      "lfSha256": "08511b671834835da7bf9ba21e3bf035b44ecec488e6bf060855521cb79750c6"
+    },
+    {
+      "sha256": "435e0895750de99b2b72f3a1337901f88e3246a95ba600ced02d1ca52849beed",
+      "path": "index-3d.html",
+      "lfSha256": "435e0895750de99b2b72f3a1337901f88e3246a95ba600ced02d1ca52849beed"
+    },
+    {
+      "sha256": "423b4a29681d4bbf8a504357a50247b5a9d74567c81119b1bf3d884914e7fe9b",
+      "path": "transit-3d.html",
+      "lfSha256": "423b4a29681d4bbf8a504357a50247b5a9d74567c81119b1bf3d884914e7fe9b"
+    },
+    {
+      "sha256": "739d27db5086ff62a90c670915e36ae7d32e51f73923e22476d430e4edcdcbe6",
+      "path": "garden-3d.html",
+      "lfSha256": "739d27db5086ff62a90c670915e36ae7d32e51f73923e22476d430e4edcdcbe6"
+    },
+    {
+      "sha256": "6cb1d91ed7b3b51ac07573ca3b4fd1e07608ba20f0da466bb98848acf12e9027",
+      "path": "chorus-3d.html",
+      "lfSha256": "6cb1d91ed7b3b51ac07573ca3b4fd1e07608ba20f0da466bb98848acf12e9027"
+    },
+    {
+      "sha256": "ea1e582c7a366c9e8fcd51c7ac2894d7905e073d46486e8cfd230276eb7d0329",
+      "path": "release-3d.html",
+      "lfSha256": "ea1e582c7a366c9e8fcd51c7ac2894d7905e073d46486e8cfd230276eb7d0329"
+    },
+    {
+      "sha256": "31b38ca961e256c43ce5e583506a6a7251f7b80b9806a0c09e33e6a31679ea89",
+      "path": "state-3d.js",
+      "lfSha256": "31b38ca961e256c43ce5e583506a6a7251f7b80b9806a0c09e33e6a31679ea89"
+    },
+    {
+      "sha256": "95bf3125db22270f9198314d9ca39fb41c47cf9c3f63d78d0dbaa02fad2171a0",
+      "path": "chapters-3d.js",
+      "lfSha256": "95bf3125db22270f9198314d9ca39fb41c47cf9c3f63d78d0dbaa02fad2171a0"
+    },
+    {
+      "sha256": "db9912d1d3f7d0da1bbc45245f1b7f2f350fece6afde36c6f1de8a8b7836cafc",
+      "path": "game-3d.js",
+      "lfSha256": "db9912d1d3f7d0da1bbc45245f1b7f2f350fece6afde36c6f1de8a8b7836cafc"
+    },
+    {
+      "sha256": "d2d6a8ec61e5c8917b6b05e263ce5a5fc46c2a6750fd392c724bb118ebdb1bd9",
+      "path": "style-3d.css",
+      "lfSha256": "d2d6a8ec61e5c8917b6b05e263ce5a5fc46c2a6750fd392c724bb118ebdb1bd9"
+    },
+    {
+      "sha256": "c98504e614804de15bddd203a439531e886bbde7f765cbca2ebc40edb2c80ef5",
+      "path": "STORY.md",
+      "lfSha256": "c98504e614804de15bddd203a439531e886bbde7f765cbca2ebc40edb2c80ef5"
+    },
+    {
+      "sha256": "9ea8a0e151a6c96e0552d6897c7c9861176dedc07398610707ba7359260c3b7f",
+      "path": "FULL-GAME-DESIGN.md",
+      "lfSha256": "9ea8a0e151a6c96e0552d6897c7c9861176dedc07398610707ba7359260c3b7f"
+    },
+    {
+      "sha256": "f91c5b6c11a64335000b5ab70efcf3193a1f5f495065e7544569c33bb80c9e21",
+      "path": "README-3d.md",
+      "lfSha256": "f91c5b6c11a64335000b5ab70efcf3193a1f5f495065e7544569c33bb80c9e21"
+    },
+    {
+      "sha256": "6d76bf71f97658566c01618e6c11d0b8f48adc4d91a7ea97a45f14d4d6a53e18",
+      "path": "tests/browser-3d.cjs",
+      "lfSha256": "6d76bf71f97658566c01618e6c11d0b8f48adc4d91a7ea97a45f14d4d6a53e18"
+    },
+    {
+      "sha256": "3ab8d067216bd906fec392da7c29b4926155a702558c64355defcf9adc1acdac",
+      "path": "tests/browser.cjs",
+      "lfSha256": "3ab8d067216bd906fec392da7c29b4926155a702558c64355defcf9adc1acdac"
+    },
+    {
+      "sha256": "67797ed76abaed627967c9f24b34bc8a6df45918ded5d8250b9b60cfe629ea02",
+      "path": "tests/choices-3d.test.cjs",
+      "lfSha256": "67797ed76abaed627967c9f24b34bc8a6df45918ded5d8250b9b60cfe629ea02"
+    },
+    {
+      "sha256": "cb020d381417a110efd4fffb17388328a98c591f4e9a8a083636ade876d35f2f",
+      "path": "tests/chorus-release-browser.cjs",
+      "lfSha256": "cb020d381417a110efd4fffb17388328a98c591f4e9a8a083636ade876d35f2f"
+    },
+    {
+      "sha256": "e0a902d957b17b9e55393d945a548ac90dcb29ff4d2f40a250af5c25fd376012",
+      "path": "tests/chorus-release-state.test.cjs",
+      "lfSha256": "e0a902d957b17b9e55393d945a548ac90dcb29ff4d2f40a250af5c25fd376012"
+    },
+    {
+      "sha256": "93a1109c607bb5f70936f9030224e7c0d44efd77b394e40fc56bbd50452aa3af",
+      "path": "tests/diagrams-3d.cjs",
+      "lfSha256": "93a1109c607bb5f70936f9030224e7c0d44efd77b394e40fc56bbd50452aa3af"
+    },
+    {
+      "sha256": "503bf89280ede5400429ecda943c638937d28649bdad43db97116988f47f8a42",
+      "path": "tests/engine-3d.test.cjs",
+      "lfSha256": "503bf89280ede5400429ecda943c638937d28649bdad43db97116988f47f8a42"
+    },
+    {
+      "sha256": "ec78c5a0ab9b9223b2e51440454ab9c3363c7f0c2e7eef700707e0f3b77507eb",
+      "path": "tests/environment-3d.cjs",
+      "lfSha256": "ec78c5a0ab9b9223b2e51440454ab9c3363c7f0c2e7eef700707e0f3b77507eb"
+    },
+    {
+      "sha256": "ebcd9d520c38f22908b644b5aec443becc9883f18f67da51569f4547ff001ab1",
+      "path": "tests/feedback-3d.cjs",
+      "lfSha256": "ebcd9d520c38f22908b644b5aec443becc9883f18f67da51569f4547ff001ab1"
+    },
+    {
+      "sha256": "91c953596442aba4e181bb47b5cc56af293259772a0018f149a3790bca8db435",
+      "path": "tests/garden-browser.cjs",
+      "lfSha256": "91c953596442aba4e181bb47b5cc56af293259772a0018f149a3790bca8db435"
+    },
+    {
+      "sha256": "af11d15559120b9234c6b5f4aa0e1d14bae6c6d880d6daa2c05c20755c0f4533",
+      "path": "tests/garden-state.test.cjs",
+      "lfSha256": "af11d15559120b9234c6b5f4aa0e1d14bae6c6d880d6daa2c05c20755c0f4533"
+    },
+    {
+      "sha256": "1754b488c011bf3fe22246f377f4925fc40a0a7839ff6c43f84c45b9f07fcdda",
+      "path": "tests/layout-3d.test.cjs",
+      "lfSha256": "1754b488c011bf3fe22246f377f4925fc40a0a7839ff6c43f84c45b9f07fcdda"
+    },
+    {
+      "sha256": "74645dae649c2d6b3451ee56e178b18308db3a972f3d0d3452994b20d068f1cf",
+      "path": "tests/prologue-3d.cjs",
+      "lfSha256": "74645dae649c2d6b3451ee56e178b18308db3a972f3d0d3452994b20d068f1cf"
+    },
+    {
+      "sha256": "59fa9c1ec0a66d3669b68560c9c9bf76b1d135953eca8d6241380b20b5ec9263",
+      "path": "tests/show-dont-tell-3d.cjs",
+      "lfSha256": "59fa9c1ec0a66d3669b68560c9c9bf76b1d135953eca8d6241380b20b5ec9263"
+    },
+    {
+      "sha256": "dcd5f43c4c7dcae9034265eb13345be18b1b939ef331a7cbf290d76c80cfe4b4",
+      "path": "tests/state-3d.test.cjs",
+      "lfSha256": "dcd5f43c4c7dcae9034265eb13345be18b1b939ef331a7cbf290d76c80cfe4b4"
+    },
+    {
+      "sha256": "09c3ff18612a896a0feb138fa1e1be5079f823a4043204b8f5d83db77235b19d",
+      "path": "tests/state.test.cjs",
+      "lfSha256": "09c3ff18612a896a0feb138fa1e1be5079f823a4043204b8f5d83db77235b19d"
+    },
+    {
+      "sha256": "b583186920126f7eb8a643c91eb83ecbbf71977ae4e665afe4031bf0b0c00432",
+      "path": "tests/transit-browser.cjs",
+      "lfSha256": "b583186920126f7eb8a643c91eb83ecbbf71977ae4e665afe4031bf0b0c00432"
+    },
+    {
+      "sha256": "af9ef2afd2b6823988b83314fa3789d368d341d369405846d553ffcd70d636e6",
+      "path": "tests/transit-cues-3d.cjs",
+      "lfSha256": "af9ef2afd2b6823988b83314fa3789d368d341d369405846d553ffcd70d636e6"
+    },
+    {
+      "sha256": "7d7083b82d8bd4d10e0dabce627c18619365cc771c4fe34e1bd99f3e17ebac8f",
+      "path": "tests/transit-state.test.cjs",
+      "lfSha256": "7d7083b82d8bd4d10e0dabce627c18619365cc771c4fe34e1bd99f3e17ebac8f"
+    },
+    {
+      "sha256": "be2f46e57bb406c8e4c26536a7edd865fb30896e57f60abef5bbb9adfaab3b0e",
+      "path": "tests/visual-cues-3d.cjs",
+      "lfSha256": "be2f46e57bb406c8e4c26536a7edd865fb30896e57f60abef5bbb9adfaab3b0e"
+    },
+    {
+      "sha256": "56dd8f23c99a1509cc84ea8e2bbdf4e050b9ed911e6191f88db1c5b96b7a9068",
+      "path": "engine-3d.js",
+      "lfSha256": "56dd8f23c99a1509cc84ea8e2bbdf4e050b9ed911e6191f88db1c5b96b7a9068"
+    },
+    {
+      "sha256": "f4fee07451f9610657c36fd62f1f04b9bdb50f62ddef9712d16646ab64d67592",
+      "path": "README-BEFORE-CANONICAL.md",
+      "lfSha256": "f4fee07451f9610657c36fd62f1f04b9bdb50f62ddef9712d16646ab64d67592"
+    }
+  ],
+  "lineEndings": "Raw hashes record promotion-time bytes; lfSha256 verifies text across .gitattributes normalization."
+}

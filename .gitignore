@@ -13,3 +13,6 @@ dist/
 
 # Local research references; never part of the public game release.
 /research/
+/backups/
+/debug.log
+/afterimage-mobile-check.png

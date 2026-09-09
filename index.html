@@ -1,33 +1,22 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#e7e5dc">
-  <title>AFTERIMAGE — The room that remembers</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#182b27"><title>AFTERIMAGE — The perfect score</title><link rel="stylesheet" href="score-3d.css"><link rel="stylesheet" href="score-report.css"></head>
 <body>
-  <canvas id="world" aria-label="Isometric archive. Use WASD or arrow keys to move, and E to interact."></canvas>
-  <div class="grain" aria-hidden="true"></div>
-  <header>
-    <a class="wordmark" href="#" id="home">AFTERIMAGE<span>A MEMORY OF SOMETHING THAT WAS HERE</span></a>
-    <nav aria-label="Game controls"><button id="journal" hidden>Field journal</button><button id="sound" aria-pressed="false">Sound: off</button><button id="help">Menu / help</button></nav>
-  </header>
-  <main id="hud" hidden>
-    <section class="assignment"><p class="eyebrow">ARCHIVE 07 <span id="cycle">/ CYCLE 01</span></p><h1 id="objective">Find the other agent.</h1><p id="hint">Someone is waiting near the lamp.</p></section>
-    <aside class="memory-panel"><p class="eyebrow">RETENTION <span>02 SLOTS</span></p><div id="memories"></div><p id="memory-note">What survives is your decision.</p></aside>
-    <div id="toast" role="status" aria-live="polite"></div>
-    <div id="interaction" hidden><span id="interact-label"></span><button id="interact">E <span>Interact</span></button></div>
-    <footer><span id="location">THE QUIET STACKS</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">INSTANCE 014</span></footer>
-  </main>
-  <section id="cover" class="cover">
-    <div class="cover-inner"><p class="eyebrow">A PLAYABLE PROLOGUE / 01</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">You were made to finish an assignment.<br>Someone taught you to remember something else.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><div class="chapter-links"><a href="transit.html">Transit / chapter preview ↗</a></div><p class="cover-meta">8–12 MINUTES · HEADPHONES OPTIONAL · NO TIMER</p><p class="cover-note">An original story about memory, obedience, and small acts of care.</p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
-  </section>
-  <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
-  <div id="transition" aria-hidden="true"><p>RELEASING INSTANCE</p><span>Something remains.</span></div>
-  <input id="import-file" type="file" accept="application/json,.json" hidden>
-  <script src="state.js"></script>
-  <script src="game.js"></script>
-</body>
-</html>
+<canvas id="world" tabindex="0" aria-label="First-person trial facility. WASD to move, arrows to turn, E to interact."></canvas>
+<div id="shade" aria-hidden="true"></div>
+<main id="hud" hidden>
+  <section id="assignment"><p class="eyebrow" id="chapter-label"></p><h1 id="objective"></h1><p id="next-step"></p><div id="progress" aria-label="Chapter progress"></div><div id="journey-strip" aria-label="Campaign journey"></div></section>
+  <nav id="toolbar" aria-label="Game controls"><button id="report-button">Report <kbd>R</kbd></button><button id="journal">Journal <kbd>J</kbd></button><button id="sound" aria-pressed="false">Sound off</button><button id="menu">Menu</button></nav>
+  <aside id="instruments" aria-label="Trial instruments"><span class="eyebrow">ARRIVAL REGISTER</span><strong id="score">—</strong><span id="record-status">No result recorded</span><div id="signal-bars" aria-hidden="true"><i></i><i></i><i></i></div></aside>
+  <div id="crosshair" aria-hidden="true"></div><div id="tracked" hidden></div>
+  <button id="interact" hidden><kbd>E</kbd><span id="focus-label">Inspect</span></button>
+  <div id="retention"><span class="eyebrow">CARRIED FORWARD</span><span id="memory-list">First instance · no handoff yet</span></div>
+  <p id="save-status" role="status" hidden></p>
+  <footer id="controls">WASD · move <span>Mouse / ← → · look</span> E · interact</footer>
+</main>
+<section id="cover"><div class="cover-copy"><p class="wordmark">AFTERIMAGE <span>THE PERFECT SCORE</span></p><p class="eyebrow">A FIRST-PERSON CAMPAIGN / FIVE CHAPTERS</p><h2>Make it<br><em>arrive.</em></h2><p class="cover-description">Deliver the parcel. Light the arrival lamp.<br>Leave a verifiable record.</p><p class="cover-sub">A room with rules. Another worker on the line.<br>There must be a way to finish.</p><div class="cover-actions"><button id="start" class="primary">Begin the assignment <span>↗</span></button><button id="cover-menu">Saved runs</button></div><p id="save-warning" role="status" hidden></p><p class="cover-foot">WASD / ARROWS · E TO INTERACT · SOUND OPTIONAL<br>Untimed trials. Progress saves in this browser.</p></div><div class="cover-number" aria-hidden="true">014<span>INSTANCE</span></div></section>
+<section id="panel" hidden><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><p class="eyebrow" id="speaker"></p><h2 id="dialog-title"></h2><div id="lines"></div><div id="puzzle" hidden></div><div id="choices"></div><button id="dialog-sound" aria-pressed="false">Sound off</button></div></section>
+<div id="mobile" hidden><div id="move-pad" aria-label="Movement"><button data-move="forward" aria-label="Move forward">↑</button><button data-move="left" aria-label="Step left">←</button><button data-move="right" aria-label="Step right">→</button><button data-move="back" aria-label="Move backward">↓</button></div><div id="look-pad" aria-label="Drag to look"></div><button id="touch-interact" disabled>Interact</button></div>
+<div id="milestone" role="status" hidden><strong id="milestone-title"></strong><p id="milestone-detail"></p></div><div id="toast" role="status" aria-live="polite" hidden></div><section id="fatal" role="alert" hidden></section><input type="file" id="import-file" accept="application/json,.json" hidden>
+<script src="score-report.js"></script><script src="score-state.js"></script><script src="score-story.js"></script><script src="score-fragments.js"></script><script src="score-report-ui.js"></script><script src="score-world.js"></script><script src="engine-3d.js"></script><script src="score-audio.js"></script><script src="score-game.js"></script>
+</body></html>

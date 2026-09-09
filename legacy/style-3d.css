@@ -37,3 +37,5 @@
 body.reading:has(#panel.composition:not([hidden])) #task{opacity:.28}
 body.reading #stand{visibility:hidden}
 @media(max-width:750px){#panel.composition{align-items:flex-end;justify-content:center;background:linear-gradient(transparent 45%,#06110a66)}#panel.composition .dialog{width:100%;max-height:44vh;padding:15px 18px}#panel.composition h2{font-size:23px;margin:7px 0}#panel.composition #lines{font-size:.8rem}#panel.composition #choices{margin-top:10px}#panel.composition #choices button{padding:9px 11px}}
+
+.new-campaign{border-left:2px solid var(--accent);padding:10px 14px;background:#d0d7ae0b}.new-campaign a{font-size:.78rem;color:var(--accent)}.new-campaign span{display:block;font-size:.72rem;margin-top:5px;color:var(--muted)}

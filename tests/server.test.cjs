@@ -1,24 +1,16 @@
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { once } = require('node:events');
-const { createServer } = require('../scripts/serve.cjs');
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {once}=require('node:events');
+const {createServer}=require('../scripts/serve.cjs');
+const {files,retired,aliases}=require('../scripts/runtime-files.cjs');
 
-test('local server serves game assets and excludes repository files', async () => {
-  const server = createServer();
-  server.listen(0, '127.0.0.1'); await once(server, 'listening');
-  const base = `http://127.0.0.1:${server.address().port}`;
-  try {
-    const page = await fetch(base);
-    assert.equal(page.status, 200);
-    assert.match(await page.text(), /AFTERIMAGE/);
-    const script = await fetch(base + '/game.js?test=1');
-    assert.equal(script.status, 200);
-    assert.match(script.headers.get('content-type'), /javascript/);
-    assert.equal((await fetch(base + '/style.css', { method: 'HEAD' })).status, 200);
-    for (const url of ['/research/README.md', '/transit-state.test.cjs', '/.git/config', '/package.json', '/tests/state.test.cjs', '/%2e%2e%2fpackage.json']) {
-      assert.equal((await fetch(base + url)).status, 404);
-    }
-    for (const asset of ['transit.html', 'transit.js', 'transit-state.js', 'transit-story.js', 'garden.html', 'garden.js', 'garden-state.js', 'garden-story.js', 'chapter-ui.js', 'chapter-flow.js', 'chorus.html', 'chorus.js', 'chorus-state.js', 'chorus-story.js', 'release.html', 'release.js', 'release-state.js', 'release-story.js','index-3d.html','transit-3d.html','garden-3d.html','chorus-3d.html','release-3d.html','engine-3d.js','state-3d.js','chapters-3d.js','game-3d.js','style-3d.css']) assert.equal((await fetch(base + '/' + asset)).status, 200);
-    assert.equal((await fetch(base, { method: 'POST' })).status, 405);
-  } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+test('canonical server serves only the active game and old-entry redirects',async()=>{
+  const server=createServer();server.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
+  try{
+    const page=await fetch(base);assert.equal(page.status,200);const html=await page.text();assert.match(html,/score-game\.js/);assert.doesNotMatch(html,/legacy-link|src="game\.js"/);
+    for(const name of files){const r=await fetch(base+'/'+name+'?test=1');assert.equal(r.status,200,name);assert.match(r.headers.get('content-type'),name.endsWith('.js')?/javascript/:name.endsWith('.css')?/css/:/html/);if(aliases.includes(name))assert.match(await r.text(),/location\.replace\('index\.html'/);}
+    assert.equal((await fetch(base+'/score-3d.css',{method:'HEAD'})).status,200);
+    for(const name of [...retired,'legacy/index.html','legacy/index-3d.html','legacy/engine-3d.js','research/README.md','backups/','SCORE-DESIGN.md','.git/config','package.json','tests/score-state.test.cjs','%2e%2e%2fpackage.json'])assert.equal((await fetch(base+'/'+name)).status,404,name);
+    assert.equal((await fetch(base,{method:'POST'})).status,405);
+  }finally{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });

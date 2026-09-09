@@ -19,7 +19,12 @@ async function check(page,id,bits){
 (async()=>{
  browser=await chromium.launch({headless:true});
  for(const viewport of [{width:1280,height:800},{width:390,height:844},{width:320,height:740},{width:844,height:390}])for(const [chapter,id] of cases){
-  const context=await browser.newContext({viewport,reducedMotion:'reduce'});await context.addInitScript(()=>{let api;Object.defineProperty(window,'Afterimage3DWorld',{configurable:true,get:()=>api,set:value=>{api=value;const create=value.create;value.create=(canvas,options)=>{window.openTestEncounter=options.onInteract;return create(canvas,options);};}});});
+  const context=await browser.newContext({viewport,reducedMotion:'reduce'});await context.addInitScript(()=>{
+    // Each control change reloads and renders the world. This static diagram
+    // audit needs no continuous 3D loop; keep browser actionability frames live.
+    const raf=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=callback=>callback.name==='tick'?0:raf(callback);
+    let api;Object.defineProperty(window,'Afterimage3DWorld',{configurable:true,get:()=>api,set:value=>{api=value;const create=value.create;value.create=(canvas,options)=>{window.openTestEncounter=options.onInteract;return create(canvas,options);};}});
+  });
   const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));await p.goto(new URL((chapter==='prologue'?'index':chapter)+'-3d.html',base).href);await p.evaluate(([key,seed])=>localStorage.setItem(key,JSON.stringify(seed)),[M.key,M.preview(chapter)]);await p.reload();await p.locator('#start').click();await open(p,id);await check(p,id,0);assert.equal(await p.getByRole('button',{name:/^Secure the repair/}).getAttribute('aria-describedby'),'puzzle-status');assert.match(await p.locator('#puzzle-status').innerText(),/Match the controls/);
   if(viewport.width===1280)assert.equal(await p.locator('.dialog').evaluate(el=>el.scrollHeight<=el.clientHeight+1),true,'desktop repair fits without scrolling');
   const initial=await p.locator('.contact-diagram').boundingBox();const frame=await p.locator('.dialog').boundingBox();assert.ok(initial.y>=frame.y&&initial.y<frame.y+frame.height,'diagram starts in visible panel');

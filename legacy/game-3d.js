@@ -4,7 +4,7 @@
   const names = {prologue:'Prologue',transit:'Transit',garden:'Garden',chorus:'Chorus',release:'Release'};
   const pages = {prologue:'index-3d.html',transit:'transit-3d.html',garden:'garden-3d.html',chorus:'chorus-3d.html',release:'release-3d.html'};
   const entry = document.body.dataset.chapter || 'prologue', reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let s, saved = null, storedRaw = null, active = false, panelOpen = false, engine, focus = null, currentObject = null, escapeAction = null, focusReturn = null, tracked = null, toastTimer, audio = null, ambient = null, soundOn = false, soundBusy = false, soundWanted = false, melodyNodes = [], storageOK = true;
+  let s, saved = null, storedRaw = null, active = false, panelOpen = false, engine, focus = null, currentObject = null, escapeAction = null, focusReturn = null, tracked = null, toastTimer, audio = null, ambient = null, soundTexture = null, soundOn = false, soundBusy = false, soundWanted = false, melodyNodes = [], storageOK = true;
   function valid(value) { const result = M.validate(value); if (!result) throw new Error('This is not a valid 3D campaign save.'); return result; }
   function toast(message) { $('toast').textContent = message; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 4500); }
   function fatal(message) { $('fatal').replaceChildren(); const p = document.createElement('p'); p.textContent = message; const a = document.createElement('a'); a.href = 'index.html'; a.textContent = 'Play the original edition'; $('fatal').append(p,a); $('fatal').hidden = false; }
@@ -28,7 +28,7 @@
     $('progress').replaceChildren(); const total = Math.min(12,Math.max(0,Number(task.total)||0)), completed = Math.max(0,Number(task.completed)||0); for(let i=0;i<total;i++){const mark=document.createElement('i');if(i<completed)mark.className='done';$('progress').append(mark);}
     const held = s.phase === 'work' ? s.acquired : s.kept, lost=s.phase==='work'?[]:s.acquired.filter(id=>!s.kept.includes(id)); $('memory-caption').textContent = s.phase === 'work' ? held.length + ' memories found / 2 can continue' : '2 retained / '+lost.length+' released'; $('memory-list').textContent = held.map(id => M.memories[id]?.title || id).join(' · ') || 'No memories found yet';$('memory-list').title=lost.length?'Released: '+lost.map(id=>M.memories[id].title).join(', '):'';
   }
-  function refreshWorld(useStatePosition = false) { const p = useStatePosition ? s.position : engine.getPosition(); engine.load(Story.world(s),p); s.position = engine.getPosition(); hud(); updateTracking(); }
+  function refreshWorld(useStatePosition = false) { const p = useStatePosition ? s.position : engine.getPosition(),world=Story.world(s); engine.load(world,p); syncAmbience(world.ambience); s.position = engine.getPosition(); hud(); updateTracking(); }
   function closePanel() { panelOpen=false; $('panel').hidden=true; $('panel').classList.remove('menu'); document.body.classList.remove('reading'); $('hud').inert=false; $('cover').inert=false; escapeAction=null; if(active)engine.pause(false); if(active)$('world').focus();else if(focusReturn?.isConnected)focusReturn.focus(); focusReturn=null; updateFocus(focus); }
   function show(scene, choices, options={}) {
     $('panel').classList.toggle('composition',Boolean(scene.composition));
@@ -216,6 +216,27 @@
   const dialogSound=document.createElement('button');dialogSound.id='dialog-sound';dialogSound.className='dialog-sound';$('speaker').after(dialogSound);
   function soundButtons(){for(const button of [$('sound'),dialogSound]){button.textContent=soundOn?'Sound on':'Sound off';button.setAttribute('aria-pressed',String(soundOn));button.disabled=soundBusy;}}
   function stopNotes(){for(const node of melodyNodes){try{node.stop();}catch(_){}node.disconnect();}melodyNodes=[];}
+  function syncAmbience(profile){
+    if(!soundTexture||!profile)return;
+    for(const [name,node] of Object.entries(soundTexture)){
+      const [frequency,level]=profile[name],time=audio.currentTime;
+      node.frequency.value=frequency;node.gain.gain.cancelScheduledValues(time);node.gain.gain.setTargetAtTime(level,time,.12);
+    }
+  }
+  function createAmbience(){
+    if(s.chapter==='prologue'){
+      [110,164.81,220.3].forEach((hz,i)=>{const oscillator=audio.createOscillator(),gain=audio.createGain();oscillator.type='sine';oscillator.frequency.value=hz;gain.gain.value=.009/(i+1);oscillator.connect(gain).connect(ambient);oscillator.start();});return;
+    }
+    const profile=Story.world(s).ambience,buffer=audio.createBuffer(1,audio.sampleRate*2,audio.sampleRate),data=buffer.getChannelData(0);
+    let seed=7301;for(let i=0;i<data.length;i++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;data[i]=seed/2147483648-1;}
+    const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),airGain=audio.createGain();
+    source.buffer=buffer;source.loop=true;filter.type='lowpass';filter.Q.value=.35;filter.frequency.value=profile.air[0];airGain.gain.value=profile.air[1];
+    source.connect(filter).connect(airGain).connect(ambient);source.start();soundTexture={air:{frequency:filter.frequency,gain:airGain}};
+    for(const name of ['room','work']){
+      const oscillator=audio.createOscillator(),gain=audio.createGain();oscillator.type=name==='room'?'sine':'triangle';oscillator.frequency.value=profile[name][0];gain.gain.value=profile[name][1];
+      oscillator.connect(gain).connect(ambient);oscillator.start();soundTexture[name]={frequency:oscillator.frequency,gain};
+    }
+  }
   function playNotes(){
     if(!soundOn||!audio||audio.state!=='running')return;
     stopNotes();
@@ -229,7 +250,7 @@
     try{
       if(enabled){
         if(!audio){const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw new Error('Audio is unavailable.');audio=new Audio();ambient=audio.createGain();ambient.gain.value=0;ambient.connect(audio.destination);
-          (s.chapter==='prologue'?[110,164.81,220.3]:s.chapter==='transit'?[146.83,220,293.66]:[164.81,246.94,329.63]).forEach((hz,i)=>{const oscillator=audio.createOscillator(),gain=audio.createGain();oscillator.type='sine';oscillator.frequency.value=hz;gain.gain.value=s.chapter==='prologue'?.009/(i+1):s.chapter==='transit'?.007:.006;oscillator.connect(gain).connect(ambient);oscillator.start();});
+          createAmbience();
         }
         await audio.resume();if(audio.state!=='running')throw new Error('Audio could not start.');ambient.gain.value=1;soundOn=true;
         if(preview&&s.chapter==='prologue'&&(s.phase==='work'||s.kept.includes('song')))playNotes();

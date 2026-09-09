@@ -138,6 +138,8 @@ test('Every Transit memory pair preserves the single clamp and the cost of its e
     if(ending==='both')assert.ok(Math.abs(books[0].y-books[1].y)>.3,'Both records need separate shelves');
     assert.equal(room.decor.find(o=>o.id==='parcel-lift-platform').y<.2,ending==='both');
     assert.deepEqual(room.decor.find(o=>o.id==='silt-reading-lamp'),lamp,'Finishing a dispatch must not extinguish the occupied platform');
+    assert.deepEqual(room.lighting.points.find(p=>p.id==='reading'),before.lighting.points.find(p=>p.id==='reading'),'The occupied platform keeps its actual illumination across every retained pair');
+    assert.equal(room.ambience.work[1]===0,ending==='both','Only spending the component stops the repaired parcel-lift motor');
     assert.equal(object(room,'silt').x,object(before,'silt').x,'Keeping records does not bring Silt across');
   }
 });
@@ -179,6 +181,32 @@ test('Garden evening lighting waits for the courier’s accepted controller duty
   s=State.act(s,'listen');s=State.reset(s,['sequence','fern']);s=State.act(s,'daylight');
   const lamp=state=>Chapters.world(state).decor.find(o=>o.x===0&&o.z===1.5&&o.y===2.63);
   const daylightColor=lamp(s).color;
+  const eveningLight=state=>Chapters.world(state).lighting.points.find(p=>p.id==='evening').color;
+  assert.deepEqual(eveningLight(s),[0,0,0]);
   s=State.act(s,'evening');assert.equal(lamp(s).color,daylightColor,'A proposed evening opening must not energize its lamp');
+  assert.deepEqual(eveningLight(s),[0,0,0],'The proposal must not cast evening light');
   s=State.act(s,'duty');assert.notEqual(lamp(s).color,daylightColor,'The retained sequence and accepted check should energize the evening lamp');
+  assert.ok(eveningLight(s).every(n=>n>0));
+});
+
+test('Every Garden handoff preserves repaired shade, daylight, and the public receiver ambience',()=>{
+  let s=State.preview('garden');for(const action of ['fern','morning','brim','seat'])s=State.act(s,action);
+  for(const id of ['shade','receiver']){for(let index=0;index<3;index++)if(State.puzzles[id].target&(1<<index))s=State.act(s,'turn',{id,index});s=State.act(s,id);}s=State.act(s,'listen');
+  const before=Chapters.world(s);
+  for(let a=0;a<s.acquired.length;a++)for(let b=a+1;b<s.acquired.length;b++){
+    const room=Chapters.world(State.reset(s,[s.acquired[a],s.acquired[b]]));
+    assert.deepEqual(room.lighting,before.lighting);assert.deepEqual(room.ambience,before.ambience);
+  }
+});
+
+test('Release retires equipment light and sound while daylight survives all four decisions',()=>{
+  let s=State.preview('release');for(const n of [0,1,2])s=State.act(s,'inspect',n);s=State.act(s,'counterOffer');
+  const before=Chapters.world(s);
+  for(const ending of ['complete','witness','remain','closeall']){
+    const room=Chapters.world(State.act(s,'finish',ending));
+    assert.deepEqual(room.lighting.sun,before.lighting.sun);assert.deepEqual(room.lighting.key,before.lighting.key);assert.deepEqual(room.lighting.canopy,before.lighting.canopy);
+    assert.equal(room.lighting.points.find(p=>p.id==='carrier').color.some(n=>n>0),ending==='remain');
+    assert.equal(room.lighting.points.find(p=>p.id==='garden').color.some(n=>n>0),ending!=='closeall');
+    assert.equal(room.ambience.room[1]>0,ending==='remain');assert.deepEqual(room.ambience.air,before.ambience.air);
+  }
 });

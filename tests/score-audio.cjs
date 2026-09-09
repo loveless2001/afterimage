@@ -1,0 +1,67 @@
+'use strict';
+const assert=require('node:assert/strict');
+const path=require('node:path');
+const fs=require('node:fs'),os=require('node:os');
+const {pathToFileURL}=require('node:url');
+const {chromium}=require('@playwright/test');
+let browser;
+const errors=[];
+async function signal(p){return p.evaluate(()=>{
+  const a=audioAudit.analyser;if(!a)return 0;
+  const values=new Float32Array(a.fftSize);a.getFloatTimeDomainData(values);
+  return Math.sqrt(values.reduce((sum,v)=>sum+v*v,0)/values.length);
+});}
+(async()=>{
+  browser=await chromium.launch({headless:true});
+  const context=await browser.newContext({viewport:{width:1000,height:760},reducedMotion:'reduce'});
+  await context.addInitScript(()=>{
+    const raf=requestAnimationFrame.bind(window);window.requestAnimationFrame=fn=>fn.name==='tick'?0:raf(fn);
+    window.audioAudit={contexts:[],analyser:null,notes:[]};const Native=window.AudioContext;
+    window.AudioContext=class extends Native{constructor(...args){
+      super(...args);audioAudit.contexts.push(this);
+      const analyser=this.createAnalyser();analyser.fftSize=4096;analyser.connect(this.destination);audioAudit.analyser=analyser;
+      const gain=this.createGain.bind(this);this.createGain=()=>{const node=gain(),connect=node.connect.bind(node);node.connect=(target,...rest)=>connect(target===this.destination?analyser:target,...rest);return node;};
+      const oscillator=this.createOscillator.bind(this);this.createOscillator=()=>{const node=oscillator(),start=node.start.bind(node);node.start=time=>{audioAudit.notes.push(node.frequency.value);return start(time);};return node;};
+    }};
+  });
+  const p=await context.newPage();p.on('pageerror',e=>errors.push(e.message));
+  await p.goto(pathToFileURL(path.resolve(__dirname,'../index.html')).href);
+  await p.locator('#start').click();await p.getByRole('button',{name:'Begin the assignment',exact:true}).click();
+  assert.equal(await p.evaluate(()=>audioAudit.contexts.length),0,'Sound must remain opt-in');
+  await p.locator('#sound').click();await p.waitForTimeout(1200);
+  const ambient=await signal(p);console.log('Ambient RMS: '+ambient.toFixed(5));
+  if(process.argv.includes('--measure'))return;
+  assert(ambient>.025&&ambient<.1,'Default ambience must have a clear, bounded signal');
+  assert.equal(await p.evaluate(()=>audioAudit.contexts[0].state),'running');
+  await p.locator('#menu').click();await p.getByRole('button',{name:'Sound settings',exact:true}).click();
+  const before=await p.evaluate(()=>audioAudit.notes.length);
+  await p.getByRole('button',{name:'Play test chime',exact:true}).click();await p.waitForTimeout(80);
+  assert.equal(await p.evaluate(()=>audioAudit.notes.length),before+3,'Test must play three real oscillator notes');
+  assert(await signal(p)>ambient*1.3,'Test chime must rise above the background');
+  const volume=p.getByRole('slider',{name:'Sound volume'});
+  await volume.fill('20');await p.waitForTimeout(1100);
+  assert(await signal(p)<ambient*.45,'Volume control must reduce the actual output');
+  await volume.fill('0');await p.waitForTimeout(500);assert(await signal(p)<.0001,'Zero volume must be silent');
+  await volume.fill('65');
+  await p.locator('#dialog-sound').click();
+  assert.equal(await p.evaluate(()=>audioAudit.contexts[0].state),'suspended','Mute must stop playback');
+  await p.locator('#dialog-sound').click();await p.waitForFunction(()=>document.getElementById('sound').getAttribute('aria-pressed')==='true');
+  await p.evaluate(()=>audioAudit.contexts[0].suspend());
+  await p.waitForFunction(()=>document.getElementById('dialog-sound').textContent.includes('paused'));
+  await p.getByRole('button',{name:'Play test chime',exact:true}).click();
+  await p.waitForFunction(()=>audioAudit.contexts[0].state==='running');
+  await volume.fill('40');await p.reload();await p.locator('#start').click();
+  await p.waitForFunction(()=>audioAudit.contexts[0]?.state==='running');
+  assert.equal(await p.locator('#sound').getAttribute('aria-pressed'),'true','Restore enabled preference after a user gesture');
+  await p.keyboard.press('Escape');await p.locator('#menu').click();await p.getByRole('button',{name:'Sound settings',exact:true}).click();
+  assert.equal(await p.getByRole('slider',{name:'Sound volume'}).inputValue(),'40');
+  const output=path.join(os.tmpdir(),'afterimage-score');fs.mkdirSync(output,{recursive:true});
+  await p.screenshot({path:path.join(output,'sound-settings-desktop.png')});
+  await p.setViewportSize({width:390,height:844});
+  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth&&document.querySelector('.dialog').scrollWidth<=document.querySelector('.dialog').clientWidth),true,'Audio settings overflow on a phone');
+  await p.screenshot({path:path.join(output,'sound-settings-mobile.png')});
+  await p.locator('#dialog-sound').click();await p.reload();await p.locator('#start').click();
+  assert.equal(await p.evaluate(()=>audioAudit.contexts.length),0,'Muted preference must remain silent after reload');
+  assert.deepEqual(errors,[]);
+  console.log('SCORE AUDIO PASS: real output, test chime, volume, mute, interrupted-context recovery, dialog controls and saved preferences.');
+})().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();});

@@ -1,10 +1,18 @@
 # AFTERIMAGE — first-person edition
 
+**New campaign:** open [score-3d.html](score-3d.html) for *The perfect score*, the five-chapter rework about fair trials and increasingly strange shared work. Its save is separate from this earlier iteration. [SCORE-DESIGN.md](SCORE-DESIGN.md) describes the new progression and ending consequences.
+
+In *The perfect score*, sound starts off. Enable it from the toolbar or any dialog; three notes confirm playback. Menu → Sound settings offers a volume slider and a test chime. Sound and volume preferences survive reloads. Audio is generated locally by `score-audio.js` and requires no downloaded media.
+
+The pre-rework game, documentation, and tests were backed up locally to `backups/3d-before-perfect-score-2026-09-08T17-59-41-069Z/`. Its `BACKUP-MANIFEST.json` lists 66 files with SHA-256 hashes. Opening that copy's `index-3d.html` plays the backed-up iteration. Backups and the research archive are excluded from the development server and build.
+
 Open `index-3d.html` to play from the prologue through Transit, Garden, Chorus, and Release. All new runtime files carry the `-3d` suffix. The original edition remains available at `index.html`.
 
 This is a compact, first-person adaptation with five playable chapters, volumetric WebGL rooms, collision, physical workstations, people, seats, and persistent consequences. It is an alternative prototype, with simplified contact puzzles and shorter conversations than the original edition.
 
 Archive 07 has cool ambient light and a warm desk lamp that illuminates the table, paperwork, flower, and nearby surfaces. The tabletop and bay walls block the lamp, and shelf bases cast soft contact shadows. This lighting stays physically unchanged through memory handoffs and endings. It uses the offline renderer, with no external assets or post-processing effects.
+
+Transit has a covered station and a guarded view down the tracks, with a steady reading light on Silt’s platform. Garden opens onto trees and daylight; repairing its shade opens the slats and changes the shadows across the chairs. Chorus has connected work bays, separate pools of light, and warmer acknowledgement lamps. Release separates a daylight garden from the covered service yard: retiring the carrier extinguishes its equipment lights while daylight remains. Foliage and dappled shade move gently unless reduced motion is enabled. Optional ambience follows the same physical consequences: the parcel-lift motor stops when its component becomes a shelf, and carrier hum stops on retirement while outdoor air remains. All of these effects work offline.
 
 ## Controls
 

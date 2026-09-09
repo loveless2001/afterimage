@@ -2,18 +2,20 @@
   "name": "afterimage",
   "version": "0.2.0",
   "private": true,
-  "description": "An offline browser game about memory and small acts of care.",
+  "description": "AFTERIMAGE: The perfect score. An offline first-person campaign about experiments, reports, and consequences.",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "dev": "node scripts/serve.cjs",
-    "check": "node --check game.js && node --check state.js && node --check scripts/serve.cjs && node --check transit.js && node --check transit-state.js && node --check transit-story.js && node --check garden.js && node --check garden-state.js && node --check garden-story.js && node --check chapter-ui.js && node --check chapter-flow.js && node --check chorus-state.js && node --check chorus-story.js && node --check chorus.js && node --check release-state.js && node --check release-story.js && node --check release.js && node --check engine-3d.js && node --check state-3d.js && node --check chapters-3d.js && node --check game-3d.js",
-    "test": "node --test tests/state.test.cjs tests/server.test.cjs tests/transit-state.test.cjs tests/garden-state.test.cjs tests/chorus-release-state.test.cjs tests/state-3d.test.cjs tests/choices-3d.test.cjs tests/layout-3d.test.cjs",
-    "test:browser": "node tests/browser.cjs && node tests/transit-browser.cjs && node tests/garden-browser.cjs && node tests/chorus-release-browser.cjs && node tests/browser-3d.cjs && node tests/prologue-3d.cjs && node tests/engine-3d.test.cjs --plan-only && node tests/feedback-3d.cjs && node tests/diagrams-3d.cjs && node tests/show-dont-tell-3d.cjs && node tests/visual-cues-3d.cjs && node tests/transit-cues-3d.cjs",
+    "check": "node scripts/check.cjs",
+    "test": "node --test tests/server.test.cjs tests/canonical.test.cjs tests/score-state.test.cjs tests/score-layout.test.cjs tests/score-handoff.test.cjs tests/score-report.test.cjs",
+    "test:browser": "node tests/canonical-browser.cjs && node tests/score-browser.cjs && node tests/score-motion.cjs && node tests/score-audio.cjs",
     "browser:install": "playwright install chromium",
     "build": "node scripts/build.cjs",
-    "test:3d": "node --test tests/state-3d.test.cjs tests/choices-3d.test.cjs tests/layout-3d.test.cjs && node tests/browser-3d.cjs && node tests/prologue-3d.cjs && node tests/engine-3d.test.cjs && node tests/feedback-3d.cjs && node tests/diagrams-3d.cjs && node tests/show-dont-tell-3d.cjs && node tests/visual-cues-3d.cjs && node tests/transit-cues-3d.cjs"
+    "test:3d": "npm run test:browser",
+    "test:score": "npm run test && npm run test:browser",
+    "test:legacy": "node --test legacy/tests/state.test.cjs legacy/tests/transit-state.test.cjs legacy/tests/garden-state.test.cjs legacy/tests/chorus-release-state.test.cjs legacy/tests/state-3d.test.cjs legacy/tests/choices-3d.test.cjs legacy/tests/layout-3d.test.cjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0"

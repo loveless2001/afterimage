@@ -37,8 +37,8 @@ async function rms(p){return p.evaluate(()=>{const values=new Float32Array(audio
  let state=M.fresh();for(const action of ['meet','flower','service','receiver'])state=M.act(state,action);state=M.reset(state,['name','route']);
  const lost=await make('index-3d.html',state);await visit(lost,'receiver');assert.match(await lost.locator('#dialog-title').innerText(),/Only static/);assert.equal(await lost.getByRole('button',{name:'Listen again',exact:true}).count(),0);await lost.locator('#dialog-sound').click();assert.equal((await frequencies(lost)).length,3,'lost melody must not be replayed');await lost.context().close();
 
- // Later chapters use their own ambient chord and never replay the Archive melody.
- for(const [chapter,notes] of [['transit',[146.83,220,293.66]],['garden',[164.81,246.94,329.63]],['chorus',[164.81,246.94,329.63]],['release',[164.81,246.94,329.63]]]){
+ // Later chapters use air and equipment textures and never replay the Archive melody.
+ for(const [chapter,notes] of [['transit',[98,74]],['garden',[146.83,196]],['chorus',[110,220]],['release',[98,196]]]){
    const page=await make(chapter+'-3d.html');await page.locator('#sound').click();assert.deepEqual((await frequencies(page)).map(n=>Math.round(n*100)/100),notes,chapter);await page.context().close();
  }
  const click=async(page,label)=>page.getByRole('button',{name:new RegExp('^'+label)}).click();

@@ -34,6 +34,103 @@
   function planter(w,x,z,size=.8) { w.solids.push(box(x,.23,z,size,.46,size,palette.rust)); w.decor.push(box(x,.49,z,size*.9,.09,size*.9,'#4b5040')); [-.22,0,.22].forEach((v,i)=>w.decor.push(box(x+v,.83+i*.1,z,.19,.65,.21,palette.leaf))); }
   function seat(w,id,label,x,z,yaw=0,width=1.6) { object(w,id,label,x,z,'bench',palette.wood,{actionLabel:'Sit down',w:width,h:.95,y:.475,d:.62,yaw:Math.PI-yaw,seat:{x,z,yaw,pitch:0}}); }
   function fixture(w,x,z,on=true) { w.decor.push(box(x,2.63,z,.64,.08,.64,on?palette.gold:palette.dark));w.decor.push(box(x,2.88,z,.08,.46,.08,palette.dark)); }
+  function districtEnvironment(w,s,index){
+    const f=s.flags,v=s.world;
+    const point=(id,x,y,z,r,color,on=true)=>({id,position:[x,y,z,r],color:on?color:[0,0,0]});
+    const partition=(x,height,material)=>{
+      const wall=w.solids.find(b=>b.x===x&&b.z===-1.1&&b.d===.23);
+      wall.y=height/2;wall.h=height;wall.color=material;
+      w.decor.push(box(x,height+.035,-1.1,3.16,.07,.28,material));
+    };
+    const runner=w.decor.find(b=>b.x===0&&b.y===.013);
+    const tree=(x,z,size)=>{
+      w.decor.push(box(x,1.35*size,z,.22*size,2.7*size,.24*size,'#586452'));
+      for(const [dx,dy,dz,width] of [[0,2.8,0,2.2],[-.6,2.45,.2,1.5],[.55,3.1,-.2,1.6]])w.decor.push({...box(x+dx*size,dy*size,z+dz*size,width*size,1.25*size,1.7*size,['#627c66','#718b70','#83987b'][Math.round(dy*10)%3]),kind:'foliage',sway:.035});
+    };
+    if(index===1){
+      // A guarded opening gives the platform depth without opening another route around the bridge.
+      const back=w.solids.find(b=>b.z===-7&&b.w===12);back.x=-1.55;back.w=8.9;
+      w.solids.push({...box(4.45,.52,-7,3.1,1.04,.16,palette.dark),id:'platform-end-guard'});
+      partition(4.45,1.04,palette.dark);runner.color='#857f70';
+      w.decor=w.decor.filter(b=>!(b.x===4.6&&b.z<-6.7));
+      w.decor.push(box(4.4,-.12,-11.4,3.1,.18,8.6,'#4d5d60'));
+      for(const x of [3.65,5.15])w.decor.push(box(x,.02,-11.4,.07,.08,8.6,'#81908e'));
+      for(let n=0;n<10;n++)w.decor.push(box(4.4,-.005,-7.6-n*.8,2.2,.07,.12,'#3e4c50'));
+      for(const z of [-3.5,-6.5,-9.5,-12.5]){
+        w.decor.push(box(4.4,3.18,z,3.2,.15,.15,'#566c72'));
+        w.decor.push({...box(4.4,3.04,z,1.35,.05,.18,'#c0d5ce'),emissive:true});
+        for(const x of [2.85,5.95])w.decor.push({...box(x,1.6,z,.10,3.2,.13,'#566c72'),solid:z>-7});
+      }
+      w.skyColor='#344b58';w.fogColor='#526974';
+      w.lighting={ambient:[.44,.51,.57],key:[.16,.19,.22],sun:[-.3,.9,.2],points:[
+        point('sorting',-4,2.58,-3.5,4.2,[1.25,.88,.45]),
+        point('reading',5.2,1.22,-4.7,2.8,[1.8,1.18,.55]),
+        point('platform',4.4,3.02,-6.5,4.8,[.65,.89,1.0]),
+        point('bridge',4,2.58,-4.5,3.8,[.78,.96,.86],!!f.bridge)
+      ]};
+      w.ambience={air:[360,.008],room:[98,.0035],work:[74,f.lift&&!v.liftSpent?.004:0]};
+    }else if(index===2){
+      // Low parapets keep the established courtyard boundary while opening it to the sky.
+      for(const b of w.solids)if((Math.abs(b.x)===6||b.z===-7)&&b.h===3.3){b.h=1.12;b.y=.56;b.color='#a3ad91';}
+      partition(-4.45,1.05,'#9da88d');partition(4.45,1.05,'#9da88d');runner.color='#a3a98b';
+      w.decor=w.decor.filter(b=>!(Math.abs(b.x)===5.82&&b.y===1.7)&&!(b.z<-6.7&&b.y>2.5)&&!(b.x===-3.3&&b.y===.035));
+      for(const slat of w.decor.filter(b=>b.y===2.7&&b.x===-3.25))slat.d=f.shade?.16:.37;
+      for(const leaf of w.decor.filter(b=>b.color===palette.leaf))leaf.sway=.022;
+      tree(-8,-6,1.25);tree(1,-10,1.1);tree(8,-3,1.2);tree(7,6,.9);
+      w.skyColor='#799b94';w.fogColor='#94afa0';
+      w.lighting={ambient:[.59,.63,.56],key:[.44,.42,.31],sun:[-.35,.94,-.18],
+        canopy:[-3.25,-4.27,1.75,1.41],shade:[2.7,.38,.16,f.shade?1:0],points:[
+          point('public-receiver',4,2.58,-3.5,3.7,[.9,.74,.39],!!f.receiver),
+          point('evening',0,2.58,1.5,4,[1.1,.78,.39],root.Afterimage3DState.gardenSchedule(s).evening)
+        ]};
+      w.ambience={air:[620,.012],room:[146.83,.001],work:[196,f.receiver?.0015:0]};
+    }else if(index===3){
+      partition(-4.45,1.1,'#667e7e');partition(4.45,1.1,'#667e7e');runner.color='#6c8380';
+      for(const pane of w.decor.filter(b=>Math.abs(b.x)===5.82&&b.y===1.7)){pane.y=2.2;pane.h=.85;pane.color='#718f92';}
+      for(const x of [-4.25,4.25]){
+        fixture(w,x,1.25);
+        w.decor.push(box(x,.025,1.25,1.8,.024,1.55,'#667671'));
+        w.decor.push(box(x,3.12,-1.15,.065,.065,5.0,palette.dark));
+      }
+      w.decor.push(box(0,3.12,-3.65,8.5,.065,.065,palette.dark));
+      for(const lamp of w.decor.filter(b=>String(b.id||'').startsWith('approval-light-')))lamp.emissive=lamp.color===palette.gold;
+      w.skyColor='#2e4956';w.fogColor='#426271';
+      const reply=bit=>f.voices&bit?[1.15,.9,.46]:[.46,.71,.77];
+      w.lighting={ambient:[.44,.54,.57],key:[.14,.18,.19],sun:[.2,.94,-.3],points:[
+        point('resident-bay',-4.25,2.58,1.25,3.5,reply(1)),point('maintenance-bay',4.25,2.58,1.25,3.5,reply(2)),
+        point('source-desk',-4,2.58,-3.5,3.6,[1.1,.96,.68]),point('dispatch-bay',4,2.58,-3.5,3.6,reply(4))
+      ]};
+      w.ambience={air:[250,.004],room:[110,.003],work:[220,.0015]};
+    }else{
+      const carrier=!s.ending||s.ending==='remain',occupied=!v.residentsErased;
+      partition(-4.45,1.04,'#a3aa91');partition(4.45,1.35,'#7d8984');runner.color='#9d9e88';
+      // The inhabited side opens onto daylight; the service yard keeps its higher enclosure.
+      const side=w.solids.find(b=>b.x===-6&&b.h===3.3);side.z=-3.5;side.d=7;
+      w.solids.push(box(-6,.5,3.5,.25,1,7));
+      w.decor=w.decor.filter(b=>!(b.x===-5.82&&b.y===1.7&&b.z>0));
+      tree(-8,1,1.2);tree(-9,6,1.0);
+      for(const leaf of w.decor.filter(b=>b.color===palette.leaf))leaf.sway=.02;
+      for(const x of [-5.9,-1.7,2.5])w.decor.push(box(x,3.16,-4.7,.12,.16,4.4,'#768883'));
+      w.decor.push({id:'record-reading-lamp',kind:'lamp',x:-5.1,y:1.17,z:-3.7,w:.32,h:.7,d:.32,color:palette.gold});
+      w.decor.push({...box(.2,2.7,-5.75,7.8,.06,.12,carrier?'#adc6bd':palette.dark),id:'carrier-service-light',emissive:carrier});
+      w.skyColor='#819e9b';w.fogColor='#9cb0a5';
+      w.lighting={ambient:[.55,.59,.56],key:[.32,.32,.25],sun:[-.65,.9,-.15],
+        canopy:[-3.825,1.81,1.75,1.64],shade:[2.7,.39,.16,1],points:[
+          point('garden',-3,2.58,1.5,3.8,[.94,.81,.49],occupied),point('service-yard',3,2.58,1.5,4,[.68,.87,.9],carrier),
+          point('local-record',-5.1,1.37,-3.7,2.6,[1.55,1.08,.55],occupied),point('carrier',.2,2.68,-5.75,5.5,[.63,.81,.84],carrier)
+        ]};
+      w.ambience={air:[510,.009],room:[98,carrier?(s.ending==='remain'?.0017:.004):0],work:[196,carrier?.0015:0]};
+    }
+    if(index===1||index===3){
+      const metal=index===1?'#516973':'#536e71';
+      for(const beam of w.solids.filter(b=>(Math.abs(b.x)===2.86&&b.z===-1.1)||(b.x===0&&b.y===3.04)))beam.color=metal;
+      w.decor.push(box(0,3.38,0,12,.16,14,index===1?'#53626a':'#78908d'));
+    }else if(index===4){
+      w.decor.push(box(3.15,3.38,0,5.7,.16,14,'#8a978d'));
+      w.decor.push(box(-3.15,3.38,-4.0,5.7,.16,6,'#8a978d'));
+    }
+    for(const lamp of w.decor.filter(b=>b.y===2.63&&b.h===.08))lamp.emissive=lamp.color===palette.gold;
+  }
   function world(s) {
     const i=chapterIndex(s), w=base(i), f=s.flags||{},v=s.world||{}, a=i===0?{...f,ending:s.ending}:{}, t={...(i===1?f:{}),siltReturned:v.siltReturned,bridge:i===1?f.bridge:v.bridgeCrossed},g=i===2?f:{},c=i===3?f:{},r=i===4?{...f,ending:s.ending}:{};
     if(i===0) {
@@ -163,6 +260,7 @@
       fixture(w,-3,1.5,!lost);fixture(w,3,1.5,!r.ending||r.ending==='remain');
       if(r.ending==='remain') w.decor.push(box(0,.03,-1.5,.08,.04,7,palette.gold));
     }
+    if(i>0)districtEnvironment(w,s,i);
     return w;
   }
   const sources = [

@@ -1,17 +1,10 @@
 # Development environment
 
-Windows primary checkout: `D:\repo\afterimage`.
-Upstream: https://github.com/loveless2001/afterimage.
-
-This checkout was cloned from the game-only public history. The latest flower activity, journal, navigation changes, and tests were copied from the original WSL prototype. Environment setup and copied improvements are included in the Pages deployment commit. Use this repository history for future Windows/WSL clones.
-
-The original `/home/lenovo/projects/afterimage` folder remains intact, including its private research archive. Its Git history is unrelated to the public game repository. Do not add the public remote there and push the whole history.
-
-For future WSL development, create a separate clone such as `~/projects/afterimage-dev` from the upstream using your authenticated GitHub login. Alternatively, clone the Windows checkout locally once it has a commit containing this setup, then point origin at GitHub. Keep the original prototype as a reference until migration is complete.
+The Windows primary checkout is `D:\repo\afterimage`. The canonical game is **The perfect score** at `index.html`. `score-*` modules and `engine-3d.js` are the active implementation. Earlier 2D and first-person sources are frozen in `legacy/`, outside the active build and server.
 
 ## Daily commands
 
-Windows PowerShell:
+Use Node 22.19.0 as the reference version. On Windows PowerShell:
 
 ```powershell
 cd D:\repo\afterimage
@@ -20,25 +13,18 @@ npm.cmd run browser:install
 npm.cmd run dev
 ```
 
-WSL, in a clean development clone:
+In a separate WSL development clone, run the same npm commands without `.cmd`. Never share node_modules or build caches between Windows and WSL.
 
-```sh
-npm ci
-npm run browser:install
-npm run dev
-```
+`npm run check`, `npm test`, and `npm run test:browser` validate the canonical game, save compatibility, all ending paths, keyboard/touch controls, reports, playable arrivals, geometry, audio, and old URL redirects. `npm run test:legacy` is an optional check of archived rules. `test:score` remains a convenience command for current checks; `test:3d` is a compatibility alias for the current browser suite.
 
-Use Node 22.19.0 as the reference version on both platforms; .nvmrc and .node-version support version managers without changing your global installation. The npm engine range also permits newer Node releases.
+`npm run build` copies the explicit allowlist in `scripts/runtime-files.cjs` into `dist/`. It removes only named, superseded runtime outputs from older builds, rejects unexpected output files for review, and excludes legacy/, research/, backups/, tests, and repository metadata. Build output includes compatibility pages that point old URLs to the canonical index.
 
-Commit a coherent change on a feature branch, then push/pull the branch between checkouts. Run check, unit tests, and browser tests before merging. Windows and Ubuntu CI use the reference Node version. Do not maintain two copies with unrelated uncommitted edits to the same feature.
+The loopback server uses the same allowlist and defaults to port 8765. Use `npm run dev -- 8766` for another port. Both Windows launchers open the canonical index. Opening it directly remains supported without Node.
 
-## Codex project
+## Repository history and publishing
 
-`D:\repo\afterimage` is attached to the game project and set as its primary folder. The previous game 4 folder remains attached as a secondary folder. New tasks start in this repository and discover its AGENTS.md automatically. Existing tasks may retain their original working directory.
+This checkout uses the game-only history from `https://github.com/loveless2001/afterimage`. The original `/home/lenovo/projects/afterimage` prototype has unrelated history. Do not merge or publish that history. Its research archive was copied to the ignored Windows research/ directory; research/COPY-RECORD.md records that transfer.
 
-## Validation scope
+For WSL development, use a separate clone of this game repository. Share coherent commits between development checkouts rather than maintaining unrelated copies of the same change. Respect .gitattributes and use Node APIs for cross-platform scripts.
 
-`npm test` covers memory rules, older-save compatibility, navigation, and the loopback server's asset allowlist. `npm run test:browser` covers three endings, save import/export, narrow-screen controls, the shared flower activity, and journal routing. Human playtesting and native desktop packaging are separate future work.
-
-
-Verified on 7 September 2026: Windows Node 22.19.0 passed syntax checks, all seven unit/server tests, and the complete Chromium browser suite. WSL Node 25.5.0 also passed the same syntax and unit/server checks. GitHub Actions includes cross-platform game checks and a separate game-only Pages deployment workflow.
+GitHub Actions runs the default checks on Windows and Ubuntu. The existing Pages workflow builds the explicit game-only output. This canonical promotion updates local source and build output. Publishing requires an explicit user request.
