@@ -248,7 +248,7 @@
   function outcome(s) {
     const e = endings[s.ending] || endings.incomplete;
     const last = s.ending === 'perfect' ? 'The completion chime sounds. A new parcel is waiting before the sound has ended.' : s.ending === 'witness' ? 'Outside, someone lays three conflicting records beside one another. Your designation is on all three.' : 'An outsider opens the report. The first useful line says where the delivery stopped.';
-    return scene('AFTERIMAGE / RUN SETTLED', e.title, e.lines.concat(last, 'Your final record is saved. Export it from the menu, or start a separate new run with explicit confirmation.'), [choice('Read the source note', '$sources'), close()]);
+    return {...scene('AFTERIMAGE / RUN SETTLED', e.title, e.lines.concat(last), [choice('Read the source note', '$sources'), close()]), replay:{title:'Other connections remain.',text:'This is one of three endings. Begin another run and choose a different route at the final relay in Release to see what it leaves behind.'}};
   }
 
   function sources() {

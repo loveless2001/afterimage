@@ -200,7 +200,14 @@ async function finish(p,ending,screens=false){
   await label(p,'Go back');assert.deepEqual(await stored(p),before,'Canceling final confirmation changed the save');
   await action(p,'enact',ending);await label(p,Story.endings[ending].label);
   const result=await stored(p);assert.equal(result.ending,ending);assert.equal(result.phase,'finished');assert(S.validate(result));
+  assert.match(await p.locator('.ending-invitation').innerText(),/one of three endings/);
+  for(const other of Object.keys(Story.endings).filter(key=>key!==ending))assert(!(await p.locator('#lines').innerText()).includes(Story.endings[other].title),'Replay invitation reveals another ending');
   if(screens)await snapshot(p,'release-'+ending);
+  await label(p,'Explore another ending');assert.deepEqual(await stored(p),result,'Exploring another ending replaced the finished save');
+  await label(p,'Keep the current run');assert.deepEqual(await stored(p),result,'Canceling replay replaced the finished save');
+  assert(await p.locator('.ending-invitation').isVisible());
+  await label(p,'Explore another ending');await p.keyboard.press('Escape');assert(await p.locator('.ending-invitation').isVisible());
+  assert.deepEqual(await stored(p),result,'Escape from replay changed the finished save');
   await sameLegacy(p);
 }
 async function persistence(p){
@@ -239,6 +246,14 @@ async function mobile(){
   assert(await p.locator('.receipt-note').isVisible());assert.equal(await p.locator('#toast').isVisible(),false,'Old hints must not cover the annotation controls');
   await action(p,'receiveReport');assert(await p.locator('#touch-interact').isVisible());
   await visit(p,'moth');await label(p,'Begin the assignment');assert.equal((await stored(p)).arrival,null);
+  await restore(p,checkpoints.release);await finish(p,'witness');await snapshot(p,'mobile-ending');
+  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Mobile ending overflows');
+  const finalRecord=await stored(p);await label(p,'Explore another ending');
+  const pending=p.waitForEvent('download');await label(p,'Export before replacing');const download=await pending,out=path.join(output,'replay-final-record.json');await download.saveAs(out);
+  assert.deepEqual(JSON.parse(fs.readFileSync(out,'utf8')),finalRecord,'Replay export lost the final record');
+  assert.deepEqual(await stored(p),finalRecord,'Exporting before replay changed the save');
+  await label(p,'Replace this run and begin');const restarted=await stored(p);
+  assert.equal(restarted.chapter,0);assert.equal(restarted.ending,null);assert.deepEqual(restarted.history,[]);assert(S.validate(restarted));await sameLegacy(p);
   await p.context().close();
 }
 async function unavailableStorage(){

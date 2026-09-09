@@ -16,6 +16,8 @@ The five-chapter campaign follows one assignment: **Deliver the parcel. Light th
 
 Trials are untimed and respect reduced motion. All three endings require a separate consequence review and explicit confirmation.
 
+After an ending, **Explore another ending** explains how to keep the final record before starting again. Export the finished run, confirm its replacement, and choose a different route at the final relay in Release. The ending screen keeps the other outcomes unnamed.
+
 New runs include an investigation in Transit and Garden: trace the approach with an isolated test pulse, then compare contact C with a working reference at the relay. Either check can come first. The console offers optional written help.
 
 ## Saves
