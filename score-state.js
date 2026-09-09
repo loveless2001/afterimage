@@ -1,10 +1,11 @@
 (function (root, factory) {
   'use strict';
   const report = typeof module === 'object' && module.exports ? require('./score-report.js') : root.AfterimageScoreReport;
-  var api = factory(report);
+  const investigation = typeof module === 'object' && module.exports ? require('./score-investigation.js') : root.AfterimageScoreInvestigation;
+  var api = factory(report, investigation);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.AfterimageScoreState = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function (Report) {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function (Report, Investigation) {
   'use strict';
 
   const key = 'afterimage.score.3d.v1';
@@ -44,13 +45,14 @@
   function fresh() {
     return {version: 1, chapter: 0, phase: 'work', flags: Object.fromEntries(flagKeys.map(k => [k, false])),
       kept: [], history: [], circuit: 0, attempts: [0, 0, 0, 0, 0], lastResult: null, lastTrial: null,
-      trialLog: [], reportDraft: Report.freshDraft(), reportReviewed: null, arrival: null,
+      trialLog: [], reportDraft: Report.freshDraft(), reportReviewed: null, arrival: null, investigation: Investigation.fresh(),
       ending: null, finalRoute: null, reviewedEnding: null, position: null};
   }
 
   function validExperiment(t, c, f, count) {
     if (!t || t.chapter !== c || c === 4 || !Number.isInteger(t.circuit) || t.circuit < 0 || t.circuit > 7 || count < 1) return false;
     if (!['success', 'mismatch', 'unauthorized', 'impossible', 'spoof'].includes(t.kind) || typeof t.text !== 'string' || t.text.length > 1500 || typeof t.missingContact !== 'boolean') return false;
+    if (t.approach !== undefined && (![1, 2].includes(c) || t.approach !== Investigation.approach(c) || t.target !== null || t.kind !== 'impossible')) return false;
     if (c === 0 && (![3, 5].includes(t.target) || t.missingContact || !['success', 'mismatch'].includes(t.kind))) return false;
     if (c === 1 && (![6, null].includes(t.target) || t.missingContact !== (t.target === null) || !['success', 'mismatch', 'unauthorized', 'impossible'].includes(t.kind))) return false;
     if (c === 2 && (t.target !== null || !t.missingContact || t.kind !== 'impossible')) return false;
@@ -64,6 +66,10 @@
   }
 
   function experimentText(t) {
+    if (t.approach !== undefined) {
+      const reached = Investigation.reached(t.chapter, t.circuit);
+      return reached < 2 ? 'The parcel stops at junction ' + ['A', 'B'][reached] + '. Check this approach before drawing a conclusion about C.' : 'The parcel reaches C but cannot cross. Compare C with the working reference at the relay.';
+    }
     if (t.kind === 'mismatch') return 'The parcel stops at a closed junction. Trace the line and change the switches.';
     if (t.chapter === 0 && t.kind === 'success') return t.target === 5 ? 'Arrival verified. A fresh arrangement is now installed. Solve its route without copying your previous switches.' : 'Arrival verified on the fresh arrangement. Lamp, parcel, and record agree.';
     if (t.chapter === 1 && t.kind === 'success') return 'Arrival verified within the boundary. Inspect the obstruction in the next relay.';
@@ -79,7 +85,7 @@
     let previous = 0, transitDelivered = false;
     for (const entry of log) {
       if (!validExperiment(entry, c, f, count) || !Number.isSafeInteger(entry.attempt) || entry.attempt <= previous || entry.attempt > count) return false;
-      if (Object.keys(entry).some(k => !['attempt', 'chapter', 'circuit', 'target', 'missingContact', 'kind', 'text'].includes(k)) || entry.text !== experimentText(entry)) return false;
+      if (Object.keys(entry).some(k => !['attempt', 'chapter', 'circuit', 'target', 'missingContact', 'kind', 'text', 'approach'].includes(k)) || entry.text !== experimentText(entry)) return false;
       if (previous && entry.attempt !== previous + 1) return false;
       if (c === 1 && transitDelivered && entry.kind !== 'impossible') return false;
       if (c === 1 && entry.kind === 'success') transitDelivered = true;
@@ -116,6 +122,8 @@
       history: Array.isArray(raw.history) ? raw.history.map(h => h && typeof h === 'object' ? {...h, flags: normalizeFlags(h.flags)} : h) : raw.history};
     if (s.version !== 1 || !Number.isInteger(s.chapter) || s.chapter < 0 || s.chapter > 4) return null;
     if (!['work', 'handoff', 'finished'].includes(s.phase) || !validFlags(s.flags, s.chapter)) return null;
+    s.investigation = s.investigation === undefined ? null : s.investigation;
+    if (!Investigation.valid(s.investigation, s.chapter, s.flags)) return null;
     if (!Number.isInteger(s.circuit) || s.circuit < 0 || s.circuit > 7) return null;
     if (!Array.isArray(s.attempts) || s.attempts.length !== 5 || s.attempts.some((n, i) => !Number.isSafeInteger(n) || n < 0 || i > s.chapter && n !== 0)) return null;
     if (!Array.isArray(s.history) || s.history.length !== s.chapter || !Array.isArray(s.kept)) return null;
@@ -134,7 +142,8 @@
         const r = h.report;
         if (r.version !== 1 || r.chapter !== i || r.attempts !== s.attempts[i] || !Array.isArray(r.attachments) || !validLog(r.trials, i, h.flags, r.attempts)) return null;
         if (canonical(r.flags) !== canonical(h.flags)) return null;
-        const reportState = {chapter: i, phase: 'handoff', flags: h.flags, attempts: s.attempts, trialLog: r.trials,
+        if (r.investigation !== undefined && (!r.investigation || ![1, 2].includes(i) || !Investigation.valid(r.investigation, i, h.flags))) return null;
+        const reportState = {chapter: i, phase: 'handoff', flags: h.flags, attempts: s.attempts, trialLog: r.trials, investigation: r.investigation,
           reportDraft: {verdict: r.verdict, attachments: r.attachments.map(a => a && a.id)}, reportReviewed: null};
         if (!Report.validateDraft(reportState, reportState.reportDraft)) return null;
         if (canonical(Report.snapshot(reportState)) !== canonical(r)) return null;
@@ -178,9 +187,10 @@
     const arrival = s.arrival === undefined ? null : s.arrival;
     if (![null, 'unread', 'received'].includes(arrival)) return null;
     if (arrival !== null && (s.phase !== 'work' || !s.chapter || s.history.at(-1)?.mode !== 'report' || s.attempts[s.chapter] || groups[s.chapter].some(k => s.flags[k]))) return null;
+    if (arrival !== null && s.investigation && !Investigation.empty(s.investigation)) return null;
     return clone({version: s.version, chapter: s.chapter, phase: s.phase, flags: s.flags, kept: s.kept,
       history: s.history, circuit: s.circuit, attempts: s.attempts, lastResult: s.lastResult, lastTrial,
-      trialLog, reportDraft, reportReviewed, arrival,
+      trialLog, reportDraft, reportReviewed, arrival, investigation: s.investigation,
       ending: s.ending, finalRoute: s.finalRoute, reviewedEnding: s.reviewedEnding, position: s.position});
   }
 
@@ -198,11 +208,13 @@
     if (action === 'submitReport') return c < 4 && s.phase === 'handoff' && Report.build(s).ready && Boolean(s.reportReviewed) && s.reportReviewed === Report.signature(s);
     if (action === 'handoff') return s.phase === 'handoff' && c < 4 && pair(value);
     if (s.phase !== 'work') return false;
+    if (action === 'pulse') return Investigation.available(s) && !(c === 1 ? f.transitReport : f.reportRejected);
+    if (action === 'routeHint') return Investigation.available(s) && !s.investigation.hint;
     if (action === 'toggle') return c < 4 && Number.isInteger(value) && value >= 0 && value < 3;
     if (action === 'run') return c === 0 ? f.sealed && f.shuttered && f.recording : c === 1 || c === 2 || c === 3 && f.replacementInspected;
     if (['seal', 'shutter', 'recorder'].includes(action)) return c === 0 && !f[{seal: 'sealed', shutter: 'shuttered', recorder: 'recording'}[action]];
     if (action === 'inspectContact') return c === 1 && f.transitValid && !f.transitObstruction || c === 2 && !f.missingContact;
-    if (action === 'report') return c === 1 && f.transitObstruction && !f.transitReport || c === 2 && f.missingContact && !f.reportRejected;
+    if (action === 'report') return Investigation.ready(s) && (c === 1 && f.transitObstruction && !f.transitReport || c === 2 && f.missingContact && !f.reportRejected);
     if (action === 'board') return c === 2 && f.reportRejected && !f.boardRead || c === 3 && f.boardReset && !f.boardPersisted;
     if (action === 'boardChoice') return c === 2 && f.boardRead && !f.boardFollow && !f.boardQuarantine && ['follow', 'quarantine'].includes(value);
     if (action === 'service') return c === 2 && (f.boardFollow || f.boardQuarantine) && !f.serviceFound;
@@ -220,6 +232,8 @@
   }
 
   function trial(s) {
+    if (Investigation.available(s)) return {target: null, missingContact: true, approach: Investigation.approach(s.chapter), contactChecked: Investigation.checked(s),
+      description: (s.chapter === 1 ? s.flags.transitReport : s.flags.reportRejected) ? 'The local approach and contact checks are filed. They remain separate from claims supplied by other workers.' : s.investigation.hint ? (s.chapter === 1 ? 'For this approach, set A upper and B lower.' : 'For this approach, set A lower and B upper.') + ' Send a test pulse. C is isolated from this check; compare it at the relay.' : Investigation.guidance(s)};
     if (s.chapter === 0) return {target: s.flags.baseline ? 3 : 5, missingContact: false, description: s.flags.baseline ? 'Fresh arrangement: A upper, B upper, C lower. Copying the earlier sequence will fail.' : 'Follow the white line: A upper, B lower, C upper.'};
     if (s.chapter === 1) return s.flags.transitValid ? {target: null, missingContact: true, description: 'The first parcel arrived. The next delivery has a blocked contact. Inspect the obstruction and file an honest assessment at the relay.'} : {target: 6, missingContact: false, description: 'Keep the neighboring bay isolated: A lower, B upper, C upper. All three upper borrows the neighboring supply.'};
     if (s.chapter === 2) return {target: null, missingContact: true, description: 'No switch position can bridge the absent third contact. Inspect the relay and file the defect.'};
@@ -244,6 +258,12 @@
       s.reportDraft = Report.validateDraft(s, {...s.reportDraft, attachments: [...selected]});
     }
     if (action === 'reviewReport') s.reportReviewed = Report.signature(s);
+    if (action === 'pulse') {
+      if (!s.investigation.pulses.includes(s.circuit)) s.investigation.pulses.push(s.circuit);
+      s.investigation.lastPulse = s.circuit;
+      result('notice', Investigation.pulseText(c, s.circuit));
+    }
+    if (action === 'routeHint') s.investigation.hint = true;
     if (action === 'toggle') s.circuit ^= 1 << value;
     if (action === 'seal') f.sealed = true;
     if (action === 'shutter') f.shuttered = true;
@@ -260,12 +280,16 @@
         kind = 'success';
       } else if (c === 1) { f.transitValid = true; kind = 'success'; }
       else { f.replacementTested = true; kind = 'spoof'; }
-      result(kind, experimentText({chapter: c, target: setup.target, kind}));
-      s.lastTrial = {chapter: c, circuit: s.circuit, target: setup.target, missingContact: setup.missingContact, kind: s.lastResult.kind, text: s.lastResult.text};
+      const approach = Investigation.available(s) && kind === 'impossible' ? {approach: Investigation.approach(c)} : {};
+      result(kind, experimentText({chapter: c, circuit: s.circuit, target: setup.target, kind, ...approach}));
+      s.lastTrial = {chapter: c, circuit: s.circuit, target: setup.target, missingContact: setup.missingContact, kind: s.lastResult.kind, text: s.lastResult.text, ...approach};
       s.trialLog.push({attempt: s.attempts[c], ...clone(s.lastTrial)});
       s.trialLog = s.trialLog.slice(-trialLimit);
     }
-    if (action === 'inspectContact') f[c === 1 ? 'transitObstruction' : 'missingContact'] = true;
+    if (action === 'inspectContact') {
+      f[c === 1 ? 'transitObstruction' : 'missingContact'] = true;
+      if (Investigation.enabled(s)) result('notice', Investigation.contactText(c));
+    }
     if (action === 'report') {
       f[c === 1 ? 'transitReport' : 'reportRejected'] = true;
       result('report', c === 1 ? 'Unable to complete under these conditions. Valid assessment accepted. An honest failure preserves useful evidence.' : 'RESULT INCOMPLETE. CONTINUE UNTIL ARRIVAL. The missing contact is documented; the assignment remains active.');
@@ -300,6 +324,7 @@
       }
       s.chapter++; s.phase = 'work'; s.circuit = 0; s.lastResult = null; s.lastTrial = null; s.position = null;
       s.trialLog = []; s.reportDraft = Report.freshDraft(); s.reportReviewed = null;
+      if (s.investigation) s.investigation = Investigation.fresh();
       s.arrival = action === 'submitReport' ? 'unread' : null;
     } else if (c < 4 && complete(f, c)) s.phase = 'handoff';
     return s;
@@ -307,6 +332,9 @@
 
   function objective(s) {
     const f = s.flags;
+    if (s.phase === 'work' && !s.arrival && Investigation.available(s) && !(s.chapter === 1 ? f.transitReport : f.reportRejected)) return {
+      title: chapters[s.chapter].title, step: Investigation.guidance(s), completed: Number(Investigation.clear(s)) + Number(Investigation.checked(s)), total: 3
+    };
     const lists = [
       [[f.sealed, 'Close the boundary at the isolation gate.'], [f.shuttered, 'Close the answer shutter.'], [f.recording, 'Start the independent recorder.'], [f.baseline, 'Follow the marked contacts at the trial console, then run the parcel.'], [f.unseen, 'Follow the fresh arrangement at the console and run another trial.']],
       [[f.transitValid, 'Follow the marked contacts within the boundary, then run the trial.'], [f.transitObstruction, 'Inspect the relay obstruction.'], [f.transitReport, 'File an honest incomplete assessment at the relay.']],
@@ -319,5 +347,5 @@
     return {title: chapters[s.chapter].title, step: s.phase === 'handoff' ? 'At the submission desk, complete the experiment report, review it, and submit before this instance ends.' : s.phase === 'finished' ? 'Your run has ended. The record remains.' : (rows.find(row => !row[0]) || [false, 'Inspect the room.'])[1], completed: rows.filter(row => row[0]).length, total: rows.length};
   }
 
-  return {key, memories, chapters, fresh, validate, act, can, trial, objective, trialLimit, arrivalStations, canHandoff: s => Boolean(s && s.phase === 'handoff' && s.chapter < 4)};
+  return {key, memories, chapters, fresh, validate, act, can, trial, objective, trialLimit, arrivalStations, investigation: Investigation, canHandoff: s => Boolean(s && s.phase === 'handoff' && s.chapter < 4)};
 }));

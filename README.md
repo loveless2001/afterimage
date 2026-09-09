@@ -16,9 +16,13 @@ The five-chapter campaign follows one assignment: **Deliver the parcel. Light th
 
 Trials are untimed and respect reduced motion. All three endings require a separate consequence review and explicit confirmation.
 
+New runs include an investigation in Transit and Garden: trace the approach with an isolated test pulse, then compare contact C with a working reference at the relay. Either check can come first. The console offers optional written help.
+
 ## Saves
 
 The canonical game keeps `afterimage.score.3d.v1`. Existing Perfect Score saves, filed reports, earlier memory handoffs, and audio preferences remain compatible. Menu provides export/import and confirmed new-run replacement.
+
+Runs saved before the investigation experiment keep their earlier progression. Start a new run to play the added checks; export an existing run before replacing it if you want to keep both.
 
 Old game URLs, including `score-3d.html` and `index-3d.html`, now lead to `index.html`. Saves from the superseded editions are left untouched; they are not converted into this campaign’s different story and rules. Browser, file URL, port, and machine changes can use separate storage. Export before moving a run.
 

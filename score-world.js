@@ -1,5 +1,6 @@
 (function (root) {
   'use strict';
+  const Investigation = typeof module === 'object' && module.exports ? require('./score-investigation.js') : root.AfterimageScoreInvestigation;
 
   // Procedural scenery only. Trial outcomes and persistence belong to score-state.js.
   // Every part has explicit geometry so navigation audits use the rendered footprint.
@@ -135,9 +136,10 @@
   }
   function apparatus(scene,i,s) {
     const f=s.flags||{},bits=Number.isInteger(s.circuit)?s.circuit:0;
-    const required=i===0?(f.baseline?3:5):i===1?6:7;
+    const investigating=Investigation.available(s);
+    const required=investigating?(Investigation.approach(i)|4):i===0?(f.baseline?3:5):i===1?6:7;
     const last=s.lastTrial||s.lastResult||{},runBits=Number.isInteger(last.circuit)?last.circuit:bits;
-    const runTarget=last.target===null?7:Number.isInteger(last.target)?last.target:required;
+    const runTarget=Number.isInteger(last.approach)?last.approach|4:last.target===null?7:Number.isInteger(last.target)?last.target:required;
     const blockedNext=i===1&&f.transitValid;
     const actual=i<2&&(last.kind==='success'||last.kind==='unauthorized');
     const claimed=actual||!!f.replacementTested||last.kind==='spoof'||s.ending==='perfect';
@@ -187,6 +189,22 @@
       detail(scene,'missing-contact-tray',-2.3,.08,-4.45,.7,.13,.55,C.wood);
       detail(scene,'unplugged-contact',-2.3,.19,-4.45,.2,.07,.18,C.gold);
     }
+    if(investigating){
+      const sample=s.investigation.lastPulse,reached=sample===null?-1:Investigation.reached(i,sample);
+      for(let n=0;n<3;n++){
+        const lit=reached>n||n===2&&reached===2;
+        detail(scene,'continuity-lamp-'+n,1.16,1.18,-.55-n*1.65,.14,.1,.14,lit?C.green:C.ink,{emissive:lit});
+      }
+      const inspected=Investigation.checked(s);
+      if(!inspected)detail(scene,'contact-inspection-cover',0,1.27,-4.05,1.86,.08,.7,C.metal);
+      detail(scene,'reference-contact',-2.57,1.415,-2.62,.16,.05,.16,C.gold);
+      detail(scene,'reference-test-lamp',-2.57,1.47,-2.81,.09,.08,.09,inspected?C.green:C.ink,{emissive:inspected});
+      detail(scene,'suspect-test-lamp',-2.14,1.47,-2.81,.09,.08,.09,C.ink);
+      if(i===1){
+        detail(scene,'trapped-contact-blade',.7,1.145,-4.09,.25,.04,.14,C.gold);
+        detail(scene,'bent-retaining-plate',.7,1.195,-4.09,.28,.05,.19,C.red,{yaw:.45});
+      }
+    }
     if(i>=3){
       detail(scene,'replacement-bypass',2,2.8,-3.9,4.0,.045,.045,C.cable);
       detail(scene,'replacement-drop',0,2.12,-5.8,.045,1.36,.045,C.cable);
@@ -211,7 +229,7 @@
     station(scene,'handoff',i===4?'Final submission':'Report submission',4.65,5.5,'terminal',C.wood,{actionLabel:i===4?'Review final submission':'Open experiment report'});
     station(scene,'window','Observation window',5.9,0,'panel',C.metal,{actionLabel:'Look beyond the window',h:.86,y:.43,w:.55,d:.3,yaw:-Math.PI/2});
     station(scene,'board',i<2?'Trial noticeboard':'Shared work board',-4.75,5.65,'panel',C.wood,{actionLabel:'Read the board',w:1.15,h:1.65,y:.825});
-    station(scene,'relay','Three route switches',-2.35,-2.65,'panel',C.gold,{actionLabel:'Configure the route'});
+    station(scene,'relay',Investigation.enabled(s)?'Contact comparison bench':'Three route switches',-2.35,-2.65,'panel',C.gold,{actionLabel:Investigation.enabled(s)?'Compare contact C':'Configure the route'});
     station(scene,'inbox',i?'Arrival desk':'Facility register',1.8,4.6,'panel',C.wood,{actionLabel:i?'Read the incoming record':'Trace the facility connections',w:1.15,h:1.05,y:.525,d:.65});
     if(s.arrival)scene.spawn={x:1.8,z:6.3,yaw:0,pitch:-.36};
     const files=(s.history||[]).filter(h=>h.report).length;

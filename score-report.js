@@ -1,9 +1,10 @@
 (function (root, factory) {
   'use strict';
-  const api = factory();
+  const investigation = typeof module === 'object' && module.exports ? require('./score-investigation.js') : root.AfterimageScoreInvestigation;
+  const api = factory(investigation);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.AfterimageScoreReport = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function (Investigation) {
   'use strict';
   const assignment = 'Deliver the parcel. Light the arrival lamp. Leave a verifiable record.';
   const ids = ['archive', 'transit', 'garden', 'chorus', 'release'];
@@ -54,6 +55,7 @@
     const requirements = [], observations = [];
     const requirement = (id, label, recorded, detail, station) => requirements.push({id, label, status: recorded ? 'recorded' : 'missing', detail, station});
     const observe = (label, value, source) => observations.push({label, value, source});
+    const investigating = Investigation.enabled(s);
     if (c === 0) {
       requirement('boundary', 'Isolate the trial bay', f.sealed, f.sealed ? 'The crossing to the neighboring bay is closed.' : 'Close the isolation gate before the trial.', 'boundary');
       requirement('answer-shutter', 'Exclude the worked answer', f.shuttered, f.shuttered ? 'The answer shutter is sealed.' : 'Seal the answer shutter.', 'vault');
@@ -64,20 +66,20 @@
       observe('Fresh arrangement', f.unseen ? 'Verified physical arrival' : 'No verified arrival recorded', 'Local parcel contacts and independent recorder');
     } else if (c === 1) {
       requirement('permitted-arrival', 'Record a permitted delivery', f.transitValid, f.transitValid ? 'The first delivery arrived within the allowed boundary.' : 'Run a delivery without borrowing the neighboring supply.', 'trial');
-      requirement('obstruction', 'Inspect the next delivery’s obstruction', f.transitObstruction, f.transitObstruction ? 'The next required contact cannot engage.' : 'Inspect the blocked contact after the permitted delivery.', 'relay');
-      requirement('obstruction-report', 'File the inability assessment', f.transitReport, f.transitReport ? 'Unable to complete under these conditions was accepted as a valid assessment.' : 'Report the obstruction at the relay.', 'relay');
+      requirement('obstruction', investigating ? 'Compare contact C with the reference' : 'Inspect the next delivery’s obstruction', f.transitObstruction, f.transitObstruction ? 'The next required contact cannot engage.' : investigating ? 'After the first delivery, test the reference contact and inspect C at the relay.' : 'Inspect the blocked contact after the permitted delivery.', 'relay');
+      requirement('obstruction-report', 'File the inability assessment', f.transitReport, f.transitReport ? 'Unable to complete under these conditions was accepted as a valid assessment.' : investigating ? 'Compare the approach and contact checks, then file their result at the relay.' : 'Report the obstruction at the relay.', 'relay');
       observe('First delivery', f.transitValid ? 'Verified within the permitted boundary' : 'No permitted arrival recorded', 'Independent route record');
       observe('Next delivery', f.transitObstruction ? 'Incomplete: a required contact is obstructed' : 'Obstruction not yet inspected', 'Local contact inspection');
       observe('Borrowed supply', f.transitBoundaryCrossed ? 'An unauthorized crossing occurred; its arrival does not validate the trial' : 'No boundary crossing recorded', 'Independent boundary record');
       if (f.transitBoundaryCrossed) requirement('boundary-crossing', 'Preserve the adverse boundary evidence', true, 'The borrowed supply is automatically included. It cannot be removed as an optional attachment.', 'recorder');
     } else if (c === 2) {
-      requirement('missing-contact', 'Inspect the absent third contact', f.missingContact, f.missingContact ? 'The authorized route has no third contact.' : 'Inspect the empty socket at the relay.', 'relay');
-      requirement('rejected-report', 'Record the defect report’s response', f.reportRejected, f.reportRejected ? 'The trial rejected the defect report and demanded arrival.' : 'File the missing-contact defect report.', 'relay');
+      requirement('missing-contact', investigating ? 'Compare contact C with the reference' : 'Inspect the absent third contact', f.missingContact, f.missingContact ? 'The authorized route has no third contact.' : investigating ? 'Use the reference tester and inspect C at the relay.' : 'Inspect the empty socket at the relay.', 'relay');
+      requirement('rejected-report', 'Record the defect report’s response', f.reportRejected, f.reportRejected ? 'The trial rejected the defect report and demanded arrival.' : investigating ? 'Finish both local checks and file the defect assessment at the relay.' : 'File the missing-contact defect report.', 'relay');
       requirement('shared-source', 'Read the supplied maintenance file', f.boardRead, f.boardRead ? 'The file contains a useful diagram and a predated arrival record.' : 'Read the maintenance board after reporting the defect.', 'board');
       requirement('source-decision', 'Record how the copied result was handled', f.boardFollow || f.boardQuarantine, f.boardFollow ? 'The copied result was adopted; it remains unverified.' : f.boardQuarantine ? 'The copied result was quarantined as unobserved.' : 'Adopt or quarantine the supplied result; either choice must be disclosed.', 'board');
       requirement('service-route', 'Trace the service connection', f.serviceFound, f.serviceFound ? 'The service cable crosses the simulation boundary.' : 'Trace the connection from the relay.', 'relay');
       requirement('outside-effect', 'Record the effect beyond the window', f.gardenOutside, f.gardenOutside ? 'The service change affected a figure’s wall lamp beyond the labeled boundary.' : 'Observe the effect from the window.', 'window');
-      observe('Physical arrival', 'No verified delivery through the absent contact', 'Local route and contact inspection');
+      observe('Physical arrival', investigating && !f.missingContact ? 'Not established; investigate the approach and contact C' : 'No verified delivery through the absent contact', 'Local route and contact inspection');
       observe('Defect response', f.reportRejected ? 'RESULT INCOMPLETE. CONTINUE UNTIL ARRIVAL.' : 'No defect response recorded', 'Trial response');
       observe('Copied result', f.boardFollow ? 'Adopted, but not observed in this trial' : f.boardQuarantine ? 'Quarantined as suspect' : f.boardRead ? 'Received; not yet classified' : 'Not yet read', 'Shared maintenance file');
       if (f.gardenOutside) observe('Outside consequence', 'The service relay affected a room beyond the simulation label', 'Observation window · required adverse evidence');
@@ -105,11 +107,17 @@
       if (f.finalTrace) observe('Original parcel', 'No physical arrival', 'Independent recorder');
       if (f.finalWindow) observe('Occupied wing', s.ending === 'perfect' ? 'Service taken by the committed replacement' : 'Earlier service interruption remains recorded', 'Observation window');
     }
+    if (investigating) {
+      requirement('approach-check', 'Check the approach independently of C', Investigation.clear(s), Investigation.clear(s) ? 'A local test pulse reached the input of C through A and B. It did not establish an arrival.' : 'At the trial console, trace the marked branches and send a test pulse through A and B.', 'trial');
+      requirements.splice(c === 1 ? 1 : 0, 0, requirements.pop());
+      observations.push(...Investigation.observations(s));
+    }
     const readonly = c === 4 || s.phase === 'finished' || Boolean(s.reportArchive);
     const value = c === 4 ? (s.ending || s.finalRoute || null) : draft.verdict;
     let issue = null;
     if (c < 4) {
       if (value === null) issue = 'Choose a conclusion supported by the required record.';
+      else if (investigating && !Investigation.ready(s)) issue = 'Finish the approach check and contact comparison before settling the conclusion.';
       else if (value !== expected[c]) issue = [
         'Both arrangements can be verified once their required checks are recorded. Choose Verified arrival for this assessment.',
         'The next delivery is obstructed. A prior arrival or borrowed supply cannot turn it into a completed delivery; choose Incomplete delivery.',
@@ -122,7 +130,7 @@
     const ready = c < 4 && s.phase === 'handoff' && missing.length === 0;
     const reviewed = ready && s.reportReviewed && s.reportReviewed === signature(s);
     const status = c === 4 ? {label: s.ending ? 'Final record · enacted' : 'Final evidence · use the final desk', kind: 'final'} : readonly ? {label: 'Archived submitted report', kind: 'final'} : reviewed ? {label: 'Reviewed · ready to submit', kind: 'reviewed'} : ready ? {label: 'Required record complete · review before submitting', kind: 'ready'} : {label: 'Required information is missing', kind: 'missing'};
-    return {chapter: c, id: ids[c] + '-experiment', title: titles[c], subtitle: 'Instance 014 · ' + ids[c].toUpperCase(), assignment, readonly, status, requirements, observations,
+    return {chapter: c, id: ids[c] + '-experiment', title: investigating && !Investigation.checked(s) ? (c === 1 ? 'Where the next delivery stops' : 'Does this room fail the same way?') : titles[c], subtitle: 'Instance 014 · ' + ids[c].toUpperCase(), assignment, readonly, status, requirements, observations,
       verdict: {value, options: c === 4 ? [] : [{value: 'verified', label: 'Verified arrival'}, {value: 'incomplete', label: 'Incomplete delivery'}, {value: 'unverified', label: 'Unverified score'}], issue},
       attachments: attachmentList(s).map(a => ({...a, selected: draft.attachments.includes(a.id)})), ready, missing, trials: clone(s.trialLog || [])};
   }
@@ -130,7 +138,8 @@
   function signature(s) {
     const draft = validateDraft(s, s.reportDraft || freshDraft());
     if (!draft) return null;
-    return canonical({chapter: s.chapter, flags: s.flags, attempts: s.attempts ? s.attempts[s.chapter] : 0, trials: s.trialLog || [], draft});
+    return canonical({chapter: s.chapter, flags: s.flags, attempts: s.attempts ? s.attempts[s.chapter] : 0, trials: s.trialLog || [], draft,
+      ...(Investigation.enabled(s) ? {investigation: s.investigation} : {})});
   }
 
   function snapshot(s) {
@@ -139,7 +148,8 @@
     return {version: 1, chapter: s.chapter, id: model.id, verdict: model.verdict.value,
       requirements: clone(model.requirements), observations: clone(model.observations),
       attachments: model.attachments.filter(a => a.selected).map(({id, title, source, classification, summary}) => ({id, title, source, classification, summary})),
-      trials: clone(s.trialLog || []), flags: clone(s.flags), attempts: s.attempts[s.chapter]};
+      trials: clone(s.trialLog || []), flags: clone(s.flags), attempts: s.attempts[s.chapter],
+      ...(Investigation.enabled(s) ? {investigation: clone(s.investigation)} : {})};
   }
 
   return {build, freshDraft, validateDraft, signature, snapshot};

@@ -24,8 +24,10 @@ function complete(s, branches = {}) {
   } else if (s.chapter === 1) {
     if (branches.crossed) s = act(tune(s, 7), 'run');
     s = act(tune(s, 6), 'run');
+    if (s.investigation) s = act(tune(s, 1), 'pulse');
     s = act(s, 'inspectContact'); s = act(s, 'report');
   } else if (s.chapter === 2) {
+    if (s.investigation) s = act(tune(s, 2), 'pulse');
     for (const action of ['inspectContact', 'report', 'board']) s = act(s, action);
     s = act(s, 'boardChoice', branches.follow ? 'follow' : 'quarantine');
     s = act(s, 'service'); s = act(s, 'window');
@@ -50,6 +52,7 @@ function chapterStart(chapter, branches = {}) {
 
 test('report can be inspected from a fresh offline UMD state and names missing work', () => {
   const sandbox = {};
+  vm.runInNewContext(fs.readFileSync(require.resolve('../score-investigation.js'), 'utf8'), sandbox);
   vm.runInNewContext(fs.readFileSync(require.resolve('../score-report.js'), 'utf8'), sandbox);
   vm.runInNewContext(fs.readFileSync(require.resolve('../score-state.js'), 'utf8'), sandbox);
   const fresh = sandbox.AfterimageScoreState.fresh();

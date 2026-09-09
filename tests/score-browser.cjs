@@ -143,10 +143,29 @@ async function campaign(p,{branch='quarantine',peer='veto',screens=false,resume=
   await handoff(p,0);
   await visit(p,'recorder');assert.equal(await p.locator('[data-action="recall"][data-value="trace"]').count(),0,'A discarded trace cannot be recalled');
   await run(p,7,'unauthorized');await at(p,'recorder','inspectTrace');assert((await stored(p)).flags.transitInvalidRead);
-  await run(p,6,'success');await at(p,'relay','inspectContact');await action(p,'report');assert((await stored(p)).flags.transitReport);
+  await run(p,6,'success');
+  const delivery=await stored(p);
+  checkpoints.investigation=delivery;
+  await at(p,'relay','inspectContact');assert(await p.locator('[data-action="report"]').isDisabled());
+  await visit(p,'trial');await action(p,'pulse');assert.match((await stored(p)).lastResult.text,/stops at A/);
+  await switchTo(p,3);await action(p,'pulse');assert.match((await stored(p)).lastResult.text,/stops at B/);
+  if(screens)await snapshot(p,'transit-approach-stopped');
+  await switchTo(p,1);await action(p,'pulse');assert.match((await stored(p)).lastResult.text,/reaches the input of C/);
+  assert.deepEqual((await stored(p)).lastTrial,delivery.lastTrial,'An isolated test cannot move the delivered parcel');
+  assert.deepEqual((await stored(p)).attempts,delivery.attempts,'A pulse is not a delivery attempt');
+  if(screens)await snapshot(p,'transit-approach-clear');
+  const tested=await stored(p);await p.reload();await start(p);assert.deepEqual((await stored(p)).investigation,tested.investigation);
+  await at(p,'relay','report');assert((await stored(p)).flags.transitReport);
   await handoff(p,1);
   if(screens){await snapshot(p,'garden-world');}
-  await run(p,7,'impossible');await at(p,'relay','inspectContact');await action(p,'report');assert.match((await stored(p)).lastResult.text,/CONTINUE UNTIL ARRIVAL/);
+  await visit(p,'trial');await switchTo(p,1);await action(p,'pulse');assert.match((await stored(p)).lastResult.text,/stops at A/,'The Transit arrangement must not establish Garden evidence');
+  await action(p,'run');assert.match((await stored(p)).lastTrial.text,/stops at junction A/);
+  await action(p,'routeHint');assert.match(await p.locator('.puzzle-clue').first().innerText(),/A lower and B upper/);
+  await switchTo(p,2);await action(p,'pulse');
+  assert.equal((await stored(p)).flags.missingContact,false,'An approach check does not inspect C');
+  await at(p,'relay','inspectContact');assert.match(await p.locator('#lines').innerText(),/no blade/);
+  if(screens)await snapshot(p,'garden-contact-comparison');
+  await action(p,'report');assert.match((await stored(p)).lastResult.text,/CONTINUE UNTIL ARRIVAL/);
   await at(p,'board','board');checkpoints.garden=await stored(p);
   }
   await visit(p,'board');await action(p,'boardChoice',branch);await at(p,'relay','service');await at(p,'window','window');
@@ -212,6 +231,10 @@ async function mobile(){
   const moved=await p.evaluate(()=>scoreTest.engine.getPosition());assert(Math.hypot(moved.x-origin.x,moved.z-origin.z)>.05,'Mobile controls should move');
   await p.waitForTimeout(90);assert.deepEqual(await p.evaluate(()=>scoreTest.engine.getPosition()),moved,'Mobile release must stop motion');
   await restore(p,checkpoints.garden);await visit(p,'handoff');await snapshot(p,'mobile-report');
+  await restore(p,checkpoints.investigation);await visit(p,'trial');await switchTo(p,1);await action(p,'pulse');
+  assert.match((await stored(p)).lastResult.text,/reaches the input of C/);
+  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Mobile investigation overflows');
+  await snapshot(p,'mobile-investigation');
   await restore(p,checkpoints.arrival);await visit(p,'inbox');await snapshot(p,'mobile-arrival-note');
   assert(await p.locator('.receipt-note').isVisible());assert.equal(await p.locator('#toast').isVisible(),false,'Old hints must not cover the annotation controls');
   await action(p,'receiveReport');assert(await p.locator('#touch-interact').isVisible());
@@ -230,7 +253,7 @@ async function unavailableStorage(){
   await p.context().close();
 }
 async function legacyRecall(){
-  let s=S.fresh();const tune=mask=>{for(let n=0;n<3;n++)if(Boolean(s.circuit&(1<<n))!==Boolean(mask&(1<<n)))s=S.act(s,'toggle',n);};
+  let s={...S.fresh(),investigation:null};const tune=mask=>{for(let n=0;n<3;n++)if(Boolean(s.circuit&(1<<n))!==Boolean(mask&(1<<n)))s=S.act(s,'toggle',n);};
   for(const a of ['seal','shutter','recorder'])s=S.act(s,a);
   tune(5);s=S.act(s,'run');tune(3);s=S.act(s,'run');s=S.act(s,'handoff',['instruction','voice']);
   s.position={x:0,z:6.3,yaw:0,pitch:-.04};

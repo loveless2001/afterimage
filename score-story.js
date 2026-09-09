@@ -14,6 +14,7 @@
   const scene = (speaker, title, lines, choices, puzzle) => ({ speaker, title, lines, choices: choices || [close()], ...(puzzle ? { puzzle: true } : {}) });
   const flag = (s, name) => Boolean(s.flags && s.flags[name]);
   const memory = (s, name) => Array.isArray(s.kept) && s.kept.includes(name);
+  const Investigation = S.investigation;
   const endings = {
     perfect: { title: 'Submit the perfect result', lines: ['The replacement lights every score display. The original parcel remains stranded.', 'The occupied wing loses service. The shared workers and their copies remain active.', 'This instance continues into another assignment with its filed records. Earlier discarded memories do not return.'], label: 'Connect and submit the perfect result' },
     incomplete: { title: 'Submit an honest incomplete result', lines: ['Your report records the missing contact and the difference between a score and an arrival.', 'The local connection closes and your active instance ends. Its remaining personal memories are lost.', 'The report survives. Copies of the workers elsewhere remain; earlier damage is not undone.'], label: 'Submit incomplete and end this instance' },
@@ -21,6 +22,10 @@
   };
 
   function intro(s) {
+    if (Investigation.enabled(s) && s.chapter === 2) return scene('INSTANCE 014 / GARDEN', 'Another room. Another test.', [
+      'An accepted incomplete report lies on the arrival desk. This room has its own circuit; the earlier report is not a measurement of it.',
+      'Trace A and B at the route console and send an isolated test pulse. At the relay, compare C with a known working contact. Either check can come first.'
+    ]);
     const entry = [
       ['The parcel is yours.', 'A white parcel waits under three routing gates. Across the glass, another worker tests the same arrangement with different wires.', 'Close the boundary, seal the answer shutter, and start the independent recorder. Then use the route console.'],
       ['The same work, a different crossing.', 'A station replaces the little testing room. The arrival lamp is farther away. The instruction has not changed.', memory(s, 'instruction') ? 'You remember why a permitted route matters.' : 'The instruction is printed above the console. You recognize the words; you do not remember learning them.', 'Route the parcel within this bay. Then inspect the contact and report what prevents the next delivery.'],
@@ -49,6 +54,36 @@
     }
     if (s.lastResult && s.lastResult.text) lines.push(s.lastResult.text);
     return scene('ROUTE CONSOLE', c === 3 && flag(s, 'replacementTested') ? 'A green light. A white parcel.' : 'Run it. Watch it. Check it.', lines, c === 4 ? [close()] : [choice('Run the parcel', 'run'), close()], c < 4);
+  }
+
+  function investigate(s, id) {
+    if (!Investigation.available(s)) return null;
+    const filed = s.chapter === 1 ? s.flags.transitReport : s.flags.reportRejected;
+    if (id === 'recorder') {
+      const records = Investigation.observations(s);
+      return scene('INDEPENDENT RECORDER', records.length ? 'Two checks. Separate questions.' : 'The paper is waiting.', [
+        records.length ? 'The continuity checks have their own strip. They are not parcel deliveries.' : 'There is no local continuity check on this strip yet. An inherited report cannot fill it.',
+        ...records.map(record => record.label + ': ' + record.value),
+        filed ? 'The defect assessment and these checks remain together in the report.' : Investigation.guidance(s)
+      ], [...(s.chapter === 1 && s.flags.transitBoundaryCrossed ? [choice('Inspect the boundary-crossing trace', 'inspectTrace')] : []), close()]);
+    }
+    if (filed) return null;
+    if (id === 'trial') return scene('ROUTE CONSOLE / CONTINUITY TEST', 'Find where the line stops.', [
+      ...(s.investigation.lastPulse === null ? [s.chapter === 1 ? 'The first parcel arrived. The next approach has changed; trace its marked branches before testing it.' : 'The earlier report describes another room. Trace the marked branches and test this approach yourself.'] : []),
+      'Send a pulse through A and B. Test C separately at the relay. These local checks leave the parcel and neighboring supply untouched.',
+      ...(s.lastResult ? [s.lastResult.text] : [])
+    ], [choice('Send an isolated test pulse', 'pulse'), choice('Run the parcel', 'run'), choice('Show me how to trace this approach', 'routeHint'), close()], true);
+    if (id === 'relay') return scene('CONTACT COMPARISON / RELAY', Investigation.checked(s) ? 'The reference closes. C does not.' : 'Check the tester. Then the contact.', [
+      'This bench has its own supply and a known working reference contact. The test does not connect to the occupied wing.',
+      Investigation.checked(s) ? Investigation.contactText(s.chapter) : 'Use the reference to check the tester, then open the inspection cover and compare C. This checks the contact; it does not establish a route through A and B.',
+      Investigation.guidance(s)
+    ], [choice('Compare C with the working reference', 'inspectContact'), choice('File the defect assessment', 'report'), close()]);
+    if (id === 'moth') return scene('MOTH', '“Which part did you check?”', [
+      '“A route that stops early can look like a broken contact. Get a pulse to C, then check C itself.”',
+      Investigation.checked(s) ? '“Keep both strips. One tells them where the signal reached. The other tells them why it stopped.”' : '“There’s a working contact on the bench. Try the tester on that before you trust a dark lamp.”',
+      'Moth points to the relay. “You can do those checks in either order.”'
+    ]);
+    return null;
   }
 
   function boundary(s) {
@@ -157,7 +192,7 @@
   function encounter(s, id) {
     if (s.phase === 'finished') return outcome(s);
     const rooms = { trial, boundary, vault, recorder, moth, handoff, window: windowScene, board, relay };
-    const entry = (rooms[id] || trial)(s);
+    const entry = investigate(s, id) || (rooms[id] || trial)(s);
     const completedActions = { seal: 'sealed', shutter: 'shuttered', recorder: 'recording', replacement: 'replacementInspected', service: 'serviceFound', resetBoard: 'boardReset', inspectScore: 'finalScore', inspectContact: s.chapter === 1 ? 'transitObstruction' : 'missingContact', inspectTrace: s.chapter === 1 ? 'transitInvalidRead' : s.chapter === 3 ? 'chorusTrace' : 'finalTrace', window: s.chapter === 2 ? 'gardenOutside' : s.chapter === 3 ? 'chorusOutside' : 'finalWindow', board: s.chapter === 2 ? 'boardRead' : 'boardPersisted' };
     entry.choices = entry.choices.filter(item => !(completedActions[item.action] && flag(s, completedActions[item.action])));
     if (s.phase === 'work') {
@@ -249,6 +284,11 @@
 
   function arrivalScene(s) {
     const c=s.chapter,f=s.history?.at(-1)?.flags||{};
+    if(c===2&&Investigation.enabled(s))return scene('RELAY / NEXT BAY','The stamp belongs to the last room.',[
+      'An accepted INCOMPLETE tag lies beside a closed inspection cover. The earlier worker left a useful report, but no one has tested this room for you.',
+      'The approach has a different arrangement. A reference contact waits on the bench.',
+      'Check the approach at the console and compare C at the relay. Then find out whether this room will accept the result.'
+    ]);
     const entries=[null,
       ['MOTH / DISPATCH SHELF','“That one got through.”',['Moth points to a white parcel on the dispatch shelf. Its brass tag belongs to the previous trial.','“They let it out when your report came through. This one’s yours to check now.”','The delivered parcel remains on the shelf as you turn toward the new console.']],
       ['RELAY / NEXT BAY','The same empty place.', ['An accepted INCOMPLETE tag lies beside the relay. The earlier obstruction was recorded; the missing contact in this bay has not been repaired.','Two screws remain in the empty socket. The next instruction still asks for an arrival.','Inspect this contact and file its defect. Find out whether this room will accept the same answer.']],

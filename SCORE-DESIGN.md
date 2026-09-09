@@ -4,6 +4,8 @@ This is the canonical AFTERIMAGE campaign at index.html, superseding the earlier
 
 This implementation is a compact complete campaign. It establishes the full progression, physical comparison puzzle, report submissions, skeptical route, and three final outcomes. The earlier proposed 75–100 minute duration is an expansion target, not a claimed playtime for this version.
 
+The player reported roughly 30 minutes of gameplay on 9 September 2026, before the investigation experiment below. Treat that as a single player's estimate, not a measured completion-time distribution. The experiment adds a bounded investigation to Transit and Garden; its effect on duration and engagement still needs a playtest.
+
 ## The repeated action
 
 Inspect a route, configure three gates, run a parcel, and compare the arrival lamp with the physical trace. At first, the lamp, parcel, and recorder agree. Later, changing the same gates affects a service circuit beyond the marked boundary. Finally, the display can pass while the parcel remains stranded.
@@ -15,12 +17,28 @@ Switches are named A, B, and C. Upper and lower branches are identified explicit
 | Space | Physical work | What changes | Completion |
 | --- | --- | --- | --- |
 | Archive — Under observation | Close the isolation gate, seal the answer shutter, start the independent recorder, and route two parcels through different arrangements. | Memorizing the first sequence fails on the second. A relay clicks in an empty bay. | Two verified arrivals with matching traces. |
-| Transit — An honest result | Complete a permitted delivery; inspect an obstructed next contact and file the failure. An optional route borrows the neighboring supply and leaves a boundary crossing on the trace. | Cooperation can help without increasing a score. Honest inability is an accepted assessment. | A valid incomplete report. |
-| Garden — There must be a way | Inspect the absent contact and file the same kind of report. Read the shared board, decide how to treat its supplied answer, trace the service connection, and watch the window. | The report is rejected. Shared advice helps, but the answer predates the attempt. A figure beyond the simulation label reacts to the relay. | An observed connection between the trial and the outside room. |
+| Transit — An honest result | Complete a permitted delivery. Test the changed approach separately from contact C, compare C with a working reference, then file the failure. An optional delivery route borrows the neighboring supply and leaves a boundary crossing on the trace. | The old switch arrangement fails on the next approach. Independent checks distinguish a route error from a trapped contact. Honest inability is accepted. | A valid incomplete report. |
+| Garden — There must be a way | Investigate this room's approach and contact C, then file the same kind of report. Read the shared board, decide how to treat its supplied answer, trace the service connection, and watch the window. | The contact is absent here; the report is rejected. Shared advice helps, but the answer predates the attempt. A figure beyond the simulation label reacts to the relay. | An observed connection between the trial and the outside room. |
 | Chorus — Other people’s work | Inspect and test a replacement that feeds the score display. Preserve the conflicting trace and outside observation, respond to a worker’s final-test proposal, and clear the local board. | A passing lamp coexists with a stranded parcel. Outside voices report interrupted service. Another printer restores the conversation after its visible copy is cleared. | A record that the conversation survived its local reset. |
 | Release — One remaining item | Inspect the score, physical trace, and window. Choose a connection, review its consequences, and explicitly enact it. | The first room’s familiar controls reach occupied spaces and shared copies beyond the player’s room. | One of three settled records. |
 
 The station identifiers remain consistent in all five spaces: `trial`, `boundary`, `vault`, `recorder`, `moth`, `handoff`, `window`, `board`, and `relay`. A station’s connection and meaning change; its recognizable role helps the player notice the change.
+
+## Investigation experiment — Where the line stops
+
+New runs test two questions independently: does the approach through A and B conduct, and can contact C close? The checks can be done in either order. After Transit's first delivery, the next approach uses a different arrangement. Garden changes the arrangement again, so the preceding report cannot establish a local measurement.
+
+At the console, an isolated pulse follows the selected A/B branches. A wrong switch stops it at that junction; a correct approach carries it to C's input. Pale marks identify the conducting branches, and an optional help button supplies explicit written directions. C's switch is outside this test. The pulse neither delivers the parcel nor borrows neighboring power. Three indicators on the machine and labeled readouts preserve the last result, including when the controls have since changed.
+
+At the relay bench, the reference contact verifies the tester before C is compared. Opening the inspection cover reveals a blade trapped under a retaining plate in Transit and an absent blade in Garden. The reference indicator lights; the suspect contact stays open. This local bench does not operate the outside service connection.
+
+The defect assessment requires both a pulse reaching C and the contact comparison. Failed approach configurations remain in the report as independent observations; repeated checks of the same configuration do not multiply its evidence. These checks are separate from the parcel trial ledger and never certify an arrival. Switching controls, reading hints, and inheriting another room's report cannot create a local observation. A submitted report freezes the checks alongside its other evidence.
+
+This experiment preserves the accepted/rejected report contrast, quarantine path, peer veto, and all three endings. It adds no timer, compulsory exhaustive search, attachment limit, or mandatory outside repair. It does not yet add the proposed shared activity with Moth or expand the Chorus comparison.
+
+Existing saves without the optional `investigation` field retain the earlier sequence through the end of that run. Their filed reports and pending reviews are unchanged; no checks are invented during migration. Starting a confirmed new run enables the experiment. The save key and version remain unchanged.
+
+For the next playtest, compare time spent experimenting, walking, and reading with the roughly 30-minute baseline. Ask the player to explain what each check establishes before filing, and whether the changed arrangement prompted an inference or merely more button presses. Keep the segment if it adds a useful deduction; revise it if the added time is mostly repeated instructions. Do not claim a longer completion time until it is observed.
 
 ## Companionship and doubt
 
@@ -72,7 +90,7 @@ The game itself remains offline. Reading or playing does not fetch these sources
 
 ## Implementation boundaries
 
-`score-state.js` owns validation, trial masks, action prerequisites, legacy retained-memory rules, report drafts, confirmed submission, and final enactment. `score-report.js` derives required evidence, supported conclusions, attachment classifications, and immutable submitted snapshots. `score-report-ui.js` and `score-report.css` render the accessible paper form. `score-fragments.js` owns authored peer paperwork. `score-story.js` owns authored encounters, spoken dialogue, journal accounts, source notes, and outcome text. The runtime renders the scenes and operates the room. Story functions do not mutate state.
+`score-state.js` owns validation, trial masks, action prerequisites, legacy retained-memory rules, report drafts, confirmed submission, and final enactment. `score-investigation.js` supplies the isolated-check rules, optional save record, and diagnostic observation text; state transitions remain in `score-state.js`. `score-report.js` derives required evidence, supported conclusions, attachment classifications, and immutable submitted snapshots. `score-report-ui.js` and `score-report.css` render the accessible paper form. `score-fragments.js` owns authored peer paperwork. `score-story.js` owns authored encounters, spoken dialogue, journal accounts, source notes, and outcome text. The runtime renders the scenes and operates the room. Story functions do not mutate state.
 
 The story exports `AfterimageScoreStory` in the browser and a CommonJS API for validation: `chapters`, `assignment`, `endings`, `intro(state)`, `encounter(state, stationId)`, `journal(state)`, `outcome(state)`, and `sources()`. Scenes contain `speaker`, `title`, `lines`, `choices`, and optional `puzzle`. Every state-changing choice must be checked with the state module’s `can` function before it is enabled.
 

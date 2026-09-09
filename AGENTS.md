@@ -19,6 +19,7 @@ Keep titles and headlines evocative. Dialogue should sound spoken, and instructi
 
 - index.html is the canonical playable entry. Old HTML entry points are compatibility redirects to it.
 - score-state.js owns save validation, trial rules, old memory-handoff compatibility, report submission, arrival state, and final enactment.
+- score-investigation.js supplies isolated continuity-check rules, diagnostic save validation, and observation text. Keep these measurements distinct from parcel arrivals and preserve pre-experiment saves without inventing checks.
 - score-report.js derives required evidence, conclusions, attachment classifications, and immutable report snapshots.
 - score-story.js owns encounters, report annotations, arrival consequences, milestones, facility connections, and ending prose. score-fragments.js owns other workers’ authored report fragments.
 - score-world.js owns the procedural facility and visible consequences. engine-3d.js is the shared offline WebGL renderer and input engine used by the current campaign.

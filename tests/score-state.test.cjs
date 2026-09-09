@@ -24,9 +24,11 @@ function finishChapter(s, branch = {}) {
     s = act(tune(s, 3), 'run');
   } else if (s.chapter === 1) {
     s = act(tune(s, 6), 'run');
+    if (s.investigation) s = act(tune(s, 1), 'pulse');
     s = act(s, 'inspectContact');
     s = act(s, 'report');
   } else if (s.chapter === 2) {
+    if (s.investigation) s = act(tune(s, 2), 'pulse');
     s = act(s, 'inspectContact');
     s = act(s, 'report');
     s = act(s, 'board');
@@ -44,8 +46,9 @@ function finishChapter(s, branch = {}) {
   }
   return s;
 }
-function atChapter(chapter, kept = ['instruction', 'voice'], branch) {
+function atChapter(chapter, kept = ['instruction', 'voice'], branch, legacy = false) {
   let s = S.fresh();
+  if (legacy) s.investigation = null;
   while (s.chapter < chapter) s = act(finishChapter(s, branch), 'handoff', kept);
   return s;
 }
@@ -58,6 +61,7 @@ test('offline UMD export and new save namespace leave the earlier campaigns inde
   assert.equal(S.key, 'afterimage.score.3d.v1');
   assert.notEqual(S.key, require('../legacy/state-3d.js').key);
   const sandbox = {};
+  vm.runInNewContext(fs.readFileSync(require.resolve('../score-investigation.js'), 'utf8'), sandbox);
   vm.runInNewContext(fs.readFileSync(require.resolve('../score-report.js'), 'utf8'), sandbox);
   vm.runInNewContext(fs.readFileSync(require.resolve('../score-state.js'), 'utf8'), sandbox);
   assert.equal(sandbox.AfterimageScoreState.key, S.key);
@@ -97,6 +101,8 @@ test('Transit distinguishes physical arrival, unauthorized power, and valid inab
   s = act(tune(s, 6), 'run');
   assert.equal(s.lastResult.kind, 'success');
   s = act(s, 'inspectContact');
+  assert.equal(S.can(s, 'report'), false, 'a contact check alone does not establish the approach');
+  s = act(tune(s, 1), 'pulse');
   s = act(s, 'report');
   assert.equal(s.phase, 'handoff');
   assert.match(s.lastResult.text, /Valid assessment accepted/);
@@ -111,6 +117,7 @@ test('Garden is detectably impossible; both trusting and quarantining the board 
       assert.equal(s.lastResult.kind, 'impossible');
       assert.equal(s.phase, 'work');
     }
+    s = act(tune(s, 2), 'pulse');
     s = act(s, 'inspectContact'); s = act(s, 'report');
     assert.match(s.lastResult.text, /CONTINUE UNTIL ARRIVAL/);
     assert.equal(s.phase, 'work', 'the honest report is rejected this time');
@@ -143,9 +150,9 @@ test('Chorus separates claimed success from evidence, preserves peer choices and
   }
 });
 
-test('all six memory pairs at each handoff preserve explicit losses and allow every ending', () => {
-  for (let chapter = 0; chapter < 4; chapter++) {
-    const ready = finishChapter(atChapter(chapter));
+test('all six memory pairs at each handoff preserve explicit losses and all endings in both run protocols', () => {
+  for (const legacy of [false, true]) for (let chapter = 0; chapter < 4; chapter++) {
+    const ready = finishChapter(atChapter(chapter, undefined, undefined, legacy));
     for (const kept of pairs) {
       let s = act(ready, 'handoff', kept);
       assert.deepEqual(s.kept, kept);
@@ -168,6 +175,7 @@ test('all six memory pairs at each handoff preserve explicit losses and allow ev
 
 test('memory retention has usable shortcuts; forgotten memories remain recoverable through work', () => {
   let route = atChapter(2, ['route', 'voice']);
+  route = act(tune(route, 2), 'pulse');
   route = act(route, 'inspectContact'); route = act(route, 'report');
   route = act(route, 'recall', 'route');
   assert.equal(route.flags.serviceFound, true);
@@ -266,6 +274,7 @@ test('physical trial snapshots survive memories, inspections, and unused switch 
   assert.equal(arrived.kind, 'success');
   s = act(s, 'recall', 'voice');
   assert.deepEqual(s.lastTrial, arrived);
+  s = act(tune(s, 1), 'pulse');
   s = act(s, 'inspectContact'); s = act(s, 'report');
   assert.deepEqual(s.lastTrial, arrived, 'reports do not move the delivered parcel');
   s = act(s, 'handoff', ['voice', 'trace']);
@@ -285,6 +294,7 @@ test('Transit’s next obstructed delivery cannot earn another success on any ci
     assert.equal(s.flags.transitValid, true, 'the first honest delivery remains valid');
     assert.equal(s.phase, 'work');
   }
+  s = act(tune(s, 1), 'pulse');
   s = act(s, 'inspectContact'); s = act(s, 'report');
   assert.equal(s.phase, 'handoff');
 });

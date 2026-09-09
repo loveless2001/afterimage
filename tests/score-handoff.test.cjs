@@ -17,8 +17,10 @@ function complete(s, branch = {}) {
       if (branch.read) s = S.act(s, 'inspectTrace');
     }
     s = S.act(tune(s, 6), 'run');
+    if (s.investigation) s = S.act(tune(s, 1), 'pulse');
     s = S.act(s, 'inspectContact'); s = S.act(s, 'report');
   } else if (s.chapter === 2) {
+    if (s.investigation) s = S.act(tune(s, 2), 'pulse');
     for (const action of ['inspectContact', 'report', 'board']) s = S.act(s, action);
     s = S.act(s, 'boardChoice', branch.adopt ? 'follow' : 'quarantine');
     s = S.act(s, 'service'); s = S.act(s, 'window');

@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node scripts/serve.cjs",
     "check": "node scripts/check.cjs",
-    "test": "node --test tests/server.test.cjs tests/canonical.test.cjs tests/score-state.test.cjs tests/score-layout.test.cjs tests/score-handoff.test.cjs tests/score-report.test.cjs",
+    "test": "node --test tests/server.test.cjs tests/canonical.test.cjs tests/score-state.test.cjs tests/score-layout.test.cjs tests/score-handoff.test.cjs tests/score-report.test.cjs tests/score-investigation.test.cjs",
     "test:browser": "node tests/canonical-browser.cjs && node tests/score-browser.cjs && node tests/score-motion.cjs && node tests/score-audio.cjs",
     "browser:install": "playwright install chromium",
     "build": "node scripts/build.cjs",

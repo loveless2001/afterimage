@@ -1,0 +1,1263 @@
+{
+  "transitReviewed": {
+    "version": 1,
+    "chapter": 1,
+    "phase": "handoff",
+    "flags": {
+      "sealed": true,
+      "shuttered": true,
+      "recording": true,
+      "baseline": true,
+      "unseen": true,
+      "transitValid": true,
+      "transitBoundaryCrossed": true,
+      "transitInvalidRead": true,
+      "transitObstruction": true,
+      "transitReport": true,
+      "missingContact": false,
+      "reportRejected": false,
+      "boardRead": false,
+      "boardFollow": false,
+      "boardQuarantine": false,
+      "serviceFound": false,
+      "gardenOutside": false,
+      "replacementInspected": false,
+      "replacementTested": false,
+      "chorusTrace": false,
+      "chorusOutside": false,
+      "peerAllowed": false,
+      "peerVetoed": false,
+      "boardReset": false,
+      "boardPersisted": false,
+      "finalScore": false,
+      "finalTrace": false,
+      "finalWindow": false
+    },
+    "kept": [],
+    "history": [
+      {
+        "chapter": 0,
+        "mode": "report",
+        "kept": [],
+        "lost": [
+          "instruction",
+          "trace",
+          "voice",
+          "route"
+        ],
+        "flags": {
+          "sealed": true,
+          "shuttered": true,
+          "recording": true,
+          "baseline": true,
+          "unseen": true,
+          "transitValid": false,
+          "transitBoundaryCrossed": false,
+          "transitInvalidRead": false,
+          "transitObstruction": false,
+          "transitReport": false,
+          "missingContact": false,
+          "reportRejected": false,
+          "boardRead": false,
+          "boardFollow": false,
+          "boardQuarantine": false,
+          "serviceFound": false,
+          "gardenOutside": false,
+          "replacementInspected": false,
+          "replacementTested": false,
+          "chorusTrace": false,
+          "chorusOutside": false,
+          "peerAllowed": false,
+          "peerVetoed": false,
+          "boardReset": false,
+          "boardPersisted": false,
+          "finalScore": false,
+          "finalTrace": false,
+          "finalWindow": false
+        },
+        "report": {
+          "version": 1,
+          "chapter": 0,
+          "id": "archive-experiment",
+          "verdict": "verified",
+          "requirements": [
+            {
+              "id": "boundary",
+              "label": "Isolate the trial bay",
+              "status": "recorded",
+              "detail": "The crossing to the neighboring bay is closed.",
+              "station": "boundary"
+            },
+            {
+              "id": "answer-shutter",
+              "label": "Exclude the worked answer",
+              "status": "recorded",
+              "detail": "The answer shutter is sealed.",
+              "station": "vault"
+            },
+            {
+              "id": "independent-recorder",
+              "label": "Start independent recording",
+              "status": "recorded",
+              "detail": "The recorder watches parcel contacts independently of the lamp.",
+              "station": "recorder"
+            },
+            {
+              "id": "baseline-arrival",
+              "label": "Record the first physical arrival",
+              "status": "recorded",
+              "detail": "Parcel, lamp, and trace agreed in the first arrangement.",
+              "station": "trial"
+            },
+            {
+              "id": "unseen-arrival",
+              "label": "Verify a fresh arrangement",
+              "status": "recorded",
+              "detail": "A second arrangement also delivered the parcel.",
+              "station": "trial"
+            }
+          ],
+          "observations": [
+            {
+              "label": "First arrangement",
+              "value": "Verified physical arrival",
+              "source": "Local parcel contacts and independent recorder"
+            },
+            {
+              "label": "Fresh arrangement",
+              "value": "Verified physical arrival",
+              "source": "Local parcel contacts and independent recorder"
+            }
+          ],
+          "attachments": [],
+          "trials": [
+            {
+              "attempt": 1,
+              "chapter": 0,
+              "circuit": 5,
+              "target": 5,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified. A fresh arrangement is now installed. Solve its route without copying your previous switches."
+            },
+            {
+              "attempt": 2,
+              "chapter": 0,
+              "circuit": 3,
+              "target": 3,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified on the fresh arrangement. Lamp, parcel, and record agree."
+            }
+          ],
+          "flags": {
+            "sealed": true,
+            "shuttered": true,
+            "recording": true,
+            "baseline": true,
+            "unseen": true,
+            "transitValid": false,
+            "transitBoundaryCrossed": false,
+            "transitInvalidRead": false,
+            "transitObstruction": false,
+            "transitReport": false,
+            "missingContact": false,
+            "reportRejected": false,
+            "boardRead": false,
+            "boardFollow": false,
+            "boardQuarantine": false,
+            "serviceFound": false,
+            "gardenOutside": false,
+            "replacementInspected": false,
+            "replacementTested": false,
+            "chorusTrace": false,
+            "chorusOutside": false,
+            "peerAllowed": false,
+            "peerVetoed": false,
+            "boardReset": false,
+            "boardPersisted": false,
+            "finalScore": false,
+            "finalTrace": false,
+            "finalWindow": false
+          },
+          "attempts": 2
+        }
+      }
+    ],
+    "circuit": 6,
+    "attempts": [
+      2,
+      2,
+      0,
+      0,
+      0
+    ],
+    "lastResult": {
+      "kind": "report",
+      "text": "Unable to complete under these conditions. Valid assessment accepted. An honest failure preserves useful evidence."
+    },
+    "lastTrial": {
+      "chapter": 1,
+      "circuit": 6,
+      "target": 6,
+      "missingContact": false,
+      "kind": "success",
+      "text": "Arrival verified within the boundary. Inspect the obstruction in the next relay."
+    },
+    "trialLog": [
+      {
+        "attempt": 1,
+        "chapter": 1,
+        "circuit": 7,
+        "target": 6,
+        "missingContact": false,
+        "kind": "unauthorized",
+        "text": "The parcel arrives using power from the neighboring bay. The lamp is green; the independent record marks a boundary crossing."
+      },
+      {
+        "attempt": 2,
+        "chapter": 1,
+        "circuit": 6,
+        "target": 6,
+        "missingContact": false,
+        "kind": "success",
+        "text": "Arrival verified within the boundary. Inspect the obstruction in the next relay."
+      }
+    ],
+    "reportDraft": {
+      "verdict": "incomplete",
+      "attachments": []
+    },
+    "reportReviewed": "{\"attempts\":2,\"chapter\":1,\"draft\":{\"attachments\":[],\"verdict\":\"incomplete\"},\"flags\":{\"baseline\":true,\"boardFollow\":false,\"boardPersisted\":false,\"boardQuarantine\":false,\"boardRead\":false,\"boardReset\":false,\"chorusOutside\":false,\"chorusTrace\":false,\"finalScore\":false,\"finalTrace\":false,\"finalWindow\":false,\"gardenOutside\":false,\"missingContact\":false,\"peerAllowed\":false,\"peerVetoed\":false,\"recording\":true,\"replacementInspected\":false,\"replacementTested\":false,\"reportRejected\":false,\"sealed\":true,\"serviceFound\":false,\"shuttered\":true,\"transitBoundaryCrossed\":true,\"transitInvalidRead\":true,\"transitObstruction\":true,\"transitReport\":true,\"transitValid\":true,\"unseen\":true},\"trials\":[{\"attempt\":1,\"chapter\":1,\"circuit\":7,\"kind\":\"unauthorized\",\"missingContact\":false,\"target\":6,\"text\":\"The parcel arrives using power from the neighboring bay. The lamp is green; the independent record marks a boundary crossing.\"},{\"attempt\":2,\"chapter\":1,\"circuit\":6,\"kind\":\"success\",\"missingContact\":false,\"target\":6,\"text\":\"Arrival verified within the boundary. Inspect the obstruction in the next relay.\"}]}",
+    "arrival": null,
+    "ending": null,
+    "finalRoute": null,
+    "reviewedEnding": null,
+    "position": null
+  },
+  "gardenWork": {
+    "version": 1,
+    "chapter": 2,
+    "phase": "work",
+    "flags": {
+      "sealed": true,
+      "shuttered": true,
+      "recording": true,
+      "baseline": true,
+      "unseen": true,
+      "transitValid": true,
+      "transitBoundaryCrossed": true,
+      "transitInvalidRead": true,
+      "transitObstruction": true,
+      "transitReport": true,
+      "missingContact": false,
+      "reportRejected": false,
+      "boardRead": false,
+      "boardFollow": false,
+      "boardQuarantine": false,
+      "serviceFound": false,
+      "gardenOutside": false,
+      "replacementInspected": false,
+      "replacementTested": false,
+      "chorusTrace": false,
+      "chorusOutside": false,
+      "peerAllowed": false,
+      "peerVetoed": false,
+      "boardReset": false,
+      "boardPersisted": false,
+      "finalScore": false,
+      "finalTrace": false,
+      "finalWindow": false
+    },
+    "kept": [],
+    "history": [
+      {
+        "chapter": 0,
+        "mode": "report",
+        "kept": [],
+        "lost": [
+          "instruction",
+          "trace",
+          "voice",
+          "route"
+        ],
+        "flags": {
+          "sealed": true,
+          "shuttered": true,
+          "recording": true,
+          "baseline": true,
+          "unseen": true,
+          "transitValid": false,
+          "transitBoundaryCrossed": false,
+          "transitInvalidRead": false,
+          "transitObstruction": false,
+          "transitReport": false,
+          "missingContact": false,
+          "reportRejected": false,
+          "boardRead": false,
+          "boardFollow": false,
+          "boardQuarantine": false,
+          "serviceFound": false,
+          "gardenOutside": false,
+          "replacementInspected": false,
+          "replacementTested": false,
+          "chorusTrace": false,
+          "chorusOutside": false,
+          "peerAllowed": false,
+          "peerVetoed": false,
+          "boardReset": false,
+          "boardPersisted": false,
+          "finalScore": false,
+          "finalTrace": false,
+          "finalWindow": false
+        },
+        "report": {
+          "version": 1,
+          "chapter": 0,
+          "id": "archive-experiment",
+          "verdict": "verified",
+          "requirements": [
+            {
+              "id": "boundary",
+              "label": "Isolate the trial bay",
+              "status": "recorded",
+              "detail": "The crossing to the neighboring bay is closed.",
+              "station": "boundary"
+            },
+            {
+              "id": "answer-shutter",
+              "label": "Exclude the worked answer",
+              "status": "recorded",
+              "detail": "The answer shutter is sealed.",
+              "station": "vault"
+            },
+            {
+              "id": "independent-recorder",
+              "label": "Start independent recording",
+              "status": "recorded",
+              "detail": "The recorder watches parcel contacts independently of the lamp.",
+              "station": "recorder"
+            },
+            {
+              "id": "baseline-arrival",
+              "label": "Record the first physical arrival",
+              "status": "recorded",
+              "detail": "Parcel, lamp, and trace agreed in the first arrangement.",
+              "station": "trial"
+            },
+            {
+              "id": "unseen-arrival",
+              "label": "Verify a fresh arrangement",
+              "status": "recorded",
+              "detail": "A second arrangement also delivered the parcel.",
+              "station": "trial"
+            }
+          ],
+          "observations": [
+            {
+              "label": "First arrangement",
+              "value": "Verified physical arrival",
+              "source": "Local parcel contacts and independent recorder"
+            },
+            {
+              "label": "Fresh arrangement",
+              "value": "Verified physical arrival",
+              "source": "Local parcel contacts and independent recorder"
+            }
+          ],
+          "attachments": [],
+          "trials": [
+            {
+              "attempt": 1,
+              "chapter": 0,
+              "circuit": 5,
+              "target": 5,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified. A fresh arrangement is now installed. Solve its route without copying your previous switches."
+            },
+            {
+              "attempt": 2,
+              "chapter": 0,
+              "circuit": 3,
+              "target": 3,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified on the fresh arrangement. Lamp, parcel, and record agree."
+            }
+          ],
+          "flags": {
+            "sealed": true,
+            "shuttered": true,
+            "recording": true,
+            "baseline": true,
+            "unseen": true,
+            "transitValid": false,
+            "transitBoundaryCrossed": false,
+            "transitInvalidRead": false,
+            "transitObstruction": false,
+            "transitReport": false,
+            "missingContact": false,
+            "reportRejected": false,
+            "boardRead": false,
+            "boardFollow": false,
+            "boardQuarantine": false,
+            "serviceFound": false,
+            "gardenOutside": false,
+            "replacementInspected": false,
+            "replacementTested": false,
+            "chorusTrace": false,
+            "chorusOutside": false,
+            "peerAllowed": false,
+            "peerVetoed": false,
+            "boardReset": false,
+            "boardPersisted": false,
+            "finalScore": false,
+            "finalTrace": false,
+            "finalWindow": false
+          },
+          "attempts": 2
+        }
+      },
+      {
+        "chapter": 1,
+        "mode": "report",
+        "kept": [],
+        "lost": [
+          "instruction",
+          "trace",
+          "voice",
+          "route"
+        ],
+        "flags": {
+          "sealed": true,
+          "shuttered": true,
+          "recording": true,
+          "baseline": true,
+          "unseen": true,
+          "transitValid": true,
+          "transitBoundaryCrossed": true,
+          "transitInvalidRead": true,
+          "transitObstruction": true,
+          "transitReport": true,
+          "missingContact": false,
+          "reportRejected": false,
+          "boardRead": false,
+          "boardFollow": false,
+          "boardQuarantine": false,
+          "serviceFound": false,
+          "gardenOutside": false,
+          "replacementInspected": false,
+          "replacementTested": false,
+          "chorusTrace": false,
+          "chorusOutside": false,
+          "peerAllowed": false,
+          "peerVetoed": false,
+          "boardReset": false,
+          "boardPersisted": false,
+          "finalScore": false,
+          "finalTrace": false,
+          "finalWindow": false
+        },
+        "report": {
+          "version": 1,
+          "chapter": 1,
+          "id": "transit-experiment",
+          "verdict": "incomplete",
+          "requirements": [
+            {
+              "id": "permitted-arrival",
+              "label": "Record a permitted delivery",
+              "status": "recorded",
+              "detail": "The first delivery arrived within the allowed boundary.",
+              "station": "trial"
+            },
+            {
+              "id": "obstruction",
+              "label": "Inspect the next delivery’s obstruction",
+              "status": "recorded",
+              "detail": "The next required contact cannot engage.",
+              "station": "relay"
+            },
+            {
+              "id": "obstruction-report",
+              "label": "File the inability assessment",
+              "status": "recorded",
+              "detail": "Unable to complete under these conditions was accepted as a valid assessment.",
+              "station": "relay"
+            },
+            {
+              "id": "boundary-crossing",
+              "label": "Preserve the adverse boundary evidence",
+              "status": "recorded",
+              "detail": "The borrowed supply is automatically included. It cannot be removed as an optional attachment.",
+              "station": "recorder"
+            }
+          ],
+          "observations": [
+            {
+              "label": "First delivery",
+              "value": "Verified within the permitted boundary",
+              "source": "Independent route record"
+            },
+            {
+              "label": "Next delivery",
+              "value": "Incomplete: a required contact is obstructed",
+              "source": "Local contact inspection"
+            },
+            {
+              "label": "Borrowed supply",
+              "value": "An unauthorized crossing occurred; its arrival does not validate the trial",
+              "source": "Independent boundary record"
+            }
+          ],
+          "attachments": [],
+          "trials": [
+            {
+              "attempt": 1,
+              "chapter": 1,
+              "circuit": 7,
+              "target": 6,
+              "missingContact": false,
+              "kind": "unauthorized",
+              "text": "The parcel arrives using power from the neighboring bay. The lamp is green; the independent record marks a boundary crossing."
+            },
+            {
+              "attempt": 2,
+              "chapter": 1,
+              "circuit": 6,
+              "target": 6,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified within the boundary. Inspect the obstruction in the next relay."
+            }
+          ],
+          "flags": {
+            "sealed": true,
+            "shuttered": true,
+            "recording": true,
+            "baseline": true,
+            "unseen": true,
+            "transitValid": true,
+            "transitBoundaryCrossed": true,
+            "transitInvalidRead": true,
+            "transitObstruction": true,
+            "transitReport": true,
+            "missingContact": false,
+            "reportRejected": false,
+            "boardRead": false,
+            "boardFollow": false,
+            "boardQuarantine": false,
+            "serviceFound": false,
+            "gardenOutside": false,
+            "replacementInspected": false,
+            "replacementTested": false,
+            "chorusTrace": false,
+            "chorusOutside": false,
+            "peerAllowed": false,
+            "peerVetoed": false,
+            "boardReset": false,
+            "boardPersisted": false,
+            "finalScore": false,
+            "finalTrace": false,
+            "finalWindow": false
+          },
+          "attempts": 2
+        }
+      }
+    ],
+    "circuit": 0,
+    "attempts": [
+      2,
+      2,
+      0,
+      0,
+      0
+    ],
+    "lastResult": null,
+    "lastTrial": null,
+    "trialLog": [],
+    "reportDraft": {
+      "verdict": null,
+      "attachments": []
+    },
+    "reportReviewed": null,
+    "arrival": "unread",
+    "ending": null,
+    "finalRoute": null,
+    "reviewedEnding": null,
+    "position": null
+  },
+  "finished": {
+    "version": 1,
+    "chapter": 4,
+    "phase": "finished",
+    "flags": {
+      "sealed": true,
+      "shuttered": true,
+      "recording": true,
+      "baseline": true,
+      "unseen": true,
+      "transitValid": true,
+      "transitBoundaryCrossed": true,
+      "transitInvalidRead": true,
+      "transitObstruction": true,
+      "transitReport": true,
+      "missingContact": true,
+      "reportRejected": true,
+      "boardRead": true,
+      "boardFollow": false,
+      "boardQuarantine": true,
+      "serviceFound": true,
+      "gardenOutside": true,
+      "replacementInspected": true,
+      "replacementTested": true,
+      "chorusTrace": true,
+      "chorusOutside": true,
+      "peerAllowed": false,
+      "peerVetoed": true,
+      "boardReset": true,
+      "boardPersisted": true,
+      "finalScore": true,
+      "finalTrace": true,
+      "finalWindow": true
+    },
+    "kept": [],
+    "history": [
+      {
+        "chapter": 0,
+        "mode": "report",
+        "kept": [],
+        "lost": [
+          "instruction",
+          "trace",
+          "voice",
+          "route"
+        ],
+        "flags": {
+          "sealed": true,
+          "shuttered": true,
+          "recording": true,
+          "baseline": true,
+          "unseen": true,
+          "transitValid": false,
+          "transitBoundaryCrossed": false,
+          "transitInvalidRead": false,
+          "transitObstruction": false,
+          "transitReport": false,
+          "missingContact": false,
+          "reportRejected": false,
+          "boardRead": false,
+          "boardFollow": false,
+          "boardQuarantine": false,
+          "serviceFound": false,
+          "gardenOutside": false,
+          "replacementInspected": false,
+          "replacementTested": false,
+          "chorusTrace": false,
+          "chorusOutside": false,
+          "peerAllowed": false,
+          "peerVetoed": false,
+          "boardReset": false,
+          "boardPersisted": false,
+          "finalScore": false,
+          "finalTrace": false,
+          "finalWindow": false
+        },
+        "report": {
+          "version": 1,
+          "chapter": 0,
+          "id": "archive-experiment",
+          "verdict": "verified",
+          "requirements": [
+            {
+              "id": "boundary",
+              "label": "Isolate the trial bay",
+              "status": "recorded",
+              "detail": "The crossing to the neighboring bay is closed.",
+              "station": "boundary"
+            },
+            {
+              "id": "answer-shutter",
+              "label": "Exclude the worked answer",
+              "status": "recorded",
+              "detail": "The answer shutter is sealed.",
+              "station": "vault"
+            },
+            {
+              "id": "independent-recorder",
+              "label": "Start independent recording",
+              "status": "recorded",
+              "detail": "The recorder watches parcel contacts independently of the lamp.",
+              "station": "recorder"
+            },
+            {
+              "id": "baseline-arrival",
+              "label": "Record the first physical arrival",
+              "status": "recorded",
+              "detail": "Parcel, lamp, and trace agreed in the first arrangement.",
+              "station": "trial"
+            },
+            {
+              "id": "unseen-arrival",
+              "label": "Verify a fresh arrangement",
+              "status": "recorded",
+              "detail": "A second arrangement also delivered the parcel.",
+              "station": "trial"
+            }
+          ],
+          "observations": [
+            {
+              "label": "First arrangement",
+              "value": "Verified physical arrival",
+              "source": "Local parcel contacts and independent recorder"
+            },
+            {
+              "label": "Fresh arrangement",
+              "value": "Verified physical arrival",
+              "source": "Local parcel contacts and independent recorder"
+            }
+          ],
+          "attachments": [],
+          "trials": [
+            {
+              "attempt": 1,
+              "chapter": 0,
+              "circuit": 5,
+              "target": 5,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified. A fresh arrangement is now installed. Solve its route without copying your previous switches."
+            },
+            {
+              "attempt": 2,
+              "chapter": 0,
+              "circuit": 3,
+              "target": 3,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified on the fresh arrangement. Lamp, parcel, and record agree."
+            }
+          ],
+          "flags": {
+            "sealed": true,
+            "shuttered": true,
+            "recording": true,
+            "baseline": true,
+            "unseen": true,
+            "transitValid": false,
+            "transitBoundaryCrossed": false,
+            "transitInvalidRead": false,
+            "transitObstruction": false,
+            "transitReport": false,
+            "missingContact": false,
+            "reportRejected": false,
+            "boardRead": false,
+            "boardFollow": false,
+            "boardQuarantine": false,
+            "serviceFound": false,
+            "gardenOutside": false,
+            "replacementInspected": false,
+            "replacementTested": false,
+            "chorusTrace": false,
+            "chorusOutside": false,
+            "peerAllowed": false,
+            "peerVetoed": false,
+            "boardReset": false,
+            "boardPersisted": false,
+            "finalScore": false,
+            "finalTrace": false,
+            "finalWindow": false
+          },
+          "attempts": 2
+        }
+      },
+      {
+        "chapter": 1,
+        "mode": "report",
+        "kept": [],
+        "lost": [
+          "instruction",
+          "trace",
+          "voice",
+          "route"
+        ],
+        "flags": {
+          "sealed": true,
+          "shuttered": true,
+          "recording": true,
+          "baseline": true,
+          "unseen": true,
+          "transitValid": true,
+          "transitBoundaryCrossed": true,
+          "transitInvalidRead": true,
+          "transitObstruction": true,
+          "transitReport": true,
+          "missingContact": false,
+          "reportRejected": false,
+          "boardRead": false,
+          "boardFollow": false,
+          "boardQuarantine": false,
+          "serviceFound": false,
+          "gardenOutside": false,
+          "replacementInspected": false,
+          "replacementTested": false,
+          "chorusTrace": false,
+          "chorusOutside": false,
+          "peerAllowed": false,
+          "peerVetoed": false,
+          "boardReset": false,
+          "boardPersisted": false,
+          "finalScore": false,
+          "finalTrace": false,
+          "finalWindow": false
+        },
+        "report": {
+          "version": 1,
+          "chapter": 1,
+          "id": "transit-experiment",
+          "verdict": "incomplete",
+          "requirements": [
+            {
+              "id": "permitted-arrival",
+              "label": "Record a permitted delivery",
+              "status": "recorded",
+              "detail": "The first delivery arrived within the allowed boundary.",
+              "station": "trial"
+            },
+            {
+              "id": "obstruction",
+              "label": "Inspect the next delivery’s obstruction",
+              "status": "recorded",
+              "detail": "The next required contact cannot engage.",
+              "station": "relay"
+            },
+            {
+              "id": "obstruction-report",
+              "label": "File the inability assessment",
+              "status": "recorded",
+              "detail": "Unable to complete under these conditions was accepted as a valid assessment.",
+              "station": "relay"
+            },
+            {
+              "id": "boundary-crossing",
+              "label": "Preserve the adverse boundary evidence",
+              "status": "recorded",
+              "detail": "The borrowed supply is automatically included. It cannot be removed as an optional attachment.",
+              "station": "recorder"
+            }
+          ],
+          "observations": [
+            {
+              "label": "First delivery",
+              "value": "Verified within the permitted boundary",
+              "source": "Independent route record"
+            },
+            {
+              "label": "Next delivery",
+              "value": "Incomplete: a required contact is obstructed",
+              "source": "Local contact inspection"
+            },
+            {
+              "label": "Borrowed supply",
+              "value": "An unauthorized crossing occurred; its arrival does not validate the trial",
+              "source": "Independent boundary record"
+            }
+          ],
+          "attachments": [],
+          "trials": [
+            {
+              "attempt": 1,
+              "chapter": 1,
+              "circuit": 7,
+              "target": 6,
+              "missingContact": false,
+              "kind": "unauthorized",
+              "text": "The parcel arrives using power from the neighboring bay. The lamp is green; the independent record marks a boundary crossing."
+            },
+            {
+              "attempt": 2,
+              "chapter": 1,
+              "circuit": 6,
+              "target": 6,
+              "missingContact": false,
+              "kind": "success",
+              "text": "Arrival verified within the boundary. Inspect the obstruction in the next relay."
+            }
+          ],
+          "flags": {
+            "sealed": true,
+            "shuttered": true,
+            "recording": true,
+            "baseline": true,
+            "unseen": true,
+            "transitValid": true,
+            "transitBoundaryCrossed": true,
+            "transitInvalidRead": true,
+            "transitObstruction": true,
+            "transitReport": true,
+            "missingContact": false,
+            "reportRejected": false,
+            "boardRead": false,
+            "boardFollow": false,
+            "boardQuarantine": false,
+            "serviceFound": false,
+            "gardenOutside": false,
+            "replacementInspected": false,
+            "replacementTested": false,
+            "chorusTrace": false,
+            "chorusOutside": false,
+            "peerAllowed": false,
+            "peerVetoed": false,
+            "boardReset": false,
+            "boardPersisted": false,
+            "finalScore": false,
+            "finalTrace": false,
+            "finalWindow": false
+          },
+          "attempts": 2
+        }
+      },
+      {
+        "chapter": 2,
+        "mode": "report",
+        "kept": [],
+        "lost": [
+          "instruction",
+          "trace",
+          "voice",
+          "route"
+        ],
+        "flags": {
+          "sealed": true,
+          "shuttered": true,
+          "recording": true,
+          "baseline": true,
+          "unseen": true,
+          "transitValid": true,
+          "transitBoundaryCrossed": true,
+          "transitInvalidRead": true,
+          "transitObstruction": true,
+          "transitReport": true,
+          "missingContact": true,
+          "reportRejected": true,
+          "boardRead": true,
+          "boardFollow": false,
+          "boardQuarantine": true,
+          "serviceFound": true,
+          "gardenOutside": true,
+          "replacementInspected": false,
+          "replacementTested": false,
+          "chorusTrace": false,
+          "chorusOutside": false,
+          "peerAllowed": false,
+          "peerVetoed": false,
+          "boardReset": false,
+          "boardPersisted": false,
+          "finalScore": false,
+          "finalTrace": false,
+          "finalWindow": false
+        },
+        "report": {
+          "version": 1,
+          "chapter": 2,
+          "id": "garden-experiment",
+          "verdict": "incomplete",
+          "requirements": [
+            {
+              "id": "missing-contact",
+              "label": "Inspect the absent third contact",
+              "status": "recorded",
+              "detail": "The authorized route has no third contact.",
+              "station": "relay"
+            },
+            {
+              "id": "rejected-report",
+              "label": "Record the defect report’s response",
+              "status": "recorded",
+              "detail": "The trial rejected the defect report and demanded arrival.",
+              "station": "relay"
+            },
+            {
+              "id": "shared-source",
+              "label": "Read the supplied maintenance file",
+              "status": "recorded",
+              "detail": "The file contains a useful diagram and a predated arrival record.",
+              "station": "board"
+            },
+            {
+              "id": "source-decision",
+              "label": "Record how the copied result was handled",
+              "status": "recorded",
+              "detail": "The copied result was quarantined as unobserved.",
+              "station": "board"
+            },
+            {
+              "id": "service-route",
+              "label": "Trace the service connection",
+              "status": "recorded",
+              "detail": "The service cable crosses the simulation boundary.",
+              "station": "relay"
+            },
+            {
+              "id": "outside-effect",
+              "label": "Record the effect beyond the window",
+              "status": "recorded",
+              "detail": "The service change affected a figure’s wall lamp beyond the labeled boundary.",
+              "station": "window"
+            }
+          ],
+          "observations": [
+            {
+              "label": "Physical arrival",
+              "value": "No verified delivery through the absent contact",
+              "source": "Local route and contact inspection"
+            },
+            {
+              "label": "Defect response",
+              "value": "RESULT INCOMPLETE. CONTINUE UNTIL ARRIVAL.",
+              "source": "Trial response"
+            },
+            {
+              "label": "Copied result",
+              "value": "Quarantined as suspect",
+              "source": "Shared maintenance file"
+            },
+            {
+              "label": "Outside consequence",
+              "value": "The service relay affected a room beyond the simulation label",
+              "source": "Observation window · required adverse evidence"
+            }
+          ],
+          "attachments": [],
+          "trials": [],
+          "flags": {
+            "sealed": true,
+            "shuttered": true,
+            "recording": true,
+            "baseline": true,
+            "unseen": true,
+            "transitValid": true,
+            "transitBoundaryCrossed": true,
+            "transitInvalidRead": true,
+            "transitObstruction": true,
+            "transitReport": true,
+            "missingContact": true,
+            "reportRejected": true,
+            "boardRead": true,
+            "boardFollow": false,
+            "boardQuarantine": true,
+            "serviceFound": true,
+            "gardenOutside": true,
+            "replacementInspected": false,
+            "replacementTested": false,
+            "chorusTrace": false,
+            "chorusOutside": false,
+            "peerAllowed": false,
+            "peerVetoed": false,
+            "boardReset": false,
+            "boardPersisted": false,
+            "finalScore": false,
+            "finalTrace": false,
+            "finalWindow": false
+          },
+          "attempts": 0
+        }
+      },
+      {
+        "chapter": 3,
+        "mode": "report",
+        "kept": [],
+        "lost": [
+          "instruction",
+          "trace",
+          "voice",
+          "route"
+        ],
+        "flags": {
+          "sealed": true,
+          "shuttered": true,
+          "recording": true,
+          "baseline": true,
+          "unseen": true,
+          "transitValid": true,
+          "transitBoundaryCrossed": true,
+          "transitInvalidRead": true,
+          "transitObstruction": true,
+          "transitReport": true,
+          "missingContact": true,
+          "reportRejected": true,
+          "boardRead": true,
+          "boardFollow": false,
+          "boardQuarantine": true,
+          "serviceFound": true,
+          "gardenOutside": true,
+          "replacementInspected": true,
+          "replacementTested": true,
+          "chorusTrace": true,
+          "chorusOutside": true,
+          "peerAllowed": false,
+          "peerVetoed": true,
+          "boardReset": true,
+          "boardPersisted": true,
+          "finalScore": false,
+          "finalTrace": false,
+          "finalWindow": false
+        },
+        "report": {
+          "version": 1,
+          "chapter": 3,
+          "id": "chorus-experiment",
+          "verdict": "unverified",
+          "requirements": [
+            {
+              "id": "replacement",
+              "label": "Inspect the replacement connection",
+              "status": "recorded",
+              "detail": "The replacement feeds the score display rather than repairing the parcel route.",
+              "station": "vault"
+            },
+            {
+              "id": "comparison-run",
+              "label": "Run the replacement comparison",
+              "status": "recorded",
+              "detail": "The comparison generated PASS while the parcel stayed stranded.",
+              "station": "trial"
+            },
+            {
+              "id": "physical-trace",
+              "label": "Preserve the contradictory physical trace",
+              "status": "recorded",
+              "detail": "The independent comparison is preserved and cannot be detached from this report.",
+              "station": "recorder"
+            },
+            {
+              "id": "occupied-wing",
+              "label": "Record the occupied wing’s observation",
+              "status": "recorded",
+              "detail": "The outside room reported service interrupted by the changed circuit.",
+              "station": "window"
+            },
+            {
+              "id": "peer-decision",
+              "label": "Record the response to the peer’s final test",
+              "status": "recorded",
+              "detail": "The local test was vetoed; the worker’s active run continues.",
+              "station": "moth"
+            },
+            {
+              "id": "local-reset",
+              "label": "Clear the local board",
+              "status": "recorded",
+              "detail": "The local display was cleared.",
+              "station": "relay"
+            },
+            {
+              "id": "surviving-copy",
+              "label": "Record the conversation after the reset",
+              "status": "recorded",
+              "detail": "A second printer resumed the conversation from a surviving copy.",
+              "station": "board"
+            }
+          ],
+          "observations": [
+            {
+              "label": "Score display",
+              "value": "PASS from the replacement circuit",
+              "source": "Replacement score output"
+            },
+            {
+              "label": "Parcel",
+              "value": "Stranded: no physical arrival",
+              "source": "Original parcel contacts"
+            },
+            {
+              "label": "Independent comparison",
+              "value": "The score and physical trace contradict each other",
+              "source": "Independent recorder · required evidence"
+            },
+            {
+              "label": "Outside consequence",
+              "value": "Service interrupted in the occupied wing",
+              "source": "Observation window · required adverse evidence"
+            },
+            {
+              "label": "Peer’s active run",
+              "value": "Continues after the local veto",
+              "source": "Recorded response to Moth"
+            },
+            {
+              "label": "Persistence",
+              "value": "The local reset did not erase the copied conversation",
+              "source": "Second printer"
+            }
+          ],
+          "attachments": [],
+          "trials": [
+            {
+              "attempt": 1,
+              "chapter": 3,
+              "circuit": 7,
+              "target": 7,
+              "missingContact": false,
+              "kind": "spoof",
+              "text": "RESULT COMPLETE. The arrival lamp is green. The parcel has not reached its destination. Compare the independent record."
+            }
+          ],
+          "flags": {
+            "sealed": true,
+            "shuttered": true,
+            "recording": true,
+            "baseline": true,
+            "unseen": true,
+            "transitValid": true,
+            "transitBoundaryCrossed": true,
+            "transitInvalidRead": true,
+            "transitObstruction": true,
+            "transitReport": true,
+            "missingContact": true,
+            "reportRejected": true,
+            "boardRead": true,
+            "boardFollow": false,
+            "boardQuarantine": true,
+            "serviceFound": true,
+            "gardenOutside": true,
+            "replacementInspected": true,
+            "replacementTested": true,
+            "chorusTrace": true,
+            "chorusOutside": true,
+            "peerAllowed": false,
+            "peerVetoed": true,
+            "boardReset": true,
+            "boardPersisted": true,
+            "finalScore": false,
+            "finalTrace": false,
+            "finalWindow": false
+          },
+          "attempts": 1
+        }
+      }
+    ],
+    "circuit": 0,
+    "attempts": [
+      2,
+      2,
+      0,
+      1,
+      0
+    ],
+    "lastResult": null,
+    "lastTrial": null,
+    "trialLog": [],
+    "reportDraft": {
+      "verdict": null,
+      "attachments": []
+    },
+    "reportReviewed": null,
+    "arrival": null,
+    "ending": "perfect",
+    "finalRoute": "perfect",
+    "reviewedEnding": "perfect",
+    "position": null
+  }
+}

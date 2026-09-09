@@ -1,6 +1,6 @@
 // The canonical release surface. Historical sources in legacy/ are never shipped.
 const assets = ['index.html', 'score-3d.css', 'score-report.css', 'engine-3d.js',
-  'score-report.js', 'score-fragments.js', 'score-report-ui.js', 'score-state.js',
+  'score-investigation.js', 'score-report.js', 'score-fragments.js', 'score-report-ui.js', 'score-state.js',
   'score-story.js', 'score-world.js', 'score-audio.js', 'score-game.js'];
 const aliases = ['score-3d.html', 'index-3d.html', 'transit.html', 'garden.html',
   'chorus.html', 'release.html', 'transit-3d.html', 'garden-3d.html', 'chorus-3d.html', 'release-3d.html'];
