@@ -12,7 +12,7 @@ A small, original browser game about an archive agent, a companion named Moth, a
 2. Double-click `index.html`. Alternatively double-click `launch-windows.cmd`.
 3. Use a modern Edge, Chrome, or Firefox browser.
 
-Keep `index.html`, `style.css`, `state.js`, and `game.js` together. The game has no network dependencies and can run offline. A native Windows browser smoke test has not been performed in this WSL session; see [VERIFICATION.md](VERIFICATION.md) for exactly what was tested.
+Keep `index.html`, `style.css`, `bend-core.js`, `state.js`, and `game.js` together. The game has no network dependencies and can run offline. A native Windows browser smoke test has not been performed in this WSL session; see [VERIFICATION.md](VERIFICATION.md) for exactly what was tested.
 
 ## Play from WSL
 
@@ -36,7 +36,7 @@ If localhost forwarding is unavailable in your WSL configuration, copy the folde
 | Pause/help or leave dialogue | Escape |
 | Sound | Optional button at top right |
 
-Walk around shelf ends if they block your path. The current objective provides the next encounter. There are no timed decisions or reflex challenges. Reduced motion follows your browser/OS preference. All necessary audio clues have text equivalents.
+Click-to-walk finds a route around shelves. The Field journal records discovered memories and offers walking directions to named places. After giving Moth the flower, you can choose its place together; that physical arrangement survives the reset without using a memory slot. The current objective provides the next encounter. There are no timed decisions or reflex challenges. Reduced motion follows your browser/OS preference. All necessary audio clues have text equivalents.
 
 ## Saves and transfers
 
@@ -49,13 +49,24 @@ New instance, imported saves, and revisiting the memory choice replace the activ
 ## Files and development
 
 - `DESIGN.md`: full creative and mechanical design, scope, larger story, and playtest questions.
-- `index.html`, `style.css`, `game.js`, `state.js`: complete playable application.
+- `core.bend`: checked story rules for memory retention, reset, relays, reunion, and endings.
+- `bend-core.js`: generated Bend runtime bundle shipped with the game.
+- `state.js`: save format, Bend bridge, and walking routes; `game.js`: scenes, controls, sound, and canvas view.
+- `index.html`, `style.css`: playable browser interface.
+- `build-bend.sh`, `core-build.html`, `core-entry.js`: inputs for rebuilding the browser bundle.
 - `launch-windows.cmd`: optional native Windows launch convenience.
 - `serve-wsl.sh`: optional loopback server; Python 3 required only for this script.
 - `tests/`: state tests and browser journey checks. Tests are development tools, not runtime dependencies.
 - `VERIFICATION.md`: tested behavior and remaining limitations.
 
-No package installation or build step is needed to edit or play. Refresh the browser after editing. For state tests, with Node installed:
+No package installation or build step is needed to play the shipped files. Editing `core.bend` requires Bend 2.0.16 and a rebuild; the bundled JavaScript remains the offline runtime:
+
+```bash
+bash build-bend.sh
+bash build-bend.sh --check
+```
+
+Refresh the browser after editing. For state tests, with Node installed:
 
 ```bash
 node --test tests/state.test.cjs

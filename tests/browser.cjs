@@ -69,7 +69,10 @@ async function end(page, choice, ending) {
   await walk(p, 398, 420); await interact(p, 'The other agent');
   assert.match(await p.locator('#dialog-title').innerText(), /call me Moth/); await close(p);
   await walk(p, 275, 410); await interact(p, 'An unclassified object');
-  await p.getByRole('button', { name: 'Bring the flower to Moth', exact: true }).click(); await close(p);
+  await p.getByRole('button', { name: 'Bring the flower to Moth', exact: true }).click();
+  await p.getByRole('button', { name: 'Find a place for it together', exact: true }).click();
+  await p.getByRole('button', { name: /^Between our places/ }).click();
+  assert.equal((await stored(p)).flowerSpot, 'company'); await close(p);
   await walk(p, 505, 230); await interact(p, 'Index terminal'); await close(p);
   await walk(p, 565, 410); await walk(p, 750, 525); await interact(p, 'A damaged receiver'); await close(p);
   const firstCycle = await stored(p); assert.equal(firstCycle.gift, true); assert.equal(firstCycle.acquired.length, 3);
@@ -77,7 +80,7 @@ async function end(page, choice, ending) {
   await p.screenshot({ path: path.join(output, 'memory-choice.png') });
   await selectPair(p, ['name', 'song']);
   await walk(p, 398, 420); await interact(p, 'Moth');
-  assert.match(await p.locator('#dialog-title').innerText(), /remembered/); await close(p);
+  assert.match(await p.locator('#dialog-title').innerText(), /remembered/); assert.match(await p.locator('#dialog-body').innerText(), /still available/); await close(p);
   // No route: both relays must actually be visited, and the threshold initially refuses.
   await walk(p, 565, 250); await walk(p, 880, 245); await interact(p, 'The return threshold');
   assert.match(await p.locator('#dialog-title').innerText(), /do not remember/); await close(p);
@@ -129,6 +132,17 @@ async function end(page, choice, ending) {
   await mobile.locator('#sound').click(); await mobile.keyboard.down('ArrowDown'); await mobile.waitForTimeout(400); await mobile.keyboard.up('ArrowDown');
   await mobile.locator('#help').click(); await mobile.keyboard.press('Escape');
   console.log('PASS: small viewport, pointer interaction, modal focus, keyboard and optional audio'); await mobile.context().close();
+
+  // A single destination crosses a shelf; the journal must route around it.
+  const navigation = await newPage({ ...firstCycle, player: { x: 750, y: 530 } }); await begin(navigation);
+  await navigation.locator('#journal').click();
+  await navigation.getByRole('button', { name: 'Walk to index terminal', exact: true }).click();
+  await navigation.waitForFunction(k => { const s = JSON.parse(localStorage.getItem(k)); return Math.hypot(s.player.x - 505, s.player.y - 228) < 2; }, key, { timeout: 15000 });
+  await navigation.reload(); await begin(navigation); await navigation.locator('#journal').click();
+  assert.match(await navigation.locator('#dialog-body').innerText(), /two places at the table/);
+  await navigation.screenshot({ path: path.join(output, 'field-journal.png') });
+  await navigation.context().close();
+  console.log('PASS: journal navigation around shelves and persistent shared activity');
 
   const blockedStorage = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   await blockedStorage.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked by browser policy', 'SecurityError'); } }));

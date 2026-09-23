@@ -5,7 +5,7 @@ The prologue was tested with Node and headless Chromium on Linux in WSL. A nativ
 ## Passed
 
 - JavaScript syntax checks for `game.js` and `state.js`; shell syntax check for `serve-wsl.sh`.
-- Four state tests: all legal retained-memory pairs and JSON round-trips; reset prerequisites; malformed-save rejection; valid ending saves.
+- Six state tests, including backward-compatible flower placement and shelf-aware path routing: all legal retained-memory pairs and JSON round-trips; reset prerequisites; malformed-save rejection; valid ending saves.
 - Full first-cycle traversal through normal browser controls: meet Moth, give the flower, read the terminal, listen to the receiver, choose retention, confirm reset.
 - Complete second cycle with name + song: recognition scene, threshold refusal without relays, physical traversal to both relays, witness ending.
 - Complete second cycle with name + route: recognition scene, shortcut without relays, witness option disabled, obedience ending.
@@ -40,8 +40,33 @@ Chromium and the loopback server required execution outside the tool sandbox bec
 - Native Windows Edge/Chrome/Firefox execution and the `.cmd` launcher still need a real Windows smoke test. The runtime has no compilation or external dependency to install.
 - Human playtesting has not happened. The 8–12 minute length, emotional response, navigation clarity, and balance of memory choices are design targets.
 - Mobile is a fallback layout, with a small overview of the archive; desktop/laptop remains the intended first-playtest target.
-- Click-to-move follows a straight line with collision sliding, not automatic pathfinding. Walk around shelf ends. This is described in the menu.
+- Click-to-move now uses shelf-aware routing. The field journal also offers named walking destinations. Clicking inside a shelf asks for an open destination.
 - No controller support, key rebinding, full screen-reader spatial navigation, multiplayer, live model calls, combat, or later chapters are implemented.
 - Browser local-storage behavior differs across direct-file origins and privacy settings; manual JSON transfer is the portable save path.
 
 The initial prototype verification preceded repository creation. A local Git repository and the incident research library were added afterward at the user's request. The gameplay files were not changed by the research update; no push or public deployment was performed.
+
+
+## Demo refinement validation
+
+The shared flower-placement activity, Field journal, and shelf-aware walking were added on 7 September 2026. Existing v1 saves remain supported; missing flower placement defaults to the original arrangement.
+
+Re-ran all six state tests and the complete direct-file Chromium browser suite. All three retained-memory pairs and endings passed, as did save import/export, storage denial, small-screen controls, and modal focus. Added browser checks cover arranging the flower, recognition of its placement after reset, journal navigation around an intervening shelf, and placement persistence after reload. No page errors or external runtime requests were observed.
+
+The updated localhost game also rendered in the Windows Codex in-app browser. This is a layout/load check, not a complete native Edge/Chrome/Firefox playthrough. Human playtesting and first-read timing remain outstanding.
+
+## Bend core rework — 23 September 2026
+
+The story transitions now run in `core.bend`, compiled by Bend 2.0.16 into `bend-core.js`. The existing browser save format and direct-file launch remain supported. Canvas drawing, dialogue text, input, audio, and pathfinding remain in JavaScript. Bend's `All terms check.` confirms that the core type-checks; it is not a proof of every game-design rule.
+
+Checks run from the repository root:
+
+```bash
+BEND_NO_TELEMETRY=1 bend core.bend
+bash build-bend.sh --check
+node --test tests/state.test.cjs
+PLAYWRIGHT_MODULE=/home/lenovo/projects/openloop/node_modules/@playwright/test node tests/browser.cjs
+git diff --check
+```
+
+The complete direct-file browser journey passed for all three endings, reset and relay paths, save import/export, storage denial, narrow viewport controls, and journal navigation, with no page errors or external runtime requests. Chromium needed execution outside the filesystem sandbox because its launch failed there with `Operation not permitted`. A native Windows browser smoke test and human playtest remain outstanding.

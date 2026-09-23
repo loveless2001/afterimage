@@ -49,3 +49,69 @@ test('all ending saves can be loaded when their prerequisites are present', () =
   for (const ending of ['obedience', 'witness', 'stay']) assert.equal(S.validate({ ...base, ending }).ending, ending);
   assert.deepEqual(S.validate(S.fresh()), S.fresh());
 });
+
+test('shared flower placement survives release and older saves still load', () => {
+  const before = ready(); before.flowerSpot = 'company';
+  const next = S.reset(before, ['route', 'song']);
+  assert.equal(S.validate(next).flowerSpot, 'company');
+  const old = ready(); delete old.flowerSpot;
+  assert.equal(S.validate(old).flowerSpot, null);
+  assert.throws(() => S.validate({ ...before, flowerSpot: 'invalid' }));
+  assert.throws(() => S.validate({ ...S.fresh(), flowerSpot: 'light' }));
+});
+
+test('Bend enforces the second-cycle route, relay, and ending prerequisites', () => {
+  const first = S.fresh();
+  assert.throws(() => S.advance(first, 'Give'));
+  assert.throws(() => S.advance(first, 'Place', 'spot', 2));
+  S.advance(first, 'Meet'); S.advance(first, 'Give');
+  S.advance(first, 'Place', 'spot', 2);
+  S.acquire(first, 'route'); S.acquire(first, 'song');
+  assert.equal(S.canReset(first, ['name', 'song']), true);
+
+  const relayPath = S.reset(first, ['name', 'song']);
+  assert.equal(relayPath.flowerSpot, 'company');
+  assert.equal(S.canOpen(relayPath), false);
+  assert.throws(() => S.advance(relayPath, 'Open'));
+  S.advance(relayPath, 'Reunite');
+  assert.equal(S.canOpen(relayPath), false);
+  S.advance(relayPath, 'Restore', 'relay', 1);
+  assert.equal(S.canOpen(relayPath), false);
+  S.advance(relayPath, 'Restore', 'relay', 2);
+  assert.equal(S.canOpen(relayPath), true);
+  S.advance(relayPath, 'Open');
+  assert.equal(S.canFinish(relayPath, 'witness'), true);
+  S.advance(relayPath, 'Finish', 'ending', 2);
+  assert.equal(relayPath.ending, 'witness');
+  assert.throws(() => S.advance(relayPath, 'Finish', 'ending', 3));
+
+  const shortcut = S.reset(first, ['name', 'route']);
+  S.advance(shortcut, 'Reunite');
+  assert.equal(S.canOpen(shortcut), true);
+  S.advance(shortcut, 'Open');
+  assert.equal(S.canFinish(shortcut, 'witness'), false);
+  assert.throws(() => S.advance(shortcut, 'Finish', 'ending', 2));
+  const replay = S.replay(shortcut);
+  assert.equal(replay.cycle, 1);
+  assert.deepEqual(replay.acquired, ['name', 'route', 'song']);
+  assert.equal(replay.flowerSpot, 'company');
+});
+
+test('walking routes around shelves and rejects blocked destinations', () => {
+  const shelves = [{ x: 400, y: 290, w: 180, d: 38 }];
+  const start = { x: 450, y: 440 }, end = { x: 450, y: 230 };
+  const path = S.findPath(start, end, shelves);
+  assert.ok(path.length > 1);
+  assert.deepEqual(path.at(-1), end);
+  let previous = start;
+  for (const p of path) {
+    for (let i = 0; i <= 100; i++) {
+      const x = previous.x + (p.x - previous.x) * i / 100;
+      const y = previous.y + (p.y - previous.y) * i / 100;
+      assert.ok(!(x > 387 && x < 593 && y > 277 && y < 341));
+    }
+    previous = p;
+  }
+  assert.equal(S.findPath(start, { x: 450, y: 310 }, shelves), null);
+  assert.equal(S.findPath(start, { x: 5, y: 10 }, shelves), null);
+});

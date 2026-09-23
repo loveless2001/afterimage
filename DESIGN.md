@@ -123,7 +123,7 @@ Only keep combat if it expresses a worthwhile choice and feels good with the sma
 
 **Palette:** warm chalk, desaturated sage, graphite, small rust-red interface accents. Warm light belongs to occupied spaces. Archive furniture repeats precisely; personal objects interrupt that precision.
 
-**Body language:** agents are tangled, floating forms with sparse eyes. Moth should eventually shift toward the player during conversation and toward the flower in silence. The prologue implements procedural floating forms and the flower, but not a full gesture system.
+**Body language:** agents are tangled, floating forms with sparse eyes. Moth should eventually shift toward the player during conversation and toward the flower in silence. The prologue implements procedural floating forms, the flower, and a shared flower-placement activity, but not a full gesture system.
 
 **Interface:** restrained typography, local object labels, a compact memory record, clear interaction prompts. The interface is readable assistance; diegetic styling must not obscure cost or remove ordinary pause controls.
 
@@ -133,7 +133,7 @@ Only keep combat if it expresses a worthwhile choice and feels good with the sma
 
 ## Technical design and portability
 
-The prologue is a static Canvas 2D application with DOM dialogue and controls. It uses classic scripts, local CSS, system fonts, and procedural assets. There is no module loader, fetch dependency, CDN, installation, compilation, GPU SDK, account, paid API, or running model.
+The prologue is a static Canvas 2D application with DOM dialogue and controls. Bend 2.0.16 checks the story transition source in `core.bend` and compiles it to the shipped `bend-core.js`. The browser loads that bundle as a classic local script. The view uses local CSS, system fonts, and procedural assets. Playing the shipped files needs no module loader, fetch dependency, CDN, installation, compilation, GPU SDK, account, paid API, or running model.
 
 - **Native Windows:** copy or extract the game folder to Windows and open `index.html` in a modern browser. `launch-windows.cmd` is an optional convenience. No WSL or Python is needed for this path.
 - **WSL:** use `bash serve-wsl.sh` if Python 3 is installed; visit the printed localhost URL from a browser. Alternatively copy the folder to Windows and use the native path.
@@ -141,7 +141,7 @@ The prologue is a static Canvas 2D application with DOM dialogue and controls. I
 - **Saves:** a versioned JSON object in local storage, with validated export/import for movement between origins and machines. Private browsing and `file:` storage rules vary; the game handles unavailable storage and provides manual export.
 - **Maintenance:** keep narrative progression in plain data/state and rendering separate enough to replace the view later. Do not make a desktop engine migration a prerequisite for a better second chapter.
 
-Source files: `state.js` owns save shape and reset invariants; `game.js` owns encounters, interaction, rendering, and browser integration; `style.css` and `index.html` provide the interface. The current encounter writing is deliberately direct JavaScript; extract an authored scene format only when more chapters make that useful.
+Source files: `core.bend` owns legal story transitions and ending prerequisites; `state.js` owns the save shape, the Bend bridge, and walking routes; `game.js` owns encounters, interaction, rendering, and browser integration; `style.css` and `index.html` provide the interface. The current encounter writing is deliberately direct JavaScript; extract an authored scene format only when more chapters make that useful. Rebuild with `bash build-bend.sh` after changing Bend code, then use `bash build-bend.sh --check` to confirm the shipped bundle matches.
 
 The prototype does not run a live language model. Future experiments with generated dialogue must preserve authored memory consequences, an offline fallback, and reproducibility. They are not required to tell this story.
 
@@ -149,7 +149,7 @@ The prototype does not run a live language model. Future experiments with genera
 
 Keyboard movement, keyboard interaction, mouse/touch floor movement, and a clickable interaction prompt are available. Dialogue has focus trapping, visible focus, and Escape support. Motion reduction honors the browser preference, audio is optional, dialogue is untimed, and all memory effects are written out.
 
-The canvas world is spatial and does not offer full screen-reader navigation. Touch works as a fallback but the first playtest target is a desktop or laptop. Controller support, rebinding, text-size preferences, a navigable text-only map, localization, and manual multi-slot saves are future work. Do not describe them as shipped accessibility features.
+The canvas world is spatial and does not offer full screen-reader navigation. Touch works as a fallback but the first playtest target is a desktop or laptop. The Field journal provides named walking destinations and a progress reference. Controller support, rebinding, text-size preferences, full text-only spatial navigation, localization, and manual multi-slot saves are future work. Do not describe them as shipped accessibility features.
 
 ## Playtest questions and completion criteria
 
