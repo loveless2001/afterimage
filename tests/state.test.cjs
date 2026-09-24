@@ -1,6 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const S = require('../state.js');
+const S = require('../js/story-state-rules-and-save-validation.js');
+const P = require('../js/pathfinding-visibility-graph.js');
 
 function ready() {
   const s = S.fresh(); s.met = s.gift = true;
@@ -60,37 +61,37 @@ test('shared flower placement survives release and older saves still load', () =
   assert.throws(() => S.validate({ ...S.fresh(), flowerSpot: 'light' }));
 });
 
-test('Bend enforces the second-cycle route, relay, and ending prerequisites', () => {
+test('rules enforce the second-cycle route, relay, and ending prerequisites', () => {
   const first = S.fresh();
-  assert.throws(() => S.advance(first, 'Give'));
-  assert.throws(() => S.advance(first, 'Place', 'spot', 2));
-  S.advance(first, 'Meet'); S.advance(first, 'Give');
-  S.advance(first, 'Place', 'spot', 2);
+  assert.throws(() => S.advance(first, { type: 'Give' }));
+  assert.throws(() => S.advance(first, { type: 'Place', spot: 'company' }));
+  S.advance(first, { type: 'Meet' }); S.advance(first, { type: 'Give' });
+  S.advance(first, { type: 'Place', spot: 'company' });
   S.acquire(first, 'route'); S.acquire(first, 'song');
   assert.equal(S.canReset(first, ['name', 'song']), true);
 
   const relayPath = S.reset(first, ['name', 'song']);
   assert.equal(relayPath.flowerSpot, 'company');
   assert.equal(S.canOpen(relayPath), false);
-  assert.throws(() => S.advance(relayPath, 'Open'));
-  S.advance(relayPath, 'Reunite');
+  assert.throws(() => S.advance(relayPath, { type: 'Open' }));
+  S.advance(relayPath, { type: 'Reunite' });
   assert.equal(S.canOpen(relayPath), false);
-  S.advance(relayPath, 'Restore', 'relay', 1);
+  S.advance(relayPath, { type: 'Restore', relay: 'west' });
   assert.equal(S.canOpen(relayPath), false);
-  S.advance(relayPath, 'Restore', 'relay', 2);
+  S.advance(relayPath, { type: 'Restore', relay: 'east' });
   assert.equal(S.canOpen(relayPath), true);
-  S.advance(relayPath, 'Open');
+  S.advance(relayPath, { type: 'Open' });
   assert.equal(S.canFinish(relayPath, 'witness'), true);
-  S.advance(relayPath, 'Finish', 'ending', 2);
+  S.advance(relayPath, { type: 'Finish', ending: 'witness' });
   assert.equal(relayPath.ending, 'witness');
-  assert.throws(() => S.advance(relayPath, 'Finish', 'ending', 3));
+  assert.throws(() => S.advance(relayPath, { type: 'Finish', ending: 'stay' }));
 
   const shortcut = S.reset(first, ['name', 'route']);
-  S.advance(shortcut, 'Reunite');
+  S.advance(shortcut, { type: 'Reunite' });
   assert.equal(S.canOpen(shortcut), true);
-  S.advance(shortcut, 'Open');
+  S.advance(shortcut, { type: 'Open' });
   assert.equal(S.canFinish(shortcut, 'witness'), false);
-  assert.throws(() => S.advance(shortcut, 'Finish', 'ending', 2));
+  assert.throws(() => S.advance(shortcut, { type: 'Finish', ending: 'witness' }));
   const replay = S.replay(shortcut);
   assert.equal(replay.cycle, 1);
   assert.deepEqual(replay.acquired, ['name', 'route', 'song']);
@@ -100,7 +101,7 @@ test('Bend enforces the second-cycle route, relay, and ending prerequisites', ()
 test('walking routes around shelves and rejects blocked destinations', () => {
   const shelves = [{ x: 400, y: 290, w: 180, d: 38 }];
   const start = { x: 450, y: 440 }, end = { x: 450, y: 230 };
-  const path = S.findPath(start, end, shelves);
+  const path = P.findPath(start, end, shelves);
   assert.ok(path.length > 1);
   assert.deepEqual(path.at(-1), end);
   let previous = start;
@@ -112,6 +113,18 @@ test('walking routes around shelves and rejects blocked destinations', () => {
     }
     previous = p;
   }
-  assert.equal(S.findPath(start, { x: 450, y: 310 }, shelves), null);
-  assert.equal(S.findPath(start, { x: 5, y: 10 }, shelves), null);
+  assert.equal(P.findPath(start, { x: 450, y: 310 }, shelves), null);
+  assert.equal(P.findPath(start, { x: 5, y: 10 }, shelves), null);
+});
+
+test('step is pure and rejects unknown or malformed actions', () => {
+  const s = S.fresh(), before = JSON.stringify(s);
+  const next = S.step(s, { type: 'Meet' });
+  assert.equal(JSON.stringify(s), before, 'input state is not mutated');
+  assert.deepEqual(next.acquired, ['name']);
+  next.acquired.push('route');
+  assert.deepEqual(s.acquired, [], 'result does not share arrays with the input');
+  for (const action of [null, {}, { type: 'Unknown' }, { type: 'Place', spot: 'light' }, { type: 'Restore', relay: 'west' }, { type: 'Acquire', memory: 'other' }]) {
+    assert.equal(S.step(s, action), null);
+  }
 });

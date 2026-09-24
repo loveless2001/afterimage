@@ -133,7 +133,7 @@ Only keep combat if it expresses a worthwhile choice and feels good with the sma
 
 ## Technical design and portability
 
-The prologue is a static Canvas 2D application with DOM dialogue and controls. Bend 2.0.16 checks the story transition source in `core.bend` and compiles it to the shipped `bend-core.js`. The browser loads that bundle as a classic local script. The view uses local CSS, system fonts, and procedural assets. Playing the shipped files needs no module loader, fetch dependency, CDN, installation, compilation, GPU SDK, account, paid API, or running model.
+The prologue is a static Canvas 2D application with DOM dialogue and controls. Story rules are one pure JavaScript transition function; the browser loads every module as a classic local script. The view uses local CSS, system fonts, and procedural assets. Playing the shipped files needs no module loader, fetch dependency, CDN, installation, compilation, GPU SDK, account, paid API, or running model.
 
 - **Native Windows:** copy or extract the game folder to Windows and open `index.html` in a modern browser. `launch-windows.cmd` is an optional convenience. No WSL or Python is needed for this path.
 - **WSL:** use `bash serve-wsl.sh` if Python 3 is installed; visit the printed localhost URL from a browser. Alternatively copy the folder to Windows and use the native path.
@@ -141,7 +141,7 @@ The prologue is a static Canvas 2D application with DOM dialogue and controls. B
 - **Saves:** a versioned JSON object in local storage, with validated export/import for movement between origins and machines. Private browsing and `file:` storage rules vary; the game handles unavailable storage and provides manual export.
 - **Maintenance:** keep narrative progression in plain data/state and rendering separate enough to replace the view later. Do not make a desktop engine migration a prerequisite for a better second chapter.
 
-Source files: `core.bend` owns legal story transitions and ending prerequisites; `state.js` owns the save shape, the Bend bridge, and walking routes; `game.js` owns encounters, interaction, rendering, and browser integration; `style.css` and `index.html` provide the interface. The current encounter writing is deliberately direct JavaScript; extract an authored scene format only when more chapters make that useful. Rebuild with `bash build-bend.sh` after changing Bend code, then use `bash build-bend.sh --check` to confirm the shipped bundle matches.
+Source files: `js/story-state-rules-and-save-validation.js` owns legal story transitions, ending prerequisites, and the save shape; `js/pathfinding-visibility-graph.js` owns walking routes; the remaining `js/` modules own encounters, interaction, rendering, and browser integration; `style.css` and `index.html` provide the interface. The current encounter writing is deliberately direct JavaScript; extract an authored scene format only when more chapters make that useful.
 
 The prototype does not run a live language model. Future experiments with generated dialogue must preserve authored memory consequences, an offline fallback, and reproducibility. They are not required to tell this story.
 

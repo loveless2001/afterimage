@@ -8,7 +8,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const { pathToFileURL } = require('node:url');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const S = require('../state.js');
+const S = require('../js/story-state-rules-and-save-validation.js');
 const url = process.env.GAME_URL || pathToFileURL(path.resolve(__dirname, '../index.html')).href;
 const output = path.join(os.tmpdir(), 'afterimage-verification');
 fs.mkdirSync(output, { recursive: true });

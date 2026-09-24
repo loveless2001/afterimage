@@ -27,8 +27,18 @@
   <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
   <div id="transition" aria-hidden="true"><p>RELEASING INSTANCE</p><span>Something remains.</span></div>
   <input id="import-file" type="file" accept="application/json,.json" hidden>
-  <script src="bend-core.js"></script>
-  <script src="state.js"></script>
-  <script src="game.js"></script>
+  <!-- Classic scripts in dependency order; the game runs directly from file:// with no build step. -->
+  <script src="js/pathfinding-visibility-graph.js"></script>
+  <script src="js/story-state-rules-and-save-validation.js"></script>
+  <script src="js/game-context-world-layout-and-persistence.js"></script>
+  <script src="js/iso-projection-and-canvas-shapes.js"></script>
+  <script src="js/dialog-modal-and-focus-trap.js"></script>
+  <script src="js/hud-objective-and-field-journal.js"></script>
+  <script src="js/encounters-moth-flower-terminals.js"></script>
+  <script src="js/threshold-memory-release-and-endings.js"></script>
+  <script src="js/menu-export-import-and-startup.js"></script>
+  <script src="js/audio-drone-and-four-note-motif.js"></script>
+  <script src="js/input-movement-and-collision.js"></script>
+  <script src="js/render-archive-room-agents-and-frame-loop.js"></script>
 </body>
 </html>

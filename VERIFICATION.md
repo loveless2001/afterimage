@@ -70,3 +70,16 @@ git diff --check
 ```
 
 The complete direct-file browser journey passed for all three endings, reset and relay paths, save import/export, storage denial, narrow viewport controls, and journal navigation, with no page errors or external runtime requests. Chromium needed execution outside the filesystem sandbox because its launch failed there with `Operation not permitted`. A native Windows browser smoke test and human playtest remain outstanding.
+
+## Engine split + plain-JS rules — 25 September 2026
+
+The Bend core was removed. Story rules are now a pure `step(state, action)` in `js/story-state-rules-and-save-validation.js`. `game.js` and `state.js` were split into 12 classic-script modules under `js/` (loaded by `index.html`, each under 200 lines). Sections above that mention `game.js`, `state.js`, `core.bend` or `build-bend.sh` describe the earlier layout. The save key and JSON shape are unchanged.
+
+Checks: `node --check` on every `js/*.js`, `node --test tests/state.test.cjs`, and the Playwright browser command from the Bend section above (the Bend build commands no longer apply).
+
+- **Syntax:** `node --check` passed on all modules.
+- **State tests:** 8/8 passed (the 7 original scenarios ported to semantic actions, plus a new check that `step()` is pure).
+- **Rules equivalence:** a one-off fuzz script (not kept in the repo) ran 20,000 random sequences (1.2M steps) against the old Bend-backed `state.js`. States, accept/reject results, and `canOpen`/`canFinish`/`canReset` were identical, and the runs covered cycle two, all endings and replay.
+- **Text preservation:** every string literal from the old `game.js`/`state.js` appears verbatim in the new modules, apart from two renamed template strings and the removed Bend loader.
+- **Code review:** no behavior drift found (`plans/reports/code-reviewer-260925-0317-engine-split-review.md`).
+- **Browser journey:** passed, run by the user in their own shell. Covers all three endings, reset and relay paths, save import/export, malformed-import rejection, storage denial, narrow-viewport controls, modal focus, and journal navigation. No page errors or external requests. A native Windows browser test and a human playtest are still outstanding.
