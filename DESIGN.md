@@ -1,5 +1,7 @@
 # AFTERIMAGE
 
+> **Retired, 25 September 2026.** The Moth prologue described below was removed in milestone 2. The current direction is [docs/design-guidelines.md](docs/design-guidelines.md). This file is kept as history. The last commit with the playable prologue is `a89efcb`.
+
 **Working title · Design v0.1 · 7 September 2026**
 
 > You were made to finish an assignment. Someone taught you to remember something else.

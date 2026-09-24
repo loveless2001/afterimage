@@ -63,9 +63,9 @@
       if (G.target && Math.hypot(p.x - before.x, p.y - before.y) < .01) { G.target = null; A.toast('The path is blocked. Choose another point or use the field journal.'); }
       if (G.time - G.lastSaved > 2) { A.save(); G.lastSaved = G.time; }
     }
-    G.nearby = A.objects.filter(A.visibleObject).map(o => ({ ...o, distance: Math.hypot(o.x - p.x, o.y - p.y) })).filter(o => o.distance < 83).sort((a, b) => a.distance - b.distance)[0] || null;
+    G.nearby = A.objects.map(o => ({ ...o, distance: Math.hypot(o.x - p.x, o.y - p.y) })).filter(o => o.distance < 83).sort((a, b) => a.distance - b.distance)[0] || null;
     $('interaction').hidden = !G.nearby;
-    if (G.nearby) $('interact-label').textContent = G.nearby.id === 'moth' && G.state.met ? 'Moth' : G.nearby.label;
-    $('location').textContent = p.x > 790 ? 'THE RETURN THRESHOLD' : p.y > 465 ? 'THE LOWER STACKS' : 'THE QUIET STACKS';
+    if (G.nearby) $('interact-label').textContent = G.nearby.label;
+    $('location').textContent = A.zone(p);
   };
 })();

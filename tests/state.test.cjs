@@ -1,109 +1,98 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const S = require('../js/story-state-rules-and-save-validation.js');
+const S = require('../js/game-rules-state-transitions-and-save-validation.js');
 const P = require('../js/pathfinding-visibility-graph.js');
 
-function ready() {
-  const s = S.fresh(); s.met = s.gift = true;
-  for (const key of Object.keys(S.memories)) S.acquire(s, key);
-  return s;
-}
+const light = (s, lamp) => S.advance(s, { type: 'Light', lamp });
+const end = (s, reason) => S.advance(s, { type: 'EndRun', reason });
+const roundTrip = s => S.validate(JSON.parse(JSON.stringify(s)));
 
-test('every legal memory pair survives reset and save round-trip', () => {
-  for (const pair of [['name', 'route'], ['name', 'song'], ['route', 'song']]) {
-    const before = ready(), next = S.reset(before, pair);
-    assert.equal(next.cycle, 2);
-    assert.deepEqual(next.kept, pair);
-    assert.deepEqual(next.acquired, pair);
-    assert.equal(next.gift, true);
-    assert.equal(next.reunion, false);
-    assert.deepEqual(next.relays, []);
-    assert.deepEqual(S.validate(JSON.parse(JSON.stringify(next))), next);
-    assert.equal(before.cycle, 1);
-    S.acquire(next, Object.keys(S.memories).find(key => !pair.includes(key)));
-    assert.deepEqual(next.acquired, pair, 'released memory cannot be reacquired');
+test('a fresh game starts run 1 at the entrance with the first budget', () => {
+  const s = S.fresh();
+  assert.equal(s.run, 1); assert.equal(s.budget, S.budgetTable[0]); assert.equal(s.finished, false);
+  assert.deepEqual(s.player, S.entrance); assert.deepEqual(roundTrip(s), s);
+});
+
+test('lighting a lamp spends its cost once and records the run', () => {
+  const s = S.fresh();
+  light(s, 'hall');
+  assert.equal(s.budget, S.budgetTable[0] - S.lamps.hall.cost);
+  assert.deepEqual(s.lights, [{ id: 'hall', run: 1 }]);
+  assert.throws(() => light(s, 'hall'), 'a lit lamp cannot be lit again');
+  for (const lamp of ['nope', 'toString', '__proto__', undefined]) assert.throws(() => light(s, lamp));
+  assert.deepEqual(roundTrip(s), s);
+});
+
+test('the budget cannot be overspent', () => {
+  const s = S.fresh(); end(s, 'left'); // run 2 has budget 6
+  light(s, 'hall'); light(s, 'west'); assert.equal(s.budget, 1);
+  assert.equal(S.canLight(s, 'east'), false);
+  assert.throws(() => light(s, 'east'));
+  light(s, 'entrance'); assert.equal(s.budget, 0);
+});
+
+test('runs end by leaving with budget left, or by spending it all', () => {
+  const s = S.fresh();
+  assert.throws(() => end(s, 'budget'), 'cannot end by budget while budget remains');
+  assert.throws(() => end(s, 'other'));
+  light(s, 'west'); end(s, 'left');
+  assert.equal(s.run, 2); assert.equal(s.budget, S.budgetTable[1]); assert.deepEqual(s.player, S.entrance);
+  assert.deepEqual(s.log, [{ run: 1, budget: 10, spent: 2, end: 'left' }]);
+  assert.deepEqual(s.lights, [{ id: 'west', run: 1 }], 'lamps stay lit across runs');
+  light(s, 'hall'); light(s, 'east'); light(s, 'entrance');
+  assert.equal(s.budget, 0);
+  assert.throws(() => end(s, 'left'), 'an empty budget ends by budget, not by leaving');
+  end(s, 'budget');
+  assert.equal(s.run, 3); assert.equal(s.budget, S.budgetTable[2]);
+  assert.deepEqual(s.log[1], { run: 2, budget: 6, spent: 6, end: 'budget' });
+  assert.deepEqual(roundTrip(s), s);
+});
+
+test('each run uses the authored budget table and run 7 finishes the game', () => {
+  const s = S.fresh();
+  for (let run = 1; run <= S.runCount; run++) {
+    assert.equal(s.run, run); assert.equal(s.budget, S.budgetTable[run - 1]);
+    end(s, 'left');
   }
+  assert.equal(s.finished, true); assert.equal(s.run, S.runCount); assert.equal(s.budget, 0);
+  assert.equal(s.log.length, S.runCount);
+  assert.throws(() => end(s, 'budget')); assert.throws(() => light(s, 'entrance'));
+  assert.deepEqual(roundTrip(s), s);
 });
 
-test('reset requires preparation and exactly two distinct acquired memories', () => {
-  assert.throws(() => S.reset(S.fresh(), ['name', 'route']));
-  for (const pair of [[], ['name'], ['name', 'name'], ['name', 'route', 'song'], ['name', 'other']]) assert.throws(() => S.reset(ready(), pair));
-  const next = S.reset(ready(), ['name', 'route']);
-  assert.throws(() => S.reset(next, ['name', 'route']));
-});
-
-test('malformed imports cannot inject arbitrary state or impossible endings', () => {
-  const base = S.reset(ready(), ['name', 'route']);
+test('malformed imports cannot inject impossible runs, spending, or fields', () => {
+  const base = S.fresh(); light(base, 'west'); end(base, 'left'); light(base, 'entrance');
   for (const patch of [
-    { version: 99 }, { cycle: 3 }, { acquired: ['name', 'route', 'song'] },
-    { kept: ['name', 'name'] }, { relays: ['east', 'east'] }, { gift: false },
-    { player: { x: Infinity, y: 10 } }, { player: { x: 2000, y: 10 } },
-    { ending: 'witness', gate: true, reunion: true }, { ending: 'stay' },
-    { met: 'true' }, { ending: '<script>' }
-  ]) assert.throws(() => S.validate({ ...base, ...patch }));
-  const clean = S.validate({ ...base, untrusted: 'ignored' });
-  assert.equal(clean.untrusted, undefined);
+    { version: 1 }, { version: 99 }, { run: 0 }, { run: 8 }, { run: 1.5 }, { finished: 'no' },
+    { budget: -1 }, { budget: 99 }, { budget: 6 }, { finished: true },
+    { log: [] }, { log: [{ run: 1, budget: 10, spent: 2, end: 'budget' }] },
+    { log: [{ run: 1, budget: 9, spent: 2, end: 'left' }] }, { log: [{ run: 1, budget: 10, spent: 10, end: 'left' }] },
+    { lights: [{ id: 'west', run: 1 }] }, { lights: [{ id: 'west', run: 1 }, { id: 'entrance', run: 3 }] },
+    { lights: [{ id: 'west', run: 1 }, { id: 'west', run: 1 }, { id: 'entrance', run: 2 }] },
+    { lights: [{ id: 'sun', run: 1 }, { id: 'entrance', run: 2 }] }, { lights: 'all' },
+    { player: { x: Infinity, y: 10 } }, { player: { x: 2000, y: 100 } }, { player: null }
+  ]) assert.throws(() => S.validate({ ...base, ...patch }), JSON.stringify(patch));
+  assert.throws(() => S.validate(null)); assert.throws(() => S.validate({ version: 1, cycle: 1 }));
+  const clean = S.validate({ ...base, untrusted: 'ignored', log: base.log.map(e => ({ ...e, extra: 1 })) });
+  assert.equal(clean.untrusted, undefined); assert.equal(clean.log[0].extra, undefined);
+  assert.deepEqual(clean, base);
 });
 
-test('all ending saves can be loaded when their prerequisites are present', () => {
-  const base = { ...S.reset(ready(), ['name', 'song']), gate: true, reunion: true };
-  for (const ending of ['obedience', 'witness', 'stay']) assert.equal(S.validate({ ...base, ending }).ending, ending);
-  assert.deepEqual(S.validate(S.fresh()), S.fresh());
-});
-
-test('shared flower placement survives release and older saves still load', () => {
-  const before = ready(); before.flowerSpot = 'company';
-  const next = S.reset(before, ['route', 'song']);
-  assert.equal(S.validate(next).flowerSpot, 'company');
-  const old = ready(); delete old.flowerSpot;
-  assert.equal(S.validate(old).flowerSpot, null);
-  assert.throws(() => S.validate({ ...before, flowerSpot: 'invalid' }));
-  assert.throws(() => S.validate({ ...S.fresh(), flowerSpot: 'light' }));
-});
-
-test('rules enforce the second-cycle route, relay, and ending prerequisites', () => {
-  const first = S.fresh();
-  assert.throws(() => S.advance(first, { type: 'Give' }));
-  assert.throws(() => S.advance(first, { type: 'Place', spot: 'company' }));
-  S.advance(first, { type: 'Meet' }); S.advance(first, { type: 'Give' });
-  S.advance(first, { type: 'Place', spot: 'company' });
-  S.acquire(first, 'route'); S.acquire(first, 'song');
-  assert.equal(S.canReset(first, ['name', 'song']), true);
-
-  const relayPath = S.reset(first, ['name', 'song']);
-  assert.equal(relayPath.flowerSpot, 'company');
-  assert.equal(S.canOpen(relayPath), false);
-  assert.throws(() => S.advance(relayPath, { type: 'Open' }));
-  S.advance(relayPath, { type: 'Reunite' });
-  assert.equal(S.canOpen(relayPath), false);
-  S.advance(relayPath, { type: 'Restore', relay: 'west' });
-  assert.equal(S.canOpen(relayPath), false);
-  S.advance(relayPath, { type: 'Restore', relay: 'east' });
-  assert.equal(S.canOpen(relayPath), true);
-  S.advance(relayPath, { type: 'Open' });
-  assert.equal(S.canFinish(relayPath, 'witness'), true);
-  S.advance(relayPath, { type: 'Finish', ending: 'witness' });
-  assert.equal(relayPath.ending, 'witness');
-  assert.throws(() => S.advance(relayPath, { type: 'Finish', ending: 'stay' }));
-
-  const shortcut = S.reset(first, ['name', 'route']);
-  S.advance(shortcut, { type: 'Reunite' });
-  assert.equal(S.canOpen(shortcut), true);
-  S.advance(shortcut, { type: 'Open' });
-  assert.equal(S.canFinish(shortcut, 'witness'), false);
-  assert.throws(() => S.advance(shortcut, { type: 'Finish', ending: 'witness' }));
-  const replay = S.replay(shortcut);
-  assert.equal(replay.cycle, 1);
-  assert.deepEqual(replay.acquired, ['name', 'route', 'song']);
-  assert.equal(replay.flowerSpot, 'company');
+test('step is pure and rejects unknown or malformed actions', () => {
+  const s = S.fresh(), before = JSON.stringify(s);
+  const next = S.step(s, { type: 'Light', lamp: 'entrance' });
+  assert.equal(JSON.stringify(s), before, 'input state is not mutated');
+  next.lights[0].run = 5; next.player.x = 99;
+  assert.equal(JSON.stringify(s), before, 'result does not share nested values with the input');
+  for (const action of [null, {}, { type: 'Unknown' }, { type: 'Light' }, { type: 'EndRun' }]) assert.equal(S.step(s, action), null);
 });
 
 test('walking routes around shelves and rejects blocked destinations', () => {
   const shelves = [{ x: 400, y: 290, w: 180, d: 38 }];
-  const start = { x: 450, y: 440 }, end = { x: 450, y: 230 };
-  const path = P.findPath(start, end, shelves);
+  const start = { x: 450, y: 440 }, target = { x: 450, y: 230 };
+  const path = P.findPath(start, target, shelves);
   assert.ok(path.length > 1);
-  assert.deepEqual(path.at(-1), end);
+  assert.deepEqual(path.at(-1), target);
   let previous = start;
   for (const p of path) {
     for (let i = 0; i <= 100; i++) {
@@ -115,16 +104,4 @@ test('walking routes around shelves and rejects blocked destinations', () => {
   }
   assert.equal(P.findPath(start, { x: 450, y: 310 }, shelves), null);
   assert.equal(P.findPath(start, { x: 5, y: 10 }, shelves), null);
-});
-
-test('step is pure and rejects unknown or malformed actions', () => {
-  const s = S.fresh(), before = JSON.stringify(s);
-  const next = S.step(s, { type: 'Meet' });
-  assert.equal(JSON.stringify(s), before, 'input state is not mutated');
-  assert.deepEqual(next.acquired, ['name']);
-  next.acquired.push('route');
-  assert.deepEqual(s.acquired, [], 'result does not share arrays with the input');
-  for (const action of [null, {}, { type: 'Unknown' }, { type: 'Place', spot: 'light' }, { type: 'Restore', relay: 'west' }, { type: 'Acquire', memory: 'other' }]) {
-    assert.equal(S.step(s, action), null);
-  }
 });

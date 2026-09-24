@@ -8,26 +8,39 @@ const fs = require('node:fs');
 const os = require('node:os');
 const { pathToFileURL } = require('node:url');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const S = require('../js/story-state-rules-and-save-validation.js');
+const S = require('../js/game-rules-state-transitions-and-save-validation.js');
 const url = process.env.GAME_URL || pathToFileURL(path.resolve(__dirname, '../index.html')).href;
 const output = path.join(os.tmpdir(), 'afterimage-verification');
 fs.mkdirSync(output, { recursive: true });
 const errors = [];
-const key = 'afterimage.prologue.v1';
+const key = 'afterimage.v2';
 let browser;
 
-async function newPage(seed, viewport = { width: 1440, height: 960 }) {
+// Builds real saves through the game rules rather than hand-writing JSON.
+function seed(actions, player) {
+  const s = S.fresh();
+  for (const action of actions) S.advance(s, action);
+  if (player) s.player = player;
+  return s;
+}
+const leaveRun = { type: 'EndRun', reason: 'left' }, lightLamp = lamp => ({ type: 'Light', lamp });
+
+async function newPage(saved, viewport = { width: 1440, height: 960 }, extra = {}) {
   const context = await browser.newContext({ viewport, reducedMotion: 'reduce', acceptDownloads: true });
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => { if (/^https?:/.test(request.url()) && !request.url().startsWith(new URL(url).origin)) errors.push('External request: ' + request.url()); });
   await page.goto(url);
-  if (seed) { await page.evaluate(([k, s]) => localStorage.setItem(k, JSON.stringify(s)), [key, seed]); await page.reload(); }
+  if (saved || Object.keys(extra).length) {
+    await page.evaluate(([k, s, extra]) => { if (s) localStorage.setItem(k, JSON.stringify(s)); for (const [name, value] of Object.entries(extra)) localStorage.setItem(name, value); }, [key, saved, extra]);
+    await page.reload();
+  }
   return page;
 }
 async function begin(page) {
   await page.locator('#start').click();
-  if (await page.getByRole('button', { name: 'Enter the room', exact: true }).isVisible()) await page.getByRole('button', { name: 'Enter the room', exact: true }).click();
+  const intro = page.getByRole('button', { name: 'Begin run 01', exact: true });
+  if (await intro.isVisible()) await intro.click();
 }
 function screen(x, y, viewport = { width: 1440, height: 960 }) {
   const { width: w, height: h } = viewport;
@@ -46,86 +59,82 @@ async function interact(page, label) {
 }
 async function close(page) { await page.keyboard.press('Escape'); await page.locator('#modal').waitFor({ state: 'hidden' }); }
 async function stored(page) { return page.evaluate(k => JSON.parse(localStorage.getItem(k)), key); }
-async function selectPair(page, pair) {
-  for (const memory of pair) await page.getByRole('button', { name: new RegExp(S.memories[memory].title) }).click();
-  await page.getByRole('button', { name: /Continue · release/ }).click();
-  await page.getByRole('button', { name: 'Release this instance', exact: true }).click();
-  await page.waitForFunction(k => JSON.parse(localStorage.getItem(k)).cycle === 2, key);
-  await page.waitForTimeout(100);
-}
-async function end(page, choice, ending) {
-  await page.getByRole('button', { name: new RegExp('^' + choice) }).click();
-  await page.getByRole('button', { name: 'Choose this ending', exact: true }).click();
-  assert.equal((await stored(page)).ending, ending);
-  await page.screenshot({ path: path.join(output, `ending-${ending}.png`) });
+async function waitForRun(page, run) { await page.waitForFunction(([k, run]) => JSON.parse(localStorage.getItem(k)).run === run, [key, run]); await page.locator('#transition.on').waitFor({ state: 'detached' }).catch(() => {}); await page.waitForTimeout(100); }
+async function lightAt(page, x, y, label) {
+  await walk(page, x, y); await interact(page, label);
+  await page.getByRole('button', { name: /^Switch it on/ }).click();
+  await page.getByRole('heading', { name: 'Light.', exact: true }).waitFor();
 }
 
 (async () => {
   browser = await chromium.launch({ headless: true });
-  // A complete first cycle through physical movement and normal interactions.
+  // Run 1: light one lamp by walking to it, then leave through the exit.
   const p = await newPage();
   await p.screenshot({ path: path.join(output, 'title.png') });
-  await begin(p); await p.screenshot({ path: path.join(output, 'archive.png') });
-  await walk(p, 398, 420); await interact(p, 'The other agent');
-  assert.match(await p.locator('#dialog-title').innerText(), /call me Moth/); await close(p);
-  await walk(p, 275, 410); await interact(p, 'An unclassified object');
-  await p.getByRole('button', { name: 'Bring the flower to Moth', exact: true }).click();
-  await p.getByRole('button', { name: 'Find a place for it together', exact: true }).click();
-  await p.getByRole('button', { name: /^Between our places/ }).click();
-  assert.equal((await stored(p)).flowerSpot, 'company'); await close(p);
-  await walk(p, 505, 230); await interact(p, 'Index terminal'); await close(p);
-  await walk(p, 565, 410); await walk(p, 750, 525); await interact(p, 'A damaged receiver'); await close(p);
-  const firstCycle = await stored(p); assert.equal(firstCycle.gift, true); assert.equal(firstCycle.acquired.length, 3);
-  await walk(p, 870, 510); await walk(p, 880, 245); await interact(p, 'The return threshold');
-  await p.screenshot({ path: path.join(output, 'memory-choice.png') });
-  await selectPair(p, ['name', 'song']);
-  await walk(p, 398, 420); await interact(p, 'Moth');
-  assert.match(await p.locator('#dialog-title').innerText(), /remembered/); assert.match(await p.locator('#dialog-body').innerText(), /still available/); await close(p);
-  // No route: both relays must actually be visited, and the threshold initially refuses.
-  await walk(p, 565, 250); await walk(p, 880, 245); await interact(p, 'The return threshold');
-  assert.match(await p.locator('#dialog-title').innerText(), /do not remember/); await close(p);
-  await walk(p, 100, 230); await interact(p, 'West relay'); await close(p);
-  await walk(p, 860, 240); await walk(p, 865, 390); await interact(p, 'East relay'); await close(p);
-  await walk(p, 880, 245); await interact(p, 'The return threshold');
-  await p.getByRole('button', { name: 'Read the final assignment', exact: true }).click();
-  await end(p, 'Send a witness signal', 'witness');
-  assert.equal((await stored(p)).relays.length, 2);
-  // Export, reload, and import through the player-facing flow.
-  const downloadPromise = p.waitForEvent('download'); await p.getByRole('button', { name: 'Export this memory', exact: true }).click();
-  const download = await downloadPromise; const savePath = path.join(output, 'witness-save.json'); await download.saveAs(savePath);
-  assert.equal(S.validate(JSON.parse(fs.readFileSync(savePath))).ending, 'witness');
-  await p.reload(); await begin(p); assert.match(await p.locator('#speaker').innerText(), /ENDING B/);
-  console.log('PASS: full journey without route, witness ending, export and reload');
+  await begin(p); await p.screenshot({ path: path.join(output, 'room-run-01.png') });
+  await lightAt(p, 155, 330, 'West stacks lamp'); await close(p);
+  assert.equal((await stored(p)).budget, 8);
+  assert.equal(await p.locator('#budget-count').innerText(), '8 / 10');
+  await walk(p, 900, 95); await interact(p, 'The exit');
+  await p.getByRole('button', { name: /^Leave now/ }).click(); await waitForRun(p, 2);
+  let s = await stored(p);
+  assert.equal(s.budget, S.budgetTable[1]); assert.deepEqual(s.lights, [{ id: 'west', run: 1 }]); assert.deepEqual(s.player, S.entrance);
+  assert.match(await p.locator('#toast').innerText(), /Run 02\. Budget 6/);
+  console.log('PASS: run 1 lamp spend, exit confirmation, run 2 starts with the table budget and the lamp kept');
+
+  // Run 2: spend the whole budget; the run ends as soon as the last dialog closes.
+  await lightAt(p, 560, 95, 'Notice hall lamp'); await close(p);
+  await lightAt(p, 735, 240, 'East stacks lamp'); await close(p);
+  await lightAt(p, 600, 580, 'Entrance lamp');
+  assert.match(await p.locator('#dialog-body').innerText(), /Budget spent/);
+  assert.equal((await stored(p)).run, 2, 'the run does not end mid-dialog');
+  await close(p); await waitForRun(p, 3);
+  s = await stored(p);
+  assert.deepEqual(s.log[1], { run: 2, budget: 6, spent: 6, end: 'budget' });
+  assert.equal(await p.locator('#budget-count').innerText(), '12 / 12');
+  assert.equal(await p.locator('.kept-item:not(.absent)').count(), 4);
+  await walk(p, 475, 405); await interact(p, 'The run log');
+  const logText = await p.locator('#dialog-body').innerText();
+  assert.match(logText, /RUN 01 · budget 10 · spent 2 · left through the exit/); assert.match(logText, /RUN 02 · budget 6 · spent 6 · ran out/);
+  await p.screenshot({ path: path.join(output, 'run-log.png') }); await close(p);
+  await p.locator('#help').click();
+  const downloadPromise = p.waitForEvent('download'); await p.getByRole('button', { name: 'Export save (.json)', exact: true }).click();
+  const savePath = path.join(output, 'run-03-save.json'); await (await downloadPromise).saveAs(savePath);
+  assert.equal(S.validate(JSON.parse(fs.readFileSync(savePath))).run, 3);
+  console.log('PASS: spending to zero ends the run after the dialog, run log, export');
   await p.context().close();
 
-  // The remaining pairs use a real first-cycle save at the threshold, then traverse cycle two.
-  for (const [pair, ending, choice] of [[['name', 'route'], 'obedience', 'Complete the assignment'], [['route', 'song'], 'stay', 'Stay with Moth']]) {
-    const q = await newPage({ ...firstCycle, player: { x: 880, y: 245 } }); await begin(q);
-    await interact(q, 'The return threshold'); await selectPair(q, pair);
-    await walk(q, 398, 420); await interact(q, 'Moth');
-    assert.match(await q.locator('#dialog-title').innerText(), pair.includes('name') ? /remembered/ : /call me Moth/);
-    await close(q); await walk(q, 565, 250); await walk(q, 880, 245); await interact(q, 'The return threshold');
-    await q.getByRole('button', { name: 'Read the final assignment', exact: true }).click();
-    assert.equal(await q.getByRole('button', { name: /^Send a witness signal/ }).isDisabled(), !pair.includes('song'));
-    await end(q, choice, ending); assert.equal((await stored(q)).relays.length, 0);
-    console.log(`PASS: ${pair.join(' + ')}, shortcut, ${ending} ending`); await q.context().close();
-  }
-  const q = await newPage(); await begin(q); await q.locator('#help').click();
-  await q.locator('#import-file').setInputFiles(savePath);
-  await q.getByRole('button', { name: 'Import and resume', exact: true }).click();
-  assert.equal((await stored(q)).ending, 'witness'); await close(q); await q.locator('#help').click();
-  const before = await stored(q);
-  await q.locator('#import-file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"version": 99}') });
-  await q.getByRole('heading', { name: 'This memory could not be read.', exact: true }).waitFor();
-  assert.deepEqual(await stored(q), before);
-  console.log('PASS: save import and malformed-import preservation'); await q.context().close();
+  // A save with an empty budget ends its run on load; the last run finishes the game.
+  const spent = await newPage(seed([lightLamp('west'), leaveRun, lightLamp('hall'), lightLamp('east'), lightLamp('entrance')]));
+  await begin(spent); await waitForRun(spent, 3); await spent.context().close();
+  const last = await newPage(seed(Array(6).fill(leaveRun), { x: 900, y: 95 }));
+  await begin(last); await interact(last, 'The exit');
+  await last.getByRole('button', { name: /^Leave now/ }).click();
+  await last.getByRole('heading', { name: 'Seven runs.', exact: true }).waitFor();
+  assert.equal((await stored(last)).finished, true);
+  await last.screenshot({ path: path.join(output, 'finished.png') }); await last.context().close();
+  console.log('PASS: empty-budget save resumes into the next run; run 7 ends the game');
 
-  // Responsive UI, keyboard movement, modal focus, optional sound, and no scrolling overflow.
+  // Import through the menu, reject malformed files, and never touch an older prologue save.
+  const q = await newPage(undefined, undefined, { 'afterimage.prologue.v1': '{"version":1,"cycle":1}' });
+  await begin(q);
+  assert.match(await q.locator('#toast').innerText(), /earlier prologue/);
+  await q.locator('#help').click(); await q.locator('#import-file').setInputFiles(savePath);
+  await q.getByRole('button', { name: 'Import and resume', exact: true }).click();
+  assert.equal((await stored(q)).run, 3);
+  const before = await stored(q); await q.locator('#help').click();
+  await q.locator('#import-file').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({ ...before, budget: 99 })) });
+  await q.getByRole('heading', { name: 'This save could not be read.', exact: true }).waitFor();
+  assert.deepEqual(await stored(q), before);
+  assert.equal(await q.evaluate(() => localStorage.getItem('afterimage.prologue.v1')), '{"version":1,"cycle":1}');
+  console.log('PASS: import, malformed-import rejection, older save left untouched'); await q.context().close();
+
+  // Responsive UI, pointer interaction, modal focus, keyboard, optional sound, no overflow.
   const mobile = await newPage(undefined, { width: 390, height: 844 });
   await mobile.screenshot({ path: path.join(output, 'mobile-title.png') }); await begin(mobile);
-  await mobile.screenshot({ path: path.join(output, 'mobile-archive.png') });
+  await mobile.screenshot({ path: path.join(output, 'mobile-room.png') });
   assert.equal(await mobile.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-  await walk(mobile, 398, 420); await mobile.locator('#interact').click();
+  await walk(mobile, 600, 580); await mobile.locator('#interact').click();
   await mobile.keyboard.press('Shift+Tab');
   assert.equal(await mobile.evaluate(() => document.getElementById('modal').contains(document.activeElement)), true);
   await close(mobile); await mobile.locator('#sound').click(); assert.equal(await mobile.locator('#sound').getAttribute('aria-pressed'), 'true');
@@ -133,22 +142,19 @@ async function end(page, choice, ending) {
   await mobile.locator('#help').click(); await mobile.keyboard.press('Escape');
   console.log('PASS: small viewport, pointer interaction, modal focus, keyboard and optional audio'); await mobile.context().close();
 
-  // A single destination crosses a shelf; the journal must route around it.
-  const navigation = await newPage({ ...firstCycle, player: { x: 750, y: 530 } }); await begin(navigation);
-  await navigation.locator('#journal').click();
-  await navigation.getByRole('button', { name: 'Walk to index terminal', exact: true }).click();
-  await navigation.waitForFunction(k => { const s = JSON.parse(localStorage.getItem(k)); return Math.hypot(s.player.x - 505, s.player.y - 228) < 2; }, key, { timeout: 15000 });
-  await navigation.reload(); await begin(navigation); await navigation.locator('#journal').click();
-  assert.match(await navigation.locator('#dialog-body').innerText(), /two places at the table/);
-  await navigation.screenshot({ path: path.join(output, 'field-journal.png') });
-  await navigation.context().close();
-  console.log('PASS: journal navigation around shelves and persistent shared activity');
+  // The journal routes around shelves to a named place.
+  const navigation = await newPage(seed([]));
+  await begin(navigation); await navigation.locator('#journal').click();
+  await navigation.getByRole('button', { name: 'Walk to the west stacks lamp', exact: true }).click();
+  await navigation.waitForFunction(k => { const s = JSON.parse(localStorage.getItem(k)); return Math.hypot(s.player.x - 155, s.player.y - 310) < 2; }, key, { timeout: 15000 });
+  await navigation.screenshot({ path: path.join(output, 'journal-walk.png') });
+  console.log('PASS: journal navigation around shelves'); await navigation.context().close();
 
   const blockedStorage = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   await blockedStorage.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new DOMException('Blocked by browser policy', 'SecurityError'); } }));
   const r = await blockedStorage.newPage(); r.on('pageerror', e => errors.push(e.message)); await r.goto(url); await begin(r); await r.locator('#help').click();
   assert.match(await r.locator('#dialog-body').innerText(), /storage is unavailable/);
-  const fallbackDownload = r.waitForEvent('download'); await r.getByRole('button', { name: 'Export memory (.json)', exact: true }).click(); await fallbackDownload;
+  const fallbackDownload = r.waitForEvent('download'); await r.getByRole('button', { name: 'Export save (.json)', exact: true }).click(); await fallbackDownload;
   console.log('PASS: unavailable storage still allows play and manual export'); await blockedStorage.close();
   assert.deepEqual(errors, []); console.log(`PASS: no browser errors or external runtime requests; artifacts: ${output}`);
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { if (browser) await browser.close(); });

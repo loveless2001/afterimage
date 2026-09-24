@@ -83,3 +83,24 @@ Checks: `node --check` on every `js/*.js`, `node --test tests/state.test.cjs`, a
 - **Text preservation:** every string literal from the old `game.js`/`state.js` appears verbatim in the new modules, apart from two renamed template strings and the removed Bend loader.
 - **Code review:** no behavior drift found (`plans/reports/code-reviewer-260925-0317-engine-split-review.md`).
 - **Browser journey:** passed, run by the user in their own shell. Covers all three endings, reset and relay paths, save import/export, malformed-import rejection, storage denial, narrow-viewport controls, modal focus, and journal navigation. No page errors or external requests. A native Windows browser test and a human playtest are still outstanding.
+
+## Milestone 2: runs, budget, new room — 25 September 2026
+
+The Moth prologue was retired. The game is now seven runs in one room, with an authored budget table (`[10, 6, 12, 7, 14, 9, 12]`, provisional). Four persistent lamps are the budget sink, and there is a run log, an exit, and a notice hall that stays empty until notes arrive. Saves use the new key `afterimage.v2`. A v1 prologue save is detected and left untouched.
+
+- **Syntax:** `node --check` passed on all `js/*.js` and `tests/browser.cjs`.
+- **State tests:** 8/8 passed. They cover lamp costs, no double lighting or overspending, both ways a run can end, the budget table, run 7 finishing the game, 22 malformed-save cases (including spending that doesn't match the lit lamps), and purity.
+- **Layout:** every object and the alcove are unblocked and reachable from the entrance (visibility-graph check).
+- **Code review:** no bugs found (`plans/reports/code-reviewer-260925-0322-runs-budget-review.md`). The mobile budget bar is now hidden at 520px or narrower, where it shows the number only, per design §4. This fix came after the browser run below; a headless check confirmed the computed `display` is `none` at 500px wide and `flex` at 1440px.
+- **Headless Chromium smoke:** the title screen and room render from `file://` with no console errors.
+- **Browser journey:** passed, run by the user in their own shell. It covers:
+  - run 1 lighting a lamp, then leaving through the exit
+  - run 2 starting with the table budget and the lamp kept
+  - spending to 0, which ends the run only after the dialog closes
+  - the run log and export
+  - an empty-budget save resuming into the next run
+  - run 7 finishing the game
+  - import, malformed-import rejection and the untouched v1 save
+  - mobile, keyboard, sound, journal routing and blocked storage
+
+  No page errors or external requests.

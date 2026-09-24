@@ -9,46 +9,53 @@
   A.P = window.AfterimagePath;
   A.canvas = $('world');
   A.ctx = A.canvas.getContext('2d');
-  A.storageKey = 'afterimage.prologue.v1';
+  A.storageKey = 'afterimage.v2';
+  const legacyKey = 'afterimage.prologue.v1';
   A.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  A.pad = n => String(n).padStart(2, '0');
   // Runtime values that change during play. Modules read and write them here
-  // so reassignments (a reset, an import) are visible everywhere.
+  // so reassignments (a new run, an import) are visible everywhere.
   const G = A.game = {
     state: S.fresh(), started: false, modalOpen: false, transitioning: false,
     storageOK: true, loadWarning: '', target: null, nearby: null, lastTime: 0, time: 0,
     width: 0, height: 0, scale: 1, origin: { x: 0, y: 0 }, lastSaved: 0,
     returnFocus: null, escapeAction: null, keys: new Set()
   };
-  // Shelves block walking; objects are what the player can walk up to and use.
+  // Obstacles: two shelves per stack, a shelf screening the west alcove, and
+  // the central desk (drawn as a desk, not a shelf).
   A.shelves = [
-    { x: 110, y: 120, w: 200, d: 38, h: 98 }, { x: 390, y: 120, w: 160, d: 38, h: 98 },
-    { x: 655, y: 120, w: 180, d: 38, h: 98 }, { x: 110, y: 290, w: 190, d: 38, h: 87 },
-    { x: 605, y: 320, w: 195, d: 38, h: 92 }, { x: 120, y: 480, w: 160, d: 38, h: 87 }
+    { x: 70, y: 220, w: 170, d: 38, h: 98 }, { x: 70, y: 360, w: 170, d: 38, h: 87 },
+    { x: 640, y: 120, w: 190, d: 38, h: 98 }, { x: 640, y: 290, w: 190, d: 38, h: 92 },
+    { x: 60, y: 500, w: 150, d: 38, h: 87 },
+    { x: 430, y: 300, w: 90, d: 40, h: 30, desk: true }
   ];
+  // Things the player can walk up to. Lamp objects name their lamp in the rules.
   A.objects = [
-    { id: 'moth', x: 398, y: 378, label: 'The other agent', type: 'agent' },
-    { id: 'route', x: 505, y: 228, label: 'Index terminal', type: 'terminal' },
-    { id: 'song', x: 760, y: 532, label: 'A damaged receiver', type: 'receiver' },
-    { id: 'gift', x: 270, y: 405, label: 'An unclassified object', type: 'flower' },
-    { id: 'west', x: 100, y: 230, label: 'West relay', type: 'relay' },
-    { id: 'east', x: 865, y: 390, label: 'East relay', type: 'relay' },
-    { id: 'threshold', x: 881, y: 215, label: 'The return threshold', type: 'gate' }
+    { id: 'hall', x: 400, y: 62, label: 'The notice hall', type: 'hall' },
+    { id: 'lamp-hall', lamp: 'hall', x: 560, y: 62, label: 'Notice hall lamp', type: 'lamp' },
+    { id: 'log', x: 475, y: 380, label: 'The run log', type: 'terminal' },
+    { id: 'lamp-west', lamp: 'west', x: 155, y: 310, label: 'West stacks lamp', type: 'lamp' },
+    { id: 'lamp-east', lamp: 'east', x: 735, y: 225, label: 'East stacks lamp', type: 'lamp' },
+    { id: 'lamp-entrance', lamp: 'entrance', x: 600, y: 600, label: 'Entrance lamp', type: 'lamp' },
+    { id: 'exit', x: 905, y: 62, label: 'The exit', type: 'gate' }
   ];
-  // Moth and the flower are gone after the obedience ending; the flower
-  // leaves its plinth once it has been given.
-  A.visibleObject = o => !(G.state.ending === 'obedience' && ['moth', 'gift'].includes(o.id)) && !(o.id === 'gift' && G.state.gift);
+  // Footer location name for a floor point.
+  A.zone = p => p.y < 130 && p.x < 640 ? 'THE NOTICE HALL' : p.x > 845 ? 'THE EXIT' : p.x < 260 && p.y < 500 ? 'THE WEST STACKS'
+    : p.x > 620 && p.y < 360 ? 'THE EAST STACKS' : p.y > 500 ? 'THE ENTRANCE' : 'THE CENTRAL DESK';
 
-  // Resume a browser save if one exists. Blocked storage still allows play.
+  // Resume a v2 save if one exists. An older prologue save is never touched;
+  // the player is told this version starts fresh. Blocked storage still plays.
   try {
     const saved = localStorage.getItem(A.storageKey);
-    if (saved) { G.state = S.validate(JSON.parse(saved)); $('start').firstChild.textContent = 'Continue your instance '; }
+    if (saved) { G.state = S.validate(JSON.parse(saved)); $('start').firstChild.textContent = 'Continue your runs '; }
+    else if (localStorage.getItem(legacyKey)) G.loadWarning = 'A save from the earlier prologue was found. This version starts fresh; the old save is left untouched.';
   } catch (error) {
     if (error.name === 'SecurityError') G.storageOK = false;
-    else G.loadWarning = 'The previous save could not be read. A new instance is ready; you can import a backup from the menu.';
+    else G.loadWarning = 'The previous save could not be read. A new game is ready; you can import a backup from the menu.';
   }
   A.save = function () {
     try { localStorage.setItem(A.storageKey, JSON.stringify(G.state)); }
-    catch (_) { if (G.storageOK) A.toast('Browser saving is unavailable. Export your memory from the menu.'); G.storageOK = false; }
+    catch (_) { if (G.storageOK) A.toast('Browser saving is unavailable. Export your save from the menu.'); G.storageOK = false; }
   };
   let toastTimer;
   A.toast = function (text) {

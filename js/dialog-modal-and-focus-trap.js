@@ -32,6 +32,7 @@
     G.modalOpen = false; $('modal').hidden = true; $('hud').inert = false;
     document.querySelector('header').inert = false; $('cover').inert = false;
     G.returnFocus?.focus(); G.returnFocus = null; G.escapeAction = null; A.updateHUD();
+    A.endRunIfSpent();
   };
   // The standard "walk away" choice that simply closes the dialog.
   A.leave = (label = 'Step away') => ({ label, run: A.closeDialog });

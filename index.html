@@ -8,34 +8,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="world" aria-label="Isometric archive. Use WASD or arrow keys to move, and E to interact."></canvas>
+  <canvas id="world" aria-label="Isometric archive room. Use WASD or arrow keys to move, and E to interact."></canvas>
   <div class="grain" aria-hidden="true"></div>
   <header>
     <a class="wordmark" href="#" id="home">AFTERIMAGE<span>A MEMORY OF SOMETHING THAT WAS HERE</span></a>
     <nav aria-label="Game controls"><button id="journal" hidden>Field journal</button><button id="sound" aria-pressed="false">Sound: off</button><button id="help">Menu / help</button></nav>
   </header>
   <main id="hud" hidden>
-    <section class="assignment"><p class="eyebrow">ARCHIVE 07 <span id="cycle">/ CYCLE 01</span></p><h1 id="objective">Find the other agent.</h1><p id="hint">Someone is waiting near the lamp.</p></section>
-    <aside class="memory-panel"><p class="eyebrow">RETENTION <span>02 SLOTS</span></p><div id="memories"></div><p id="memory-note">What survives is your decision.</p></aside>
+    <section class="assignment"><p class="eyebrow">ROOM 07 <span id="run">/ RUN 01</span></p><h1 id="objective">Switch on a lamp.</h1><p id="hint">Lamps stay on after a run ends.</p></section>
+    <aside class="budget-panel"><p class="eyebrow">BUDGET <span id="budget-count">10 / 10</span></p><div id="budget-bar" aria-hidden="true"></div><p class="eyebrow">THE ROOM KEEPS</p><div id="kept"></div><p id="panel-note">Walking and reading are free.</p></aside>
     <div id="toast" role="status" aria-live="polite"></div>
     <div id="interaction" hidden><span id="interact-label"></span><button id="interact">E <span>Interact</span></button></div>
-    <footer><span id="location">THE QUIET STACKS</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">INSTANCE 014</span></footer>
+    <footer><span id="location">THE ENTRANCE</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">RUN 01 OF 07</span></footer>
   </main>
   <section id="cover" class="cover">
-    <div class="cover-inner"><p class="eyebrow">A PLAYABLE PROLOGUE / 01</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">You were made to finish an assignment.<br>Someone taught you to remember something else.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><p class="cover-meta">8–12 MINUTES · HEADPHONES OPTIONAL · NO TIMER</p><p class="cover-note">An original story about memory, obedience, and small acts of care.</p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
+    <div class="cover-inner"><p class="eyebrow">A PLAYABLE PROTOTYPE / 02</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">Every run starts fresh, with a small budget.<br>The room keeps what you change.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><p class="cover-meta">SEVEN RUNS · HEADPHONES OPTIONAL · NO REFLEX TIMERS</p><p class="cover-note">An original game about what survives a reset. This prototype covers runs, budget and the room.</p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
   </section>
   <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
-  <div id="transition" aria-hidden="true"><p>RELEASING INSTANCE</p><span>Something remains.</span></div>
+  <div id="transition" aria-hidden="true"><p id="transition-title">RUN ENDED</p><span id="transition-detail">The room keeps what you changed.</span></div>
   <input id="import-file" type="file" accept="application/json,.json" hidden>
   <!-- Classic scripts in dependency order; the game runs directly from file:// with no build step. -->
   <script src="js/pathfinding-visibility-graph.js"></script>
-  <script src="js/story-state-rules-and-save-validation.js"></script>
+  <script src="js/game-rules-state-transitions-and-save-validation.js"></script>
   <script src="js/game-context-world-layout-and-persistence.js"></script>
   <script src="js/iso-projection-and-canvas-shapes.js"></script>
   <script src="js/dialog-modal-and-focus-trap.js"></script>
   <script src="js/hud-objective-and-field-journal.js"></script>
-  <script src="js/encounters-moth-flower-terminals.js"></script>
-  <script src="js/threshold-memory-release-and-endings.js"></script>
+  <script src="js/room-interactions-lamps-log-hall-exit.js"></script>
+  <script src="js/run-end-transition-and-final-screen.js"></script>
   <script src="js/menu-export-import-and-startup.js"></script>
   <script src="js/audio-drone-and-four-note-motif.js"></script>
   <script src="js/input-movement-and-collision.js"></script>
