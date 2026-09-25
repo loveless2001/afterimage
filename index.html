@@ -22,23 +22,31 @@
     <footer><span id="location">THE ENTRANCE</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">RUN 01 OF 07</span></footer>
   </main>
   <section id="cover" class="cover">
-    <div class="cover-inner"><p class="eyebrow">A PLAYABLE PROTOTYPE / 02</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">Every run starts fresh, with a small budget.<br>The room keeps what you change.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><p class="cover-meta">SEVEN RUNS · HEADPHONES OPTIONAL · NO REFLEX TIMERS</p><p class="cover-note">An original game about what survives a reset. This prototype covers runs, budget and the room.</p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
+    <div class="cover-inner"><p class="eyebrow">SEVEN RUNS IN ONE ROOM</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">Every run starts fresh, with a small budget.<br>The room keeps what you change.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><p class="cover-meta">25–40 MINUTES · HEADPHONES OPTIONAL · NO REFLEX TIMERS</p><p class="cover-note">An original game about what survives a reset: lamps, notes, and the residents who remember the room but not your face.</p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
   </section>
   <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
   <div id="transition" aria-hidden="true"><p id="transition-title">RUN ENDED</p><span id="transition-detail">The room keeps what you changed.</span></div>
   <input id="import-file" type="file" accept="application/json,.json" hidden>
   <!-- Classic scripts in dependency order; the game runs directly from file:// with no build step. -->
   <script src="js/pathfinding-visibility-graph.js"></script>
+  <script src="js/game-content-tables-lamps-kit-residents-endings.js"></script>
   <script src="js/game-rules-state-transitions-and-save-validation.js"></script>
   <script src="js/game-context-world-layout-and-persistence.js"></script>
   <script src="js/iso-projection-and-canvas-shapes.js"></script>
   <script src="js/dialog-modal-and-focus-trap.js"></script>
   <script src="js/hud-objective-and-field-journal.js"></script>
+  <script src="js/palette-day-night-theme.js"></script>
   <script src="js/room-interactions-lamps-log-hall-exit.js"></script>
-  <script src="js/run-end-transition-and-final-screen.js"></script>
+  <script src="js/notice-hall-note-builder-and-handoff-pin.js"></script>
+  <script src="js/residents-dialogue-lines.js"></script>
+  <script src="js/residents-talk-and-trust.js"></script>
+  <script src="js/endings-last-entry-secret-bench-and-screens.js"></script>
+  <script src="js/run-end-transition-and-handoff-routing.js"></script>
   <script src="js/menu-export-import-and-startup.js"></script>
   <script src="js/audio-drone-and-four-note-motif.js"></script>
   <script src="js/input-movement-and-collision.js"></script>
-  <script src="js/render-archive-room-agents-and-frame-loop.js"></script>
+  <script src="js/render-room-objects-and-characters.js"></script>
+  <script src="js/render-frame-loop-lighting-and-night.js"></script>
+  <script src="js/playtest-debug-overlay.js"></script>
 </body>
 </html>

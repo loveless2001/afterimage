@@ -31,7 +31,7 @@ Complete direct-file browser journey command used the existing Playwright instal
 PLAYWRIGHT_MODULE=/home/lenovo/projects/openloop/node_modules/@playwright/test node tests/browser.cjs
 ```
 
-The application does not depend on that repository or Playwright at runtime. To run the test elsewhere, point `PLAYWRIGHT_MODULE` at an existing Playwright package, or install Playwright in your own development environment. Set `GAME_URL` to test a hosted copy. Browser test artifacts were saved under `/tmp/afterimage-verification`; `preview.png` is the desktop archive capture included with this project.
+The application does not depend on that repository or Playwright at runtime. To run the test elsewhere, point `PLAYWRIGHT_MODULE` at an existing Playwright package, or install Playwright in your own development environment. Set `GAME_URL` to test a hosted copy. Browser test artifacts were saved under `/tmp/afterimage-verification`; `preview.png` was replaced on 25 September 2026 with a capture of the current game (run 03, desktop).
 
 Chromium and the loopback server required execution outside the tool sandbox because its process/socket restrictions blocked them. They ran successfully under the available automatic approval mechanism.
 
@@ -104,3 +104,64 @@ The Moth prologue was retired. The game is now seven runs in one room, with an a
   - mobile, keyboard, sound, journal routing and blocked storage
 
   No page errors or external requests.
+
+## Milestone 3: notes, phrase kit, handoff pin — 25 September 2026
+
+Notes are built from the preset phrase kit (5 place subjects, 6 verbs, 5 qualifiers; resident subjects follow in M4) and cost 1. They stay on the 24-slot wall, where this run's notes show blue and older ones as faded ghost cards. A full wall asks which note to take down, and the new note reuses its slot. As a run ends, one wall note can be pinned at the entrance, and the next run opens by reading it. Saves from M2 without notes still load.
+
+- **Syntax:** `node --check` passed on all `js/*.js` and `tests/browser.cjs`.
+- **State tests:** 12/12 passed. New tests cover note cost and slot order, invalid phrase parts, full-wall replacement, pin rules, note validation (duplicate slots, future runs, a pin pointing at the current run, spending), and loading an M2 save.
+- **Layout:** the new entrance pin board is reachable and not blocked.
+- **Headless Chromium smoke:** the page loads from `file://` with no console errors.
+- **Browser journey:** covered by the complete suite below.
+
+## Milestones 4–7: residents, endings, polish — 25 September 2026
+
+The game is complete: three residents with trust and recognition, the turn at run 6, three endings plus a secret one, revisiting, the night palette with a menu override, audio cues, and the `?debug` playtest overlay. All writing is original and generic.
+
+- **Syntax:** `node --check` passed on all `js/*.js` (20 modules; the largest is 138 lines) and all `tests/*.cjs`.
+- **State tests:** `node --test tests/*.test.cjs` passed 19/19. `tests/state-residents-endings.test.cjs` covers:
+  - talk cost and trust rules
+  - name subjects only after meeting
+  - recognition from a pinned note
+  - endings gated at the turn and by prerequisites
+  - revisiting restoring the run exactly
+  - the secret conditions
+  - strict validation of talks, trust, endings and settings
+  - older finished saves reading as ending A
+  - forged trust being rejected
+  - older pinned saves being upgraded
+- **Layout:** every object and resident spot, both before the turn and after it, is unblocked, reachable from the entrance, and at least 85 apart.
+- **Contrast (WCAG):** the day `--muted` token darkened from `#686b60` (4.39:1) to `#5e6156`, which is at least 4.95:1 on every light background, including the canvas glow. The night tokens measure 4.68–12.26:1 for text.
+- **Smoke playthrough:** a scratch DevTools-protocol driver (not in the repo) drove headless Chromium through the real UI, with 22 checks and no page exceptions or console errors. It covered:
+  - earning all three residents' trust across runs 1–2
+  - the run 6 night palette and the turn announcement
+  - secret ending D
+  - revisiting, then ending A from the desk
+  - a spent last run that must choose an ending (Escape can't skip it), then ending B
+  - revisiting a spent last run, which asks again
+  - the palette override
+
+  Screenshots of night mode and the ending screens were checked by eye.
+- **Narrow screens:** at 500px wide (the smallest headless window), mid-game in both day and night: no horizontal overflow. At 520px or narrower the panel shows only the notes and residents rows; the panel note already summarises the lamps.
+- **Browser journeys:** `tests/browser.cjs` now runs two journeys:
+  - `browser-journey-runs-notes-saves.cjs`, whose finished-game check now writes the last entry
+  - `browser-journey-residents-endings.cjs`, which covers:
+    - meeting a resident by walking up
+    - Wren's recognition
+    - the bench secret
+    - revisiting
+    - the desk's last entry
+    - the menu's revisit and palette options
+    - importing an empty-budget save with wall notes (from the M2 and M3 reviews)
+    - `?debug`
+
+  **Pending:** the Playwright run happens in the user's shell (same command as in the Bend section above).
+
+**Code review of M4–M6** (`plans/reports/code-reviewer-260925-0419-residents-endings-review.md`) found one real bug and one smaller issue, both fixed:
+- **Forged trust (bug):** `validate()` accepted trust that its request never earned, so an imported save could unlock the secret ending.
+  - Trust now needs evidence: Juno needs the hall lamp lit by that run; Pell needs a note naming Pell posted by then; Wren needs the pin that opened that run to name her.
+  - Run-log entries now record their pin, so Wren's check is exact. Older logs without pins are upgraded from the current pin.
+- **Silent Escape (smaller):** the forced last entry on a spent run 7 now explains why Escape doesn't close it, instead of silently redrawing.
+
+After the fixes, the state tests passed 19/19, the smoke playthrough passed with no page errors, and `node --check` passed on every file.

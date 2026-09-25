@@ -14,13 +14,15 @@
     if (G.transitioning) return;
     dialog('AFTERIMAGE / PAUSED', 'A little room to breathe.', [
       'Move with WASD or the arrow keys. Press E near something to use it. You can also click or tap the floor to walk there, then use the Interact button. Open the field journal to walk to a named place.',
-      'Each run has a budget. Walking and reading are free; switching things on costs budget. A run ends when the budget is spent or when you leave through the exit. There are no reflex timers. Sound is optional; every clue is also written.',
+      'Each run has a budget. Walking and reading are free; lamps, notes and a first talk with each resident cost budget. A run ends when the budget is spent or when you leave through the exit. There are no reflex timers. Sound is optional; every clue is also written.',
       G.storageOK ? 'Progress saves in this browser. Export a save to move it between Windows, WSL, browsers, or folders.' : 'Browser storage is unavailable. Export a save before closing the game.'
     ], [
       leave(G.started ? 'Return to the room' : 'Return to title'),
       ...(G.started ? [{ label: 'Open field journal', run: A.journal }] : []),
       { label: 'Export save (.json)', run: A.exportSave },
       { label: 'Import save (.json)', run: () => $('import-file').click() },
+      { label: `Palette: ${G.state.palette}`, detail: 'Auto follows your system, and turns to night from run 06.', run: () => { S.advance(G.state, { type: 'SetPalette', palette: S.palettes[(S.palettes.indexOf(G.state.palette) + 1) % S.palettes.length] }); A.save(); A.updateHUD(); A.menu(); } },
+      ...(G.state.ending ? [{ label: 'Revisit the ending', detail: 'Return to the run where the last entry was written.', run: A.revisitEnding }] : []),
       { label: 'Begin a new set of runs', run: () => dialog('NEW GAME', 'Start again from run 01?', ['This replaces the current save in this browser, including every lamp the room has kept. Export it first if you want to keep it.'], [
         { label: 'Begin again', run: () => { G.state = S.fresh(); G.target = null; A.save(); A.closeDialog(); startGame(true); } }, { label: 'Cancel', run: A.menu }
       ], A.menu) }
@@ -54,7 +56,7 @@
   // and a run saved with an empty budget ends straight away.
   function resume() {
     startGame(false);
-    if (G.state.finished) A.showFinished(); else A.endRunIfSpent();
+    if (G.state.finished) A.showEnding(); else A.endRunIfSpent();
   }
   $('start').addEventListener('click', () => {
     const fresh = G.state.run === 1 && !G.state.lights.length && !G.state.log.length;

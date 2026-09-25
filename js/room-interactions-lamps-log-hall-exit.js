@@ -1,6 +1,7 @@
 // What happens when the player uses something in the room: lamps (spend
-// budget, stay lit), the run log at the desk (free to read), the notice hall
-// (empty until notes arrive), and the exit (ends the run early).
+// budget, stay lit), the run log at the desk (free to read; from the turn it
+// also holds the last entry), the exit (ends the run early), and hand-offs to
+// the notes, residents and endings modules.
 // interact(id) is the single entry point from the keyboard, button and tests.
 (function () {
   'use strict';
@@ -9,11 +10,14 @@
 
   A.interact = function (id) {
     if (G.modalOpen || G.transitioning || !G.started) return;
-    const object = A.objects.find(o => o.id === id);
+    const object = A.roomObjects().find(o => o.id === id);
     if (!object) return;
     if (object.type === 'lamp') return useLamp(object);
+    if (object.type === 'resident') return A.talkTo(object.resident);
+    if (id === 'bench') return A.visitBench();
     if (id === 'log') return readLog();
-    if (id === 'hall') return dialog('NOTICE HALL', 'Twenty-four empty slots.', ['Card holders line the wall in two neat rows. Nothing has been posted yet.', '[Posting notes is not part of this prototype yet. Reading here is always free.]'], [leave()]);
+    if (id === 'hall') return A.openNoticeHall();
+    if (id === 'pin') return A.showPinned();
     if (id === 'exit') return useExit();
   };
 
@@ -37,19 +41,25 @@
   // The desk keeps a record of every run: its budget, what was spent, how it ended.
   function readLog() {
     const state = G.state;
-    const lines = state.log.map(e => `RUN ${pad(e.run)} · budget ${e.budget} · spent ${e.spent} · ${e.end === 'budget' ? 'ran out' : 'left through the exit'}`);
-    if (!state.finished) lines.push(`RUN ${pad(state.run)} · budget ${S.budgetTable[state.run - 1]} · ${state.budget} left · in progress`);
+    const posted = run => { const n = state.notes.filter(note => note.run === run).length; return n ? ` · ${n} ${n === 1 ? 'note' : 'notes'}` : ''; };
+    const lines = state.log.map(e => `RUN ${pad(e.run)} · budget ${e.budget} · spent ${e.spent}${posted(e.run)} · ${e.end === 'budget' ? 'ran out' : 'left through the exit'}`);
+    if (!state.finished) lines.push(`RUN ${pad(state.run)} · budget ${S.budgetTable[state.run - 1]} · ${state.budget} left${posted(state.run)} · in progress`);
     if (!state.log.length) lines.unshift('This is the first run. Nothing earlier is recorded.');
     lines.push(`[${state.lights.length} of ${Object.keys(S.lamps).length} lamps are on. Reading the log is free.]`);
-    dialog('RUN LOG / ROOM 07', 'What each run did.', lines, [leave()]);
+    const lastEntry = !state.finished && state.run >= S.turnRun;
+    dialog('RUN LOG / ROOM 07', 'What each run did.', lines, [
+      ...(lastEntry ? [{ label: 'Write the last entry', primary: true, detail: 'Choose what the room keeps. This ends the runs.', run: () => A.chooseLastEntry() }] : []),
+      ...(state.finished ? [{ label: 'Read the ending again', run: A.showEnding }] : []),
+      leave()
+    ]);
   }
 
   function useExit() {
     const state = G.state;
-    if (state.finished) return A.showFinished();
+    if (state.finished) return A.showEnding();
     const last = state.run === S.runCount;
     dialog('THE EXIT', `Leave run ${pad(state.run)}?`, [
-      `Leaving ends this run now. The ${state.budget} budget you have left is lost. The room keeps its lamps.`,
+      `Leaving ends this run now. The ${state.budget} budget you have left is lost. The room keeps its lamps and notes.`,
       last ? 'This is the last run.' : `Run ${pad(state.run + 1)} starts at the entrance with a budget of ${S.budgetTable[state.run]}.`
     ], [
       { label: 'Leave now', primary: true, detail: last ? 'End the final run.' : `End run ${pad(state.run)}.`, run: () => A.endRun('left') },

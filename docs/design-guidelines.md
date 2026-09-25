@@ -229,13 +229,20 @@ There is no real-time pressure: walking is free and the budget is spent only by 
   | Qualifier | 5 | first · later · never · together · again |
 
   - Resident subjects show as "someone" until that resident has been met in any run; after that they show the resident's name.
+  - *As built (M3):* the kit has only the 5 place subjects. The resident subjects are appended in M4, so stored indices never shift.
   - The alcove is deliberately not in the kit, so the secret has to be found by exploring, not by reading notes.
   - A note is subject + verb, with an optional qualifier. That gives 8 × 6 × 6 = 288 combinations.
   - A save stores a note as three small integers.
 - Each note stores the run ID, fragment IDs and slot index.
 - Old notes render as ghost cards. Notes from the current run render blue.
 - Cap at 24 slots; when full, posting asks which note to take down.
+  - *As built (M3):* a taken-down note stays in the save with `slot: null`, so each run's spending can still be checked against its lamps and notes. The wall fills from the top row.
 - **Handoff:** at run end, choose one note (or none) to pin at the entrance. The next run starts by reading it.
+  - *As built (M3):*
+    - There is no handoff on the last run.
+    - When leaving through the exit, the player can still choose "Stay in this run".
+    - When the budget is spent, Escape means pin nothing.
+    - The pinned note is quoted in the hint until the run spends anything, and the entrance pin board can be re-read for free.
 - Notes can change the world. For example, a note "switch · west · first" makes the next run's hint point there, and residents may quote notes.
 
 ### 6.4 Residents
@@ -372,6 +379,43 @@ Tuning rules:
 
 ---
 
+## As built: residents, endings, polish (milestones 4–6)
+
+- **Residents:** Wren (desk, the run log), Juno (the lamps), Pell (the notice hall). The first talk with each costs 1 per run, after a confirmation; talking again that run is free.
+  - Trust needs an earlier meeting plus the resident's request:
+
+    | Resident | Request |
+    |---|---|
+    | Juno | the notice hall lamp is lit |
+    | Pell | a note naming Pell is on the wall |
+    | Wren | recognition: the pinned note names Wren |
+
+  - Before you meet them, residents are described by what they are doing; afterwards their names join the note kit (subjects 5–7).
+  - Trusted residents each give one hint towards the secret.
+  - From run 6 they gather at the desk; after the secret ending they sit on the bench.
+- **The turn (run 6):**
+  - The auto palette turns to night, and a toast announces the change.
+  - The alcove glows, and the run log offers "Write the last entry".
+  - The last run asks for the entry as it ends. It can't be skipped when the budget is spent; after leaving through the exit, you can still choose to stay.
+- **Endings:** none is scored.
+
+  | Ending | Requires | Trace left in the room |
+  |---|---|---|
+  | A, the record | always available | a closed log on the desk |
+  | B, the lights | all 4 lamps lit | wider, brighter pools |
+  | C, the wall | 12 or more notes on the wall | every card blue |
+  | D, still here (secret) | all 3 residents trusted, plus a wall note with "wait" and "together" | the residents on the bench |
+
+  - Each ending leaves the trace listed above.
+  - Revisiting pops the last log entry and restores that run and its budget.
+  - The alcove bench ("A quiet corner") is listed in the journal only after it has been found.
+- **Palette:**
+  - The menu cycles auto, day and night, and the choice is saved.
+  - Auto follows the system colour scheme and turns to night from run 6.
+  - The canvas darkens with a multiply layer at night, and the light pools shine through it.
+- **Audio cues:** a single tone when a note is posted, the motif played backwards as a run ends, and a 55 Hz hum when the budget is at 25% or less (only if sound is on).
+- **Playtest overlay:** `?debug` shows, per run, the time taken, how the run ended, the budget left and the notes posted, as the §12a targets require. It is in memory only.
+
 ## Decisions (2026-09-25)
 
 - No Bend for now. Rules live in plain JS.
@@ -381,3 +425,4 @@ Tuning rules:
 - Target session length is 25–40 minutes.
 - Phrase kit is 8 subjects / 6 verbs / 5 qualifiers.
 - The budget table is provisional, to be tuned after the first playtest (§12a).
+- Milestones 4–6 are built as described above. Milestone 7 verification is recorded in `VERIFICATION.md`.

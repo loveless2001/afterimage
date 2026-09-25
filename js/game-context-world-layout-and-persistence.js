@@ -29,16 +29,24 @@
     { x: 60, y: 500, w: 150, d: 38, h: 87 },
     { x: 430, y: 300, w: 90, d: 40, h: 30, desk: true }
   ];
-  // Things the player can walk up to. Lamp objects name their lamp in the rules.
-  A.objects = [
+  // Fixed things the player can walk up to. Lamp objects name their lamp in the rules.
+  A.fixedObjects = [
     { id: 'hall', x: 400, y: 62, label: 'The notice hall', type: 'hall' },
     { id: 'lamp-hall', lamp: 'hall', x: 560, y: 62, label: 'Notice hall lamp', type: 'lamp' },
     { id: 'log', x: 475, y: 380, label: 'The run log', type: 'terminal' },
     { id: 'lamp-west', lamp: 'west', x: 155, y: 310, label: 'West stacks lamp', type: 'lamp' },
     { id: 'lamp-east', lamp: 'east', x: 735, y: 225, label: 'East stacks lamp', type: 'lamp' },
     { id: 'lamp-entrance', lamp: 'entrance', x: 600, y: 600, label: 'Entrance lamp', type: 'lamp' },
-    { id: 'exit', x: 905, y: 62, label: 'The exit', type: 'gate' }
+    { id: 'pin', x: 360, y: 610, label: 'The entrance pin', type: 'pin' },
+    { id: 'exit', x: 905, y: 62, label: 'The exit', type: 'gate' },
+    { id: 'bench', x: 110, y: 450, label: 'A quiet corner', type: 'bench' }
   ];
+  // Everything interactable right now: fixed objects plus the residents, whose
+  // places and labels depend on the run (see the residents module).
+  A.roomObjects = () => [...A.fixedObjects, ...Object.keys(S.residents).map(id => {
+    const [x, y] = A.residentSpot(id, G.state);
+    return { id, resident: id, x, y, label: A.residentLabel(id, G.state), type: 'resident' };
+  })];
   // Footer location name for a floor point.
   A.zone = p => p.y < 130 && p.x < 640 ? 'THE NOTICE HALL' : p.x > 845 ? 'THE EXIT' : p.x < 260 && p.y < 500 ? 'THE WEST STACKS'
     : p.x > 620 && p.y < 360 ? 'THE EAST STACKS' : p.y > 500 ? 'THE ENTRANCE' : 'THE CENTRAL DESK';
