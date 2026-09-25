@@ -54,14 +54,19 @@
   };
 
   A.showEnding = function () {
-    const state = G.state, e = S.endings[state.ending];
+    const state = G.state, e = S.endings[state.ending], quote = i => `“${S.noteText(state.notes[i].parts)}”`, wall = S.onWall(state);
+    // Each resident's latest answer, and the wall from its oldest card to its newest.
+    const answers = Object.keys(S.residents).map(id => state.answers.filter(a => a.id === id).at(-1)).filter(Boolean).map(a => quote(a.note));
+    const kept = answers.length ? [`What you told them stays too: ${answers.join(', ')}.`] : [];
+    // Every ending's text is built below, so this must not assume notes on the wall.
+    const span = wall.length ? `, from ${quote(wall[0])} to ${quote(wall.at(-1))}` : '';
     const text = {
       record: ['Wren closes the log. Every run is there, in order: what each one spent and how it ended.', trusted('wren') ? 'On the last line, Wren writes a note about you, the way you once wrote one about her.' : 'Nobody here will remember you. The book will.', 'The desk lamp stays on over the closed log.'],
       lights: ['You leave every lamp burning.', trusted('juno') ? 'Juno walks the room once, touching each lamp as if to check it is real.' : 'Whoever comes next will start in a lit room.', 'They will not know who switched the lamps on. They will know someone did.'],
-      wall: [`${S.onWall(state).length} cards stay on the wall. None of them is signed.`, trusted('pell') ? 'Pell reads them aloud from the first slot to the last. It sounds like one long conversation.' : 'Read together, they sound like one long conversation with yourself.', 'The next reader will add to it.'],
+      wall: [`${wall.length} cards stay on the wall${span}. None of them is signed.`, trusted('pell') ? 'Pell reads them aloud from the first slot to the last. It sounds like one long conversation.' : 'Read together, they sound like one long conversation with yourself.', 'The next reader will add to it.'],
       alcove: ['You sit down. Wren, Juno and Pell move up to make room.', 'Nobody opens the exit. Nobody counts the budget.', 'For the first time, a run does not end. It just goes quiet.']
     }[state.ending];
-    dialog(`ENDING ${e.letter} / ${e.title.toUpperCase()}`, endingTitle(state.ending), [...text, `[Ending ${e.letter} of 4. Runs played: ${state.log.length}. Nothing is scored.]`], [
+    dialog(`ENDING ${e.letter} / ${e.title.toUpperCase()}`, endingTitle(state.ending), [...text, ...kept, `[Ending ${e.letter} of 4. Runs played: ${state.log.length}. Nothing is scored.]`], [
       { label: 'Remain in the room', primary: true, run: A.closeDialog },
       { label: 'Revisit the choice', run: A.revisitEnding },
       { label: 'Export this save', run: A.exportSave }

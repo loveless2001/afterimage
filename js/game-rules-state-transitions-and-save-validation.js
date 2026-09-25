@@ -7,9 +7,9 @@
   const C = root.AfterimageContent || require('./game-content-tables-lamps-kit-residents-endings.js');
   const { budgetTable, runCount, turnRun, lamps, residents, endings, wallSlots, noteCost, talkCost, palettes, entrance, isInt, isLit, isOnWall, onWall } = C;
   const endReasons = ['left', 'budget', 'ending'];
-  const fresh = () => ({ version: 2, run: 1, budget: budgetTable[0], lights: [], notes: [], pinned: null, talks: [], trusted: [], log: [], ending: null, finished: false, benchSeen: false, palette: 'auto', player: { ...entrance } });
+  const fresh = () => ({ version: 2, run: 1, budget: budgetTable[0], lights: [], notes: [], pinned: null, talks: [], trusted: [], answers: [], log: [], ending: null, finished: false, benchSeen: false, palette: 'auto', player: { ...entrance } });
   // Copies nested values so a transition never shares them with its input.
-  const clone = s => ({ ...s, lights: s.lights.map(l => ({ ...l })), notes: s.notes.map(n => ({ ...n, parts: [...n.parts] })), talks: s.talks.map(t => ({ ...t })), trusted: s.trusted.map(t => ({ ...t })), log: s.log.map(e => ({ ...e })), player: { ...s.player } });
+  const clone = s => ({ ...s, lights: s.lights.map(l => ({ ...l })), notes: s.notes.map(n => ({ ...n, parts: [...n.parts] })), talks: s.talks.map(t => ({ ...t })), trusted: s.trusted.map(t => ({ ...t })), answers: s.answers.map(a => ({ ...a })), log: s.log.map(e => ({ ...e })), player: { ...s.player } });
 
   const canLight = (s, id) => !s.finished && Object.hasOwn(lamps, id) && !isLit(s, id) && s.budget >= lamps[id].cost;
   const canWrite = s => !s.finished && s.budget >= noteCost;
@@ -34,7 +34,7 @@
         next.lights.push({ id: action.lamp, run: s.run }); next.budget -= lamps[action.lamp].cost;
         return next;
       case 'Post': {
-        if (!canPost(s, action.replace) || !C.validParts(action.parts) || !C.subjectAvailable(s, action.parts[0])) return null;
+        if (!canPost(s, action.replace) || !C.validParts(action.parts) || !C.partsAvailable(s, action.parts)) return null;
         const used = new Set(onWall(s).map(i => s.notes[i].slot)), replacing = isOnWall(s, action.replace);
         const slot = replacing ? s.notes[action.replace].slot : [...Array(wallSlots).keys()].find(i => !used.has(i));
         if (replacing) next.notes[action.replace].slot = null;
@@ -47,6 +47,10 @@
         if (!C.talkedThisRun(s, id)) { next.talks.push({ id, run: s.run }); next.budget -= talkCost; }
         // Trust needs an earlier meeting, so a first meeting only states the request.
         if (C.hasMet(s, id) && !C.isTrusted(s, id) && C.requestMet[id](next)) next.trusted.push({ id, run: s.run });
+        // A resident who already trusted you reads this run's note as the answer
+        // to their open question; trust earned in this talk waits for the next one.
+        const note = C.isTrusted(s, id) ? C.answerNote(next, id) : -1;
+        if (note >= 0) next.answers.push({ id, q: C.openQuestion(next, id), run: s.run, note });
         return next;
       }
       case 'EndRun': {
@@ -129,6 +133,21 @@
     for (const e of log) if (e.pin !== null && (!isInt(e.pin, 0, notes.length - 1) || notes[e.pin].run > e.run || e.end === 'ending' || e.run === runCount)) fail('Invalid pinned note.');
     if (pinned !== (v.run >= 2 ? log[v.run - 2].pin : null)) fail('Invalid pinned note.');
     if (!trusted.every(t => earned[t.id](t))) fail('Invalid trust.');
+    // Answers (added in milestone 8): each resident's questions in order, one per
+    // run, after trust and at a talk that run, each by a fitting note from that run.
+    const answers = list(v.answers, true).map(a => (a && Object.hasOwn(residents, a.id) && isInt(a.q, 0, C.questions[a.id].length - 1) && isInt(a.run, 1, v.run) &&
+      isInt(a.note, 0, notes.length - 1)) ? { id: a.id, q: a.q, run: a.run, note: a.note } : fail('Invalid answers.'));
+    for (const id of Object.keys(residents)) answers.filter(a => a.id === id).forEach((a, q, mine) => {
+      const trust = trusted.find(t => t.id === id), n = notes[a.note];
+      if (a.q !== q || !trust || trust.run > a.run || (q && mine[q - 1].run >= a.run) || !talks.some(t => t.id === id && t.run === a.run) ||
+        n.run !== a.run || !C.questions[id][q].accept(n.parts)) fail('Invalid answers.');
+    });
+    if (!unique(answers, a => a.note)) fail('Invalid answers.');
+    // A taught word can only appear in notes posted after the note that earned it.
+    notes.forEach((n, i) => n.parts.forEach((w, set) => {
+      const t = w !== null && !(set === 0 && C.residentBySubject(w)) && w >= C.baseWords[set] ? C.teacherOf(set, w) : null;
+      if (t && !answers.some(a => a.id === t.id && a.q === t.q && a.note < i)) fail('Invalid notes.');
+    }));
     // Lamps, notes and first talks are the only costs; each run's spending must match.
     for (let run = 1; run <= v.run; run++) {
       const spent = run <= log.length ? log[run - 1].spent : budgetTable[run - 1] - v.budget;
@@ -139,7 +158,7 @@
     if (!palettes.includes(palette) || typeof benchSeen !== 'boolean') fail('Invalid settings.');
     const p = v.player;
     if (!p || !Number.isFinite(p.x) || !Number.isFinite(p.y) || p.x < 30 || p.x > 930 || p.y < 30 || p.y > 650) fail('Invalid position.');
-    const s = { version: 2, run: v.run, budget: v.budget, lights, notes, pinned, talks, trusted, log, ending, finished: v.finished, benchSeen, palette, player: { x: p.x, y: p.y } };
+    const s = { version: 2, run: v.run, budget: v.budget, lights, notes, pinned, talks, trusted, answers, log, ending, finished: v.finished, benchSeen, palette, player: { x: p.x, y: p.y } };
     // Nothing changes after an ending, so its prerequisites must still hold.
     if (ending && !C.endingReady(s, ending)) fail('Invalid ending.');
     return s;

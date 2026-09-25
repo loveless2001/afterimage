@@ -11,7 +11,7 @@
     if (!G.modalOpen) G.returnFocus = document.activeElement;
     G.modalOpen = true; G.target = null; G.keys.clear(); G.escapeAction = onEscape || A.closeDialog;
     $('speaker').textContent = speaker; $('dialog-title').textContent = title;
-    $('dialog-body').replaceChildren(); $('choices').replaceChildren();
+    $('dialog-body').replaceChildren(); $('choices').replaceChildren(); $('choices').className = '';
     paragraphs.forEach(text => {
       const p = document.createElement('p');
       if (text.startsWith('[')) { p.className = 'aside'; text = text.slice(1, -1); }

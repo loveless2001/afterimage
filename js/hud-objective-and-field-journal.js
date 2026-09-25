@@ -27,6 +27,8 @@
     const unmet = residentIds.filter(id => !S.hasMet(state, id)).length;
     if (unmet) return ['Meet the residents.', `${unmet} of 3 residents have not met you yet. A first talk each run costs ${S.talkCost}.`];
     if (cheapest <= state.budget) return ['Light the archive.', `${dark.length} ${dark.length === 1 ? 'lamp is' : 'lamps are'} still dark. The cheapest costs ${cheapest}. A note costs ${S.noteCost}.`];
+    const asking = residentIds.find(id => S.openQuestion(state, id) !== null && !S.answeredThisRun(state, id));
+    if (asking) { const name = S.residents[asking].name; return [`Answer ${name}.`, `${name} has a question (see the field journal). Answer it with a note posted this run, then talk to ${name} again.`]; }
     return ['Leave something for the next run.', `Post a note at the notice hall (costs ${S.noteCost}), or leave through the exit in the far corner.`];
   }
   // One row of the "room keeps" panel.
@@ -50,11 +52,12 @@
     const low = !state.finished && isLow(state);
     $('budget-bar').classList.toggle('low', low); A.setLowHum(low && G.started);
     const wall = S.onWall(state).length, thisRun = state.notes.filter(n => n.run === state.run).length, trust = state.trusted.length;
+    const met = residentIds.filter(id => S.hasMet(state, id)).length;
     const dark = Object.keys(S.lamps).filter(id => !S.isLit(state, id)), cheapest = Math.min(...dark.map(id => S.lamps[id].cost));
     // Three short rows keep the panel clear of the room; the journal lists each lamp.
     $('kept').replaceChildren(
       keptRow('▤', 'Notes on the wall', `${wall} OF ${S.wallSlots}${thisRun ? ` · ${thisRun} THIS RUN` : ''}`, wall > 0),
-      keptRow('◎', 'Residents', `MET ${residentIds.filter(id => S.hasMet(state, id)).length}/3 · TRUST ${trust}/3`, trust > 0),
+      keptRow('◎', 'Residents', met < 3 ? `MET ${met}/3 · TRUST ${trust}/3` : `TRUST ${trust}/3 · ANSWERED ${state.answers.length}/${S.questionCount}`, trust > 0),
       keptRow('◆', 'Lamps', `${state.lights.length} OF ${lampCount} LIT${dark.length ? ` · NEXT COSTS ${cheapest}` : ''}`, state.lights.length > 0));
     $('panel-note').textContent = state.lights.length || wall ? `Kept: ${state.lights.length} of ${lampCount} lamps, ${wall} notes.` : 'Walking and reading are free.';
     A.applyPalette();
@@ -67,8 +70,11 @@
     const record = [title + ' ' + hint, state.finished ? 'The runs are over.' : `RUN ${pad(state.run)} of ${pad(S.runCount)} · ${state.budget} of ${runBudget(state)} budget left.`];
     for (const id of residentIds) {
       const r = S.residents[id];
-      record.push(!S.hasMet(state, id) ? 'RESIDENT / Someone you have not met yet.' : `${r.name.toUpperCase()} / ${r.role}; ${S.isTrusted(state, id) ? 'trusts you.' : 'has not decided about you.'}`);
+      const q = S.openQuestion(state, id), asks = q === null ? '' : ` Asks: ${A.questionLines[id][q].ask} Answer with ${A.questionLines[id][q].form}.`;
+      const trust = !S.isTrusted(state, id) ? 'has not decided about you.' : q === null ? 'trusts you; every question answered.' : 'trusts you.';
+      record.push(!S.hasMet(state, id) ? 'RESIDENT / Someone you have not met yet.' : `${r.name.toUpperCase()} / ${r.role}; ${trust}${asks}`);
     }
+    if (state.answers.length) record.push(`WORDS LEARNED / ${S.learnedWords(state).join(', ')}.`);
     for (const [id, lamp] of Object.entries(S.lamps)) {
       const lit = state.lights.find(l => l.id === id);
       record.push(lit ? `THE ROOM KEEPS / ${lamp.title}, lit in run ${pad(lit.run)}.` : `DARK / ${lamp.title}. Costs ${lamp.cost}.`);

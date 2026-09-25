@@ -1,6 +1,7 @@
 // Notes: reading the notice hall, building a note from the preset phrase kit
-// (subject → verb → qualifier), taking a note down when the wall is full,
-// pinning one note at the entrance as a run ends, and reading that pin.
+// (subject → verb → qualifier; learned words join as residents teach them),
+// taking a note down when the wall is full, pinning one note at the entrance
+// as a run ends, and reading that pin.
 (function () {
   'use strict';
   const A = window.Afterimage, G = A.game, S = A.S, pad = A.pad;
@@ -26,11 +27,12 @@
   // One step of the builder; Escape and "Back" go one step back.
   function pick(step, draft) {
     const [set, title] = steps[step], back = step ? () => pick(step - 1, draft.slice(0, -1)) : A.openNoticeHall;
-    // Resident names only appear once that resident has been met.
-    const options = S.kit[set].map((word, i) => ({ label: word, run: () => chosen(step, [...draft, i]) })).filter((_, i) => step !== 0 || S.subjectAvailable(G.state, i));
+    // Resident names appear once met, and taught words once their question is answered.
+    const options = S.kit[set].map((word, i) => ({ label: word, run: () => chosen(step, [...draft, i]) })).filter((_, i) => S.wordAvailable(G.state, step, i));
     if (step === 2) options.push({ label: 'No qualifier', run: () => chosen(step, [...draft, null]) });
     dialog(`WRITE A NOTE / ${step + 1} OF 3`, title, [draft.length ? `So far: ${S.noteText(draft)}` : 'Notes are built from preset words, so every run can read them.'],
       [...options, { label: step ? 'Back' : 'Cancel', run: back }], back);
+    A.$('choices').classList.add('words'); // two columns, so a longer kit still fits on a phone
   }
   function chosen(step, draft) {
     if (step < 2) return pick(step + 1, draft);

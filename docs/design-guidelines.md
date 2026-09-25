@@ -230,6 +230,7 @@ There is no real-time pressure: walking is free and the budget is spent only by 
 
   - Resident subjects show as "someone" until that resident has been met in any run; after that they show the resident's name.
   - *As built (M3):* the kit has only the 5 place subjects. The resident subjects are appended in M4, so stored indices never shift.
+  - *As built (M8):* nine learned words are appended after them: subjects *the dark*, *log*, *wall*; verbs *light*, *remember*, *keep*; qualifiers *tonight*, *still*, *for good*. Each is taught by answering a resident's question (see the milestone 8 section).
   - The alcove is deliberately not in the kit, so the secret has to be found by exploring, not by reading notes.
   - A note is subject + verb, with an optional qualifier. That gives 8 × 6 × 6 = 288 combinations.
   - A save stores a note as three small integers.
@@ -357,6 +358,7 @@ tests/browser.cjs                  Playwright journey, no external requests
 5. **Endings:** 3 standard plus the secret, the ending screens and the room traces.
 6. **Polish:** night palette with its run-6 switch and the menu override, audio cues, mobile layout, accessibility pass.
 7. **Verification:** state tests, a browser journey for each ending, and screenshots in `/tmp/afterimage-verification`.
+8. **Notes answer residents** (after the first playtest): trusted residents ask questions that notes answer; answers teach new words.
 
 ---
 
@@ -391,7 +393,7 @@ Tuning rules:
     | Wren | recognition: the pinned note names Wren |
 
   - Before you meet them, residents are described by what they are doing; afterwards their names join the note kit (subjects 5–7).
-  - Trusted residents each give one hint towards the secret.
+  - Each resident's hint towards the secret now comes with the reply to their last question (M8), and is repeated once all their questions are answered.
   - From run 6 they gather at the desk; after the secret ending they sit on the bench.
 - **The turn (run 6):**
   - The auto palette turns to night, and a toast announces the change.
@@ -416,6 +418,45 @@ Tuning rules:
 - **Audio cues:** a single tone when a note is posted, the motif played backwards as a run ends, and a 55 Hz hum when the budget is at 25% or less (only if sound is on).
 - **Playtest overlay:** `?debug` shows, per run, the time taken, how the run ended, the budget left and the notes posted, as the §12a targets require. It is in memory only.
 
+## As built: questions and learned words (milestone 8)
+
+The first playtest found that runs 3–5 dragged once the lamps were lit and all three residents trusted you. By then notes only counted towards 12, and trusted residents repeated one line. Now a note's words matter:
+
+- Once a resident trusts you, they ask 3 questions in order (9 in total). The dialog always states the kind of note that answers, so nothing is guessed.
+- **To answer:** post a fitting note this run, then talk to them again that run. It costs the usual first talk (1) plus the note (1); the answer itself is free.
+- **Limits:**
+  - One answer per resident per run.
+  - The talk that earns trust never also answers.
+  - A note answers at most one question.
+  - A note from an earlier run doesn't count.
+- **Rewards:** each answer earns a reply that quotes the note and teaches one word for the note kit.
+
+  | Resident | Asks | Answered by | Teaches |
+  |---|---|---|---|
+  | Juno | where it was darkest | a place + avoid/check | *light* |
+  | Juno | who the light is for | a resident + *light* | *the dark* |
+  | Juno | what the dark should do | *the dark* + leave | *tonight* |
+  | Wren | what goes on the blank line | any note with a qualifier | *remember* |
+  | Wren | who you remember | a resident + *remember* | *log* |
+  | Wren | what the log should keep | *log* + *keep* (taught by Pell) | *still* |
+  | Pell | something worth reading twice | any note ending "again" | *keep* |
+  | Pell | what the wall should keep | a place or resident + *keep* | *wall* |
+  | Pell | something for all of us | a resident or *wall* + *remember* (taught by Wren) | *for good* |
+
+- **Crossed chains:** when a question needs another resident's word, the dialog says who uses it.
+- **Secret hints:** each resident's last reply carries their hint towards the secret. Ending rules are unchanged: C still needs 12 notes and D still needs "wait · together", so finished saves still load.
+- **Where progress shows:**
+  - the Residents row (`TRUST n/3 · ANSWERED n/9` once everyone is met)
+  - the objective "Answer X." (after lamps, before "Leave something…")
+  - the journal (each open question and its note form, plus the words learned)
+  - the run toast ("Learned last run: …")
+  - the ending screens, which quote each resident's latest answer; ending C also quotes the wall's first and newest cards
+- **Note builder:** all three steps list only available words, in a two-column grid so 11 subjects fit at 390px.
+- **Save:** `answers: [{ id, q, run, note }]`. A save without it loads with none.
+  - Validation checks question order, one answer per resident per run, trust by then, a talk that run, and a fitting note from that run used once.
+  - A note that uses a taught word must come after the note that earned it.
+- **Playtest watch:** a fast route finishes all 9 by run 4, which could leave run 5 empty again. If so, add a 4th question each or cap answers per run.
+
 ## Decisions (2026-09-25)
 
 - No Bend for now. Rules live in plain JS.
@@ -426,3 +467,4 @@ Tuning rules:
 - Phrase kit is 8 subjects / 6 verbs / 5 qualifiers.
 - The budget table is provisional, to be tuned after the first playtest (§12a).
 - Milestones 4–6 are built as described above. Milestone 7 verification is recorded in `VERIFICATION.md`.
+- After the first playtest: notes answer residents' questions and teach words (milestone 8). Ending C keeps its 12-note rule.

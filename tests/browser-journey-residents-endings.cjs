@@ -30,6 +30,17 @@ module.exports = async h => {
   assert.deepEqual((await stored(w)).trusted, [{ id: 'wren', run: 2 }]); await w.context().close();
   console.log('PASS: recognition from a pinned note earns Wren’s trust');
 
+  // A trusted Juno reads this run's note as the answer and teaches a word for the builder.
+  const a = await newPage(seed([lightLamp('hall'), talk('juno'), talk('juno'), post([2, 1, null])], { x: 700, y: 490 }));
+  await begin(a); await interact(a, 'Juno'); await heading(a, '“So that’s where.”');
+  assert.match(await a.locator('#dialog-body').innerText(), /New word: “light”/);
+  assert.deepEqual((await stored(a)).answers, [{ id: 'juno', q: 0, run: 1, note: 0 }]); await close(a);
+  await walk(a, 400, 95); await interact(a, 'The notice hall'); await button(a, 'Write a note').click();
+  assert.equal(await a.locator('#choices').getAttribute('class'), 'words');
+  await button(a, 'desk').click(); assert.equal(await button(a, 'light').count(), 1, 'the learned verb is in the builder');
+  await a.screenshot({ path: path.join(output, 'question-answered-word-learned.png') }); await a.context().close();
+  console.log('PASS: answering a question with a note teaches a word the note builder offers');
+
   // The turn: night palette, the bench secret, revisiting, then the desk's last entry.
   const t = await newPage(seed([...trustAll, leaveRun, leaveRun, leaveRun, leaveRun], { x: 150, y: 450 }));
   await begin(t);

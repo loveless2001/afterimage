@@ -165,3 +165,35 @@ The game is complete: three residents with trust and recognition, the turn at ru
 - **Silent Escape (smaller):** the forced last entry on a spent run 7 now explains why Escape doesn't close it, instead of silently redrawing.
 
 After the fixes, the state tests passed 19/19, the smoke playthrough passed with no page errors, and `node --check` passed on every file.
+
+## Milestone 8: notes answer residents — 25 September 2026
+
+After the first playtest (runs 3–5 dragged once lamps and trust were done), trusted residents now ask 3 questions each. A note posted that run answers, and each answer teaches a word for the note kit. See the milestone 8 section of `docs/design-guidelines.md`.
+
+- **Syntax:** `node --check` passed on all `js/*.js` and `tests/*.cjs`.
+- **State tests:** `node --test tests/*.test.cjs` passed 23/23. The new file `tests/state-questions-and-learned-words.test.cjs` covers:
+  - answers need a fitting note from this run
+  - one answer per resident per run
+  - the trust talk never also answers
+  - one note answers one question
+  - taught words are blocked until learned
+  - cross-chain words name their teacher
+  - all 9 answers fit the budget table by run 4
+  - saves without `answers` load
+  - seven forged saves (answers or early words) are rejected
+- **Browser smoke (CDP, scratchpad runner, headless shell):** passed with no page errors. It covered:
+  - the answer reply and "New word" line
+  - the builder offering the learned verb in its two-column grid
+  - the one-answer-per-run notice
+  - "not quite" for a non-fitting note
+  - the "Answer Pell." objective
+  - Wren's missing-word hint naming Pell
+  - `ANSWERED 9/9` and the words learned in the journal
+  - the "Learned last run" toast
+  - ending C's wall and answer quotes
+  - ending B with no notes (regression)
+  - the builder at 390px: 11 subjects and Cancel fit
+- **Browser journeys:** `browser-journey-residents-endings.cjs` adds a step that answers Juno's first question in the room and checks the builder. The Playwright run (`tests/browser.cjs`, same command as above) passed in the user's shell on 25 September 2026.
+
+**Code review** (`plans/reports/code-reviewer-260925-1138-notes-answer-questions-review.md`) found one critical regression, now fixed. `showEnding()` built every ending's text up front, and the new wall quote indexed an empty wall, so ending A or B with no notes crashed the ending screen. The quote is now only built when the wall has notes. The rules and validation had no findings.
+

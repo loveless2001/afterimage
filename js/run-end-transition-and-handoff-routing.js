@@ -29,7 +29,8 @@
       $('transition').classList.remove('on'); G.transitioning = false;
       if (next.finished) return A.showEnding();
       const turn = next.run === S.turnRun ? ' The lights are different tonight; the residents have gathered at the desk.' : '';
-      A.toast(`Run ${pad(next.run)}. Budget ${next.budget}. The room kept ${next.lights.length} of ${Object.keys(S.lamps).length} lamps and ${S.onWall(next).length} notes.${turn}`);
+      const learned = S.learnedWords(before, before.run).map(w => `“${w}”`), words = learned.length ? ` Learned last run: ${learned.join(', ')}.` : '';
+      A.toast(`Run ${pad(next.run)}. Budget ${next.budget}. The room kept ${next.lights.length} of ${Object.keys(S.lamps).length} lamps and ${S.onWall(next).length} ${S.onWall(next).length === 1 ? 'note' : 'notes'}.${words}${turn}`);
       if (next.pinned !== null) A.showPinned(true);
     }, A.reducedMotion ? 30 : 1600);
   };

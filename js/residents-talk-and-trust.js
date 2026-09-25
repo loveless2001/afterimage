@@ -1,5 +1,6 @@
 // Talking to residents: confirms the cost of a first talk each run, applies
-// the Talk rule (which may record trust), and picks the right authored lines.
+// the Talk rule (which may record trust or an answer), and picks the right
+// authored lines: first meeting, trust, then questions until all are answered.
 // Resident positions change at the turn (they gather at the desk) and after
 // the secret ending (they sit on the alcove bench).
 (function () {
@@ -31,16 +32,38 @@
   };
 
   function talk(id) {
-    const met = S.hasMet(G.state, id), wasTrusted = S.isTrusted(G.state, id);
+    const met = S.hasMet(G.state, id), wasTrusted = S.isTrusted(G.state, id), answers = G.state.answers.length;
     S.advance(G.state, { type: 'Talk', resident: id }); A.save(); A.updateHUD();
     const state = G.state, wall = S.onWall(state), name = S.residents[id].name;
-    const [title, lines] = A.residentLines[id]({
-      first: !met, trusting: !wasTrusted && S.isTrusted(state, id), trusted: S.isTrusted(state, id),
+    const answer = state.answers.length > answers ? state.answers.at(-1) : null, trusting = !wasTrusted && S.isTrusted(state, id);
+    // Once trusted, a resident talks about their questions until all are answered.
+    const [title, lines] = wasTrusted && (answer || S.openQuestion(state, id) !== null) ? questionTalk(id, answer) : A.residentLines[id]({
+      first: !met, trusting, trusted: S.isTrusted(state, id),
       recognized: S.recognizes(state, id), turn: state.run >= S.turnRun, late: state.run >= 4,
       newest: wall.length ? S.noteText(state.notes[wall.at(-1)].parts) : null,
       allLamps: Object.keys(S.lamps).every(l => S.isLit(state, l))
     });
-    const tail = state.budget === 0 ? ['[Budget spent. This run ends when you close this.]'] : [];
+    const tail = [...(trusting ? [`[${name} has a question for you now. Talk to ${name} again to hear it.]`] : []),
+      ...(state.budget === 0 ? ['[Budget spent. This run ends when you close this.]'] : [])];
     dialog(met ? name.toUpperCase() : `A RESIDENT / ${name.toUpperCase()}`, title, [...lines, ...tail], [leave(`Leave ${name} be`)]);
+  }
+
+  // A trusted resident's side of the questions: the reply to the note that just
+  // answered, or the open question and the kind of note that answers it.
+  function questionTalk(id, answer) {
+    const state = G.state, name = S.residents[id].name, q = S.openQuestion(state, id), word = w => `“${S.wordText(w)}”`;
+    if (answer) {
+      const [title, lines] = A.questionLines[id][answer.q].reply(S.noteText(state.notes[answer.note].parts));
+      return [title, [...lines, `[New word: ${word(S.questions[id][answer.q].teaches)}. It is in the note builder now.]`,
+        q === null ? `[That was ${name}’s last question.]` : `[${name} has another question. It can be answered in a later run.]`]];
+    }
+    const { ask, why, form } = A.questionLines[id][q], later = S.answeredThisRun(state, id);
+    const missing = (S.questions[id][q].needs || []).filter(([set, i]) => !S.wordAvailable(state, set, i));
+    // A note from this run that answered nobody was posted, but does not fit.
+    const tried = !later && S.onWall(state).some(i => state.notes[i].run === state.run && !state.answers.some(a => a.note === i));
+    return [ask, [why, ...(tried ? ['“That isn’t quite it. Not yet.”'] : []),
+      later ? '[One answer per resident each run. This one can be answered in a later run.]'
+        : `[Answer with a note: ${form}. Post it at the notice hall this run, then talk to ${name} again.]`,
+      ...missing.map(w => `[You don’t know the word ${word(w)} yet. ${S.residents[S.teacherOf(...w).id].name} uses it.]`)]];
   }
 })();
