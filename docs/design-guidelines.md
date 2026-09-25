@@ -126,7 +126,7 @@ Implement it as `:root[data-theme="night"]`.
 - **Notice hall (N):** the persistent wall. It fills over runs and is the visual record of progress.
 - **Stacks (W/E):** exploration, collectibles and small tasks.
 - **Exit / threshold (NE):** where a run ends deliberately.
-- **Alcove (W, half-hidden behind a shelf):** houses the secret-ending object. It is readable but easy to walk past.
+- **Alcove (W, tucked between the west shelves):** houses the secret-ending object. It stays in view but is easy to walk past.
 
 **Zone rules:**
 - Each zone has a floor label (large, 17px, 50% alpha) and a footer location string.

@@ -21,12 +21,11 @@
     width: 0, height: 0, scale: 1, origin: { x: 0, y: 0 }, lastSaved: 0,
     returnFocus: null, escapeAction: null, keys: new Set()
   };
-  // Obstacles: two shelves per stack, a shelf screening the west alcove, and
-  // the central desk (drawn as a desk, not a shelf).
+  // Obstacles: two shelves per stack and the central desk (drawn as a desk,
+  // not a shelf). The west alcove bench is left open so it stays in view.
   A.shelves = [
     { x: 70, y: 220, w: 170, d: 38, h: 98 }, { x: 70, y: 360, w: 170, d: 38, h: 87 },
     { x: 640, y: 120, w: 190, d: 38, h: 98 }, { x: 640, y: 290, w: 190, d: 38, h: 92 },
-    { x: 60, y: 500, w: 150, d: 38, h: 87 },
     { x: 430, y: 300, w: 90, d: 40, h: 30, desk: true }
   ];
   // Fixed things the player can walk up to. Lamp objects name their lamp in the rules.
