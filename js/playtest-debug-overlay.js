@@ -1,6 +1,7 @@
 // Playtest overlay (design §12a), shown only with ?debug in the URL. It tracks,
 // for this browser session only, how long each run took, how it ended, the
-// budget left and the notes posted, to tune the budget table. Nothing is sent
+// budget left, the notes posted and the questions answered, to tune the budget
+// table and spot an empty run 5 (design §12, milestone 8). Nothing is sent
 // anywhere; the numbers live in memory and disappear on reload.
 (function () {
   'use strict';
@@ -19,14 +20,12 @@
     // Time is added to whichever run is current; the menu does not pause it.
     if (key !== current) { if (current !== null) seconds[current] = (seconds[current] || 0) + performance.now() - since; current = key; since = performance.now(); }
     const live = { ...seconds, [current]: (seconds[current] || 0) + performance.now() - since };
-    const rows = state.log.map(e => {
-      const notes = state.notes.filter(n => n.run === e.run).length;
-      return `RUN ${pad(e.run)}  ${(live[e.run] ? clock(live[e.run]) : '  -  ').padStart(5)}  ${e.end.padEnd(6)}  left ${e.budget - e.spent}/${e.budget}  notes ${notes}`;
-    });
-    if (!state.finished) rows.push(`RUN ${pad(state.run)}  ${clock(live[state.run] || 0).padStart(5)}  now     left ${state.budget}/${S.budgetTable[state.run - 1]}`);
+    const made = run => `notes ${state.notes.filter(n => n.run === run).length}  ans ${state.answers.filter(a => a.run === run).length}`;
+    const rows = state.log.map(e => `RUN ${pad(e.run)}  ${(live[e.run] ? clock(live[e.run]) : '  -  ').padStart(5)}  ${e.end.padEnd(6)}  left ${e.budget - e.spent}/${e.budget}  ${made(e.run)}`);
+    if (!state.finished) rows.push(`RUN ${pad(state.run)}  ${clock(live[state.run] || 0).padStart(5)}  now     left ${state.budget}/${S.budgetTable[state.run - 1]}  ${made(state.run)}`);
     const ended = state.log.filter(e => e.end !== 'ending'), byBudget = ended.filter(e => e.end === 'budget').length;
     panel.textContent = [`PLAYTEST  session ${clock(performance.now() - sessionStart)}  (targets: 3–6 min/run, 25–40 total)`,
-      ...rows, `ended by budget ${byBudget} · by leaving ${ended.length - byBudget}`, `table ${S.budgetTable.join(' ')}`].join('\n');
+      ...rows, `ended by budget ${byBudget} · by leaving ${ended.length - byBudget} · answered ${state.answers.length}/${S.questionCount}`, `table ${S.budgetTable.join(' ')}`].join('\n');
   }
   setInterval(() => { if (G.started) tick(); }, 500);
 })();

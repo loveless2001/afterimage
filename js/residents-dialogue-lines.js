@@ -1,7 +1,8 @@
 // Authored lines for the three residents. Each function receives a context
 // ({ first, recognized, trusting, trusted, turn, late, newest, allLamps }) and
 // returns [title, paragraphs]. Residents remember the room, never your face,
-// unless a pinned note names them. Trusted residents share the secret's hints.
+// unless a pinned note names them. The trusted lines only play once every
+// question is answered, repeating the hint from the last reply.
 (function () {
   'use strict';
   const A = window.Afterimage;

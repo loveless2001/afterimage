@@ -122,6 +122,9 @@
     if (q === null || answeredThisRun(s, id)) return -1;
     return onWall(s).filter(i => s.notes[i].run === s.run && !s.answers.some(a => a.note === i) && questions[id][q].accept(s.notes[i].parts)).at(-1) ?? -1;
   };
+  // Residents who have answered every question, so their last reply (with its
+  // hint towards the secret) has been heard: 0–3. The alcove warms with it.
+  const hintsHeard = s => Object.keys(residents).filter(id => isTrusted(s, id) && openQuestion(s, id) === null).length;
   // Prerequisites only; the rules also require run ≥ turnRun and an unfinished game.
   const endingReady = (s, id) => id === 'record' ? true
     : id === 'lights' ? Object.keys(lamps).every(l => isLit(s, l))
@@ -134,7 +137,7 @@
     budgetTable, runCount, turnRun, lamps, residents, kit, endings, wallSlots, noteCost, talkCost, wallEndingNotes, palettes, entrance,
     isInt, isLit, lampCost, noteText, validParts, onWall, isOnWall, residentBySubject,
     hasMet, talkedThisRun, isTrusted, pinnedNote, recognizes, requestMet, endingReady, endingAvailable,
-    baseWords, questions, questionCount, teacherOf, wordAvailable, partsAvailable, openQuestion, answeredThisRun, answerNote, wordText, learnedWords
+    baseWords, questions, questionCount, teacherOf, wordAvailable, partsAvailable, openQuestion, answeredThisRun, answerNote, wordText, learnedWords, hintsHeard
   };
   root.AfterimageContent = api;
   if (typeof module !== 'undefined') module.exports = api;

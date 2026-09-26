@@ -197,3 +197,11 @@ After the first playtest (runs 3–5 dragged once lamps and trust were done), tr
 
 **Code review** (`plans/reports/code-reviewer-260925-1138-notes-answer-questions-review.md`) found one critical regression, now fixed. `showEnding()` built every ending's text up front, and the new wall quote indexed an empty wall, so ending A or B with no notes crashed the ending screen. The quote is now only built when the wall has notes. The rules and validation had no findings.
 
+## Progress cues in the room — 26 September 2026
+
+Trusted residents wear blue rings; a card above a resident shows an open question (solid once a note posted this run answers it); the notice wall outlines its remaining top-row slots from 9 notes and rules the row at 12; the alcove warms one step per secret hint heard. See "As built: progress cues" in `docs/design-guidelines.md`. The shelf that hid the alcove bench was removed in the previous commit.
+
+- **Syntax:** `node --check` passed on all `js/*.js` and `tests/*.cjs`.
+- **State tests:** `node --test tests/*.test.cjs` passed 24/24, including the new `hintsHeard` test (0 until a resident's last question is answered, then one per resident).
+- **Browser check (agent-browser, seeded saves, 1440×960):** screenshots in day and night of run 4 with Wren ready (solid card), Pell waiting (outlined card), 10 notes (two outlined slots) and one hint heard; 12 notes (rule under the row) with three hints heard; run 1 with Juno trusted next to Pell untrusted, the card lifted over Juno's label. The objective read "Answer Juno." with the ready line in run 1 ahead of "Meet the residents.", and the journal showed the ready line and "11 more fill the top row."
+- **Browser journeys:** `browser-journey-residents-endings.cjs` now asserts the ready objective before answering Juno. **Pending:** the Playwright run in the user's shell (`tests/browser.cjs`).

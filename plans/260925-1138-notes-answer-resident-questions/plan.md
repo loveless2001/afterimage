@@ -98,4 +98,4 @@ Review: `plans/reports/code-reviewer-260925-1138-notes-answer-questions-review.m
 
 ## Decisions / open
 - Ending C keeps the 12-note rule (no answer given; "every question answered" would break finished saves).
-- Resident chains are a replacement for the trusted lines' hints, not an extra layer. Confirm this is fine.
+- Resident chains are a replacement for the trusted lines' hints, not an extra layer. Confirmed 26 Sep 2026: hints come only with the last reply (and its repeat once all questions are answered).

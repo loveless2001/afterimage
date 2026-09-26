@@ -46,7 +46,8 @@ Canvas palette:
 | Book spines (cycle) | `#d4d7c9` `#a9b49e` `#c0c7b6` `#8e9e89` | | |
 | Lamp light | `#fbf7d6` at 50% → 0% | | |
 | Player body | `#353e34`, marker `#984e40` | | |
-| Resident body | `#69745f`, rings `#bbc5a6` | | |
+| Resident body | `#69745f`, rings `#bbc5a6` (Pell's untrusted rings are neutral `#cfd0c2`) | | |
+| Trusted resident rings | `#a9c3cf` (light `--note`), 0.9px | | |
 | Interaction ring / label | `#9a574a` / `#704c40` | | |
 
 Proposed additions:
@@ -364,13 +365,14 @@ tests/browser.cjs                  Playwright journey, no external requests
 
 ### 12a. First playtest (budget tuning)
 
-Track these per run, with a debug overlay toggled by `?debug` in the URL. It stays local and is never sent anywhere:
+Track these per run with the debug overlay (add `?debug` to the URL). It stays local and is never sent anywhere:
 
 | Measure | Target |
 |---|---|
 | Real time per run | 3–6 min |
 | Segments left when the run ends | 0–2 on short runs; long runs may end early by choice |
 | Notes posted per run | ≥ 1 from run 2 onward |
+| Questions answered per run | at least one question still open going into run 5 (all 9 done by run 4 means run 5 is empty) |
 | Runs that end by budget vs by leaving | roughly half and half |
 | Total session | 25–40 min |
 
@@ -378,6 +380,7 @@ Tuning rules:
 - If a run is under 3 minutes, add 1–2 segments.
 - If players never leave early, shorten the short runs.
 - Keep the short/long alternation.
+- If players answer all 9 questions by run 4, give each resident a 4th question or cap answers at two per run.
 
 ---
 
@@ -457,6 +460,23 @@ The first playtest found that runs 3–5 dragged once the lamps were lit and all
   - A note that uses a taught word must come after the note that earned it.
 - **Playtest watch:** a fast route finishes all 9 by run 4, which could leave run 5 empty again. If so, add a 4th question each or cap answers per run.
 
+## As built: progress cues in the room (26 Sep 2026)
+
+The room was uniformly grey-green; progress only showed in the HUD and journal. A few quiet cues now use the existing colour rules (blue = persists, warm = light). Plan: `plans/260926-0047-progress-visual-cues/plan.md`.
+
+| Cue | Shows | Text equivalent |
+|---|---|---|
+| Blue rings (`#a9c3cf`, slightly heavier) | the resident trusts you; trust persists, so it takes the blue | journal "trusts you", HUD `TRUST n/3` |
+| Outlined card above a resident | their question is open and waits for a note | journal "Asks: …", objective "Answer X." |
+| Solid blue card, pale edge | a note posted this run answers it; talk to them now | objective "Answer X." (ahead of every step but the turn) and the journal line |
+| Blue outlines on the wall's empty top-row slots (from 9 notes) | ending C's 12 = the top row, which fills first | journal "n more fill the top row." |
+| Blue rule under the top row (12+) | the row, and ending C's threshold, is full | journal "The top row is full." |
+| Warm pool at the alcove, one step per resident whose questions are all answered | the secret's hints, heard in each last reply | the hints themselves |
+
+- Cards and the wall cues are drawn after the night layer so they stay readable at night. Nothing animates. The alcove pool is part of the light pools, and from the turn it is the full alcove glow.
+- Cards sit just above the head and lift over the name label when you stand next to the resident. They hide once the resident has answered this run, after their last question, and after an ending.
+- The "wait · together" note is deliberately not marked.
+
 ## Decisions (2026-09-25)
 
 - No Bend for now. Rules live in plain JS.
@@ -468,3 +488,4 @@ The first playtest found that runs 3–5 dragged once the lamps were lit and all
 - The budget table is provisional, to be tuned after the first playtest (§12a).
 - Milestones 4–6 are built as described above. Milestone 7 verification is recorded in `VERIFICATION.md`.
 - After the first playtest: notes answer residents' questions and teach words (milestone 8). Ending C keeps its 12-note rule.
+- The secret's hints come only with each resident's last reply (repeated once all their questions are answered), never with the trust talk or the questions (26 Sep 2026). The alcove warmth counts these replies.

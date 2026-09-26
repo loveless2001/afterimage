@@ -22,6 +22,9 @@
       const ready = ['record', 'lights', 'wall'].filter(id => S.endingReady(state, id)).length;
       return ['Decide what the room keeps.', `Write the last entry in the run log at the desk. ${ready} of 3 endings are ready; lamps and notes can still change that.`];
     }
+    // A posted note only answers in its own run, so a ready answer comes first.
+    const ready = residentIds.find(id => S.answerNote(state, id) >= 0);
+    if (ready) { const name = S.residents[ready].name; return [`Answer ${name}.`, readyLine(name)]; }
     if (isLow(state)) return ['Your budget is nearly spent.', 'Post a note for the next run at the notice hall, or leave through the exit in the far corner.'];
     if (!state.lights.length && !state.notes.length && !state.talks.length) return ['Switch on a lamp.', 'Lamps stay on after a run ends. Each one costs budget; walking and reading are free.'];
     const unmet = residentIds.filter(id => !S.hasMet(state, id)).length;
@@ -31,6 +34,7 @@
     if (asking) { const name = S.residents[asking].name; return [`Answer ${name}.`, `${name} has a question (see the field journal). Answer it with a note posted this run, then talk to ${name} again.`]; }
     return ['Leave something for the next run.', `Post a note at the notice hall (costs ${S.noteCost}), or leave through the exit in the far corner.`];
   }
+  const readyLine = name => `A note you posted this run answers ${name}’s question. Talk to ${name} again.`;
   // One row of the "room keeps" panel.
   function keptRow(icon, title, detail, present) {
     const el = document.createElement('div'); el.className = `kept-item${present ? '' : ' absent'}`;
@@ -70,7 +74,8 @@
     const record = [title + ' ' + hint, state.finished ? 'The runs are over.' : `RUN ${pad(state.run)} of ${pad(S.runCount)} · ${state.budget} of ${runBudget(state)} budget left.`];
     for (const id of residentIds) {
       const r = S.residents[id];
-      const q = S.openQuestion(state, id), asks = q === null ? '' : ` Asks: ${A.questionLines[id][q].ask} Answer with ${A.questionLines[id][q].form}.`;
+      const q = S.openQuestion(state, id), ready = S.answerNote(state, id) >= 0 ? ' ' + readyLine(r.name) : '';
+      const asks = q === null ? '' : ` Asks: ${A.questionLines[id][q].ask} Answer with ${A.questionLines[id][q].form}.${ready}`;
       const trust = !S.isTrusted(state, id) ? 'has not decided about you.' : q === null ? 'trusts you; every question answered.' : 'trusts you.';
       record.push(!S.hasMet(state, id) ? 'RESIDENT / Someone you have not met yet.' : `${r.name.toUpperCase()} / ${r.role}; ${trust}${asks}`);
     }
@@ -79,7 +84,8 @@
       const lit = state.lights.find(l => l.id === id);
       record.push(lit ? `THE ROOM KEEPS / ${lamp.title}, lit in run ${pad(lit.run)}.` : `DARK / ${lamp.title}. Costs ${lamp.cost}.`);
     }
-    record.push(`NOTES / ${S.onWall(state).length} of ${S.wallSlots} on the wall.`);
+    const wall = S.onWall(state).length, toRow = S.wallEndingNotes - wall;
+    record.push(`NOTES / ${wall} of ${S.wallSlots} on the wall. ${toRow > 0 ? `${toRow} more ${toRow === 1 ? 'fills' : 'fill'} the top row.` : 'The top row is full.'}`);
     if (S.pinnedNote(state)) record.push(`PINNED / “${S.noteText(S.pinnedNote(state).parts)}”.`);
     // The alcove bench is only listed once it has been found.
     const places = A.roomObjects().filter(o => o.id !== 'bench' || state.benchSeen);

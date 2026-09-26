@@ -6,13 +6,17 @@
   'use strict';
   const A = window.Afterimage, G = A.game, S = A.S, ctx = A.ctx;
   const { project, polygon, line, box, label, ring } = A;
-  // Body, ring and marker colours per figure.
+  // Body, ring and marker colours per figure. Untrusted rings stay neutral so
+  // that blue, the colour of what persists, only ever means trust.
   const looks = {
     player: { body: '#353e34', rings: '#b9c4b1', marker: '#984e40' },
     wren: { body: '#69745f', rings: '#bbc5a6' },
     juno: { body: '#7d6b4c', rings: '#d8c9a3' },
-    pell: { body: '#566a7a', rings: '#b7c8d4' }
+    pell: { body: '#566a7a', rings: '#cfd0c2' }
   };
+  const trustedRings = '#a9c3cf';
+  // Where a notice-wall card sits: twelve per row, the top row (slots 0–11) first.
+  const slotAt = slot => ({ x: 250 + (slot % 12) * 33, z: 79 - Math.floor(slot / 12) * 34 });
 
   function shelf(s) {
     polygon([project(s.x, s.y + s.d), project(s.x + s.w, s.y + s.d), project(s.x + s.w + 40, s.y + s.d + 53), project(s.x + 40, s.y + s.d + 53)], '#626b5415');
@@ -34,13 +38,14 @@
     box(s.x + 10, s.y + 6, 16, 12, 7, ['#e9dfb4', '#b9a978', '#cfc294'], s.h + 32);
     if (G.state.ending === 'record') box(s.x + 45, s.y + 10, 28, 20, 6, ['#8a4a3c', '#6d392e', '#7b4236'], s.h);
   }
-  // A floating, ring-bodied figure. Only the player carries the red marker.
-  function agent(x, y, who = 'player') {
+  // A floating, ring-bodied figure. Only the player carries the red marker;
+  // a resident who trusts you wears slightly heavier blue rings.
+  function agent(x, y, who = 'player', trusted = false) {
     const look = looks[who], scale = G.scale, time = G.time, phase = Object.keys(looks).indexOf(who) * 1.3;
     const bob = A.reducedMotion ? 0 : Math.sin(time * 1.8 + phase) * 2.5, p = project(x, y), center = project(x, y, 39 + bob);
     ctx.fillStyle = '#3e4d3822'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 22 * scale, 10 * scale, 0, 0, Math.PI * 2); ctx.fill();
     polygon([project(x, y, 66 + bob), project(x + 17, y - 5, 38 + bob), project(x + 15, y + 8, 15 + bob), project(x - 9, y + 10, 10 + bob), project(x - 17, y, 36 + bob)], look.body);
-    ctx.save(); ctx.translate(center.x, center.y); ctx.strokeStyle = look.rings; ctx.lineWidth = .65;
+    ctx.save(); ctx.translate(center.x, center.y); ctx.strokeStyle = trusted ? trustedRings : look.rings; ctx.lineWidth = trusted ? .9 : .65;
     for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.ellipse(0, 0, (9 + i) * scale, (21 - i) * scale, i * .55 + phase + (A.reducedMotion ? 0 : time * .09), 0, Math.PI * 2); ctx.stroke(); }
     ctx.fillStyle = '#f0eacb'; ctx.fillRect(-7 * scale, -3 * scale, 5 * scale, 2 * scale); ctx.fillRect(3 * scale, -3 * scale, 5 * scale, 2 * scale); ctx.restore();
     if (look.marker) { const head = project(x, y, 85); polygon([{ x: head.x, y: head.y + 6 }, { x: head.x - 4, y: head.y }, { x: head.x + 4, y: head.y }], look.marker); }
@@ -56,7 +61,7 @@
     polygon([project(238, 0, 35), project(652, 0, 35), project(652, 0, 113), project(238, 0, 113)], '#c9cfbbd0', '#a9b39d');
     const bySlot = new Map(state.notes.filter(n => n.slot !== null).map(n => [n.slot, n]));
     for (let slot = 0; slot < S.wallSlots; slot++) {
-      const x = 250 + (slot % 12) * 33, z = 79 - Math.floor(slot / 12) * 34, note = bySlot.get(slot);
+      const { x, z } = slotAt(slot), note = bySlot.get(slot);
       if (note) card(x, 0, z, note.run === state.run || state.ending === 'wall');
       else polygon([project(x, 0, z), project(x + 24, 0, z), project(x + 24, 0, z + 24), project(x, 0, z + 24)], '#dfe2d3', '#aab39c');
     }
@@ -65,7 +70,7 @@
   function object(o) {
     const state = G.state, active = G.nearby?.id === o.id && !G.modalOpen;
     if (active) ring(o.x, o.y, 34, '#9a574a');
-    if (o.type === 'resident') agent(o.x, o.y, o.resident);
+    if (o.type === 'resident') agent(o.x, o.y, o.resident, S.isTrusted(state, o.resident));
     if (o.type === 'hall') box(o.x - 22, o.y - 8, 44, 16, 18, ['#c9cfbb', '#8f9c83', '#a9b39b']);
     if (o.type === 'bench') { box(o.x - 34, o.y - 10, 68, 20, 12, ['#b9ae92', '#8f8568', '#a39a7d']); box(o.x - 34, o.y - 14, 68, 5, 30, ['#c4b99c', '#968b6d', '#aca283'], 12); }
     if (o.type === 'pin') {
@@ -92,5 +97,5 @@
     if (active) label(o.label.toUpperCase(), o.x, o.y, o.type === 'gate' ? 183 : 89, '#704c40', 10);
   }
 
-  A.drawRoom = { shelf, desk, agent, noticeWall, object };
+  A.drawRoom = { shelf, desk, agent, noticeWall, object, slotAt };
 })();

@@ -75,8 +75,21 @@ test('every question can be answered by run 4 on the budget table', () => {
   const s = playAllQuestions();
   assert.equal(s.run, 4); assert.equal(s.answers.length, S.questionCount); assert.equal(S.questionCount, 9);
   for (const id of Object.keys(S.residents)) assert.equal(S.openQuestion(s, id), null);
+  assert.equal(S.hintsHeard(s), 3, 'every last reply, with its hint, has been heard');
   for (const [set, words] of [[0, S.kit.subjects], [1, S.kit.verbs], [2, S.kit.qualifiers]]) words.forEach((_, i) => assert.ok(S.wordAvailable(s, set, i), `${words[i]} is known`));
   assert.deepEqual(roundTrip(s), s);
+});
+
+test('the alcove warms one step per resident whose questions are all answered', () => {
+  const s = S.fresh();
+  assert.equal(S.hintsHeard(s), 0);
+  light(s, 'hall'); talk(s, 'juno'); talk(s, 'juno');
+  assert.equal(S.hintsHeard(s), 0, 'trust alone is not a hint');
+  post(s, [subject('west stacks'), verb('avoid'), null]); talk(s, 'juno'); end(s, 'left');
+  talk(s, 'juno'); post(s, [subject('Juno'), verb('light'), null]); talk(s, 'juno'); end(s, 'left');
+  assert.equal(S.hintsHeard(s), 0, 'two of three answers is not yet the last reply');
+  talk(s, 'juno'); post(s, [subject('the dark'), verb('leave'), null]); talk(s, 'juno');
+  assert.equal(S.openQuestion(s, 'juno'), null); assert.equal(S.hintsHeard(s), 1);
 });
 
 test('saves without answers still load; forged answers and early words are rejected', () => {

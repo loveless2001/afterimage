@@ -32,7 +32,10 @@ module.exports = async h => {
 
   // A trusted Juno reads this run's note as the answer and teaches a word for the builder.
   const a = await newPage(seed([lightLamp('hall'), talk('juno'), talk('juno'), post([2, 1, null])], { x: 700, y: 490 }));
-  await begin(a); await interact(a, 'Juno'); await heading(a, '“So that’s where.”');
+  await begin(a);
+  assert.equal(await a.locator('#objective').innerText(), 'Answer Juno.', 'a ready answer is the next step, ahead of meeting the others');
+  assert.match(await a.locator('#hint').innerText(), /answers Juno’s question/);
+  await interact(a, 'Juno'); await heading(a, '“So that’s where.”');
   assert.match(await a.locator('#dialog-body').innerText(), /New word: “light”/);
   assert.deepEqual((await stored(a)).answers, [{ id: 'juno', q: 0, run: 1, note: 0 }]); await close(a);
   await walk(a, 400, 95); await interact(a, 'The notice hall'); await button(a, 'Write a note').click();
