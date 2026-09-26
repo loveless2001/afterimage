@@ -24,7 +24,7 @@
   function useLamp(object) {
     const state = G.state, lamp = S.lamps[object.lamp], speaker = 'LAMP / ' + lamp.title.toUpperCase();
     const lit = state.lights.find(l => l.id === object.lamp);
-    if (lit) return dialog(speaker, 'The lamp is on.', [lit.run === state.run ? 'You switched it on during this run.' : `It has been on since run ${pad(lit.run)}. The room kept it.`], [leave()]);
+    if (lit) return dialog(speaker, 'The lamp is on.', [lit.by ? `Juno lit it at the start of run ${pad(lit.run)}, as your pinned note asked. The room keeps it.` : lit.run === state.run ? 'You switched it on during this run.' : `It has been on since run ${pad(lit.run)}. The room kept it.`], [leave()]);
     if (state.finished) return dialog(speaker, 'The runs are over.', ['The switch no longer responds.'], [leave()]);
     const affordable = S.canLight(state, object.lamp);
     dialog(speaker, 'Switch on the lamp?', ['The lamp is dark. Once it is on, it stays on in every later run.', `[Costs ${lamp.cost} of your ${state.budget} remaining this run.]`], [
@@ -41,7 +41,10 @@
   // The desk keeps a record of every run: its budget, what was spent, how it ended.
   function readLog() {
     const state = G.state;
-    const posted = run => { const n = state.notes.filter(note => note.run === run).length; return n ? ` · ${n} ${n === 1 ? 'note' : 'notes'}` : ''; };
+    const posted = run => {
+      const n = state.notes.filter(note => note.run === run && S.postedByYou(note)).length, e = state.errands.find(x => x.run === run);
+      return (n ? ` · ${n} ${n === 1 ? 'note' : 'notes'}` : '') + (e ? ` · ${S.residents[e.id].name} on an errand` : '');
+    };
     const lines = state.log.map(e => `RUN ${pad(e.run)} · budget ${e.budget} · spent ${e.spent}${posted(e.run)} · ${e.end === 'budget' ? 'ran out' : 'left through the exit'}`);
     if (!state.finished) lines.push(`RUN ${pad(state.run)} · budget ${S.budgetTable[state.run - 1]} · ${state.budget} left${posted(state.run)} · in progress`);
     if (!state.log.length) lines.unshift('This is the first run. Nothing earlier is recorded.');

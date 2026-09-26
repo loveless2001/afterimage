@@ -58,6 +58,40 @@ module.exports = async h => {
   await capped.context().close();
   console.log('PASS: a run takes two answers; the third resident’s question waits');
 
+  // Errands: pinning "Juno · light" as run 1 runs out sends Juno to light the west lamp.
+  const runOne = [lightLamp('hall'), talk('juno'), talk('pell'), talk('wren'), talk('juno'), post([7, 0, null]), talk('pell'),
+    post([2, 1, null]), talk('juno'), post([1, 0, 4]), talk('pell'), post([6, 6, null])];
+  const e = await newPage(seed(runOne));
+  await begin(e); await heading(e, 'Pin a note for the next run?');
+  assert.match(await e.locator('#dialog-body').innerText(), /sends them on an errand/);
+  assert.match(await button(e, 'Juno · light').innerText(), /Next run Juno lights the west stacks lamp for free; Juno takes no answer then/);
+  assert.doesNotMatch(await button(e, 'Pell · check').innerText(), /Next run/, 'check is not the word Pell answers to');
+  await button(e, 'Juno · light').click();
+  await e.locator('#dialog-body').getByText('Juno read it and lit the west stacks lamp before you came in.', { exact: false }).waitFor();
+  const sent = await stored(e);
+  assert.deepEqual(sent.errands, [{ id: 'juno', run: 2 }]); assert.deepEqual(sent.lights.at(-1), { id: 'west', run: 2, by: 'juno' }); assert.equal(sent.budget, 6);
+  await e.screenshot({ path: path.join(output, 'errand-opening.png') }); await e.context().close();
+  // Juno stands by the lamp she lit and reports it; her question waits.
+  const busy = await newPage(seed([...runOne, { type: 'EndRun', reason: 'budget', pin: 3 }], { x: 265, y: 320 }));
+  await begin(busy); await interact(busy, 'Juno'); await button(busy, 'Talk').click();
+  await busy.locator('#dialog-body').getByText('Your note asked, so I lit it.', { exact: false }).waitFor();
+  assert.match(await busy.locator('#dialog-body').innerText(), /Juno is on an errand this run\. This one can be answered in a later run\./);
+  await busy.screenshot({ path: path.join(output, 'errand-busy-juno.png') }); await busy.context().close();
+  console.log('PASS: a pinned note sends Juno on an errand; she lights a lamp and takes no answer');
+
+  // Run 3 after pinning "Pell · keep": Pell's card is on the wall, and Juno does not
+  // mistake it for a note of yours that failed to answer her.
+  const found = await newPage(seed([...runOne, { type: 'EndRun', reason: 'budget', pin: 3 }, post([7, 8, null]), { type: 'EndRun', reason: 'left', pin: 4 }], { x: 700, y: 490 }));
+  await begin(found);
+  assert.deepEqual((await stored(found)).notes.at(-1), { run: 3, parts: [1, 2, 1], slot: 5, found: 0 });
+  await found.locator('#journal').click();
+  assert.match(await found.locator('#dialog-body').innerText(), /FOUND \/ “lamp · bring · later”, from the west stacks in run 03\./); await close(found);
+  await interact(found, 'Juno'); await button(found, 'Talk').click();
+  await found.locator('#dialog-body').getByText('Answer with a note:', { exact: false }).waitFor();
+  assert.doesNotMatch(await found.locator('#dialog-body').innerText(), /isn’t quite it/);
+  await found.context().close();
+  console.log('PASS: Pell’s found card is listed in the journal and never counts as your note');
+
   // The turn: night palette, the bench secret, revisiting, then the desk's last entry.
   const t = await newPage(seed([...trustAll, leaveRun, leaveRun, leaveRun, leaveRun], { x: 150, y: 450 }));
   await begin(t);

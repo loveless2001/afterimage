@@ -360,6 +360,7 @@ tests/browser.cjs                  Playwright journey, no external requests
 6. **Polish:** night palette with its run-6 switch and the menu override, audio cues, mobile layout, accessibility pass.
 7. **Verification:** state tests, a browser journey for each ending, and screenshots in `/tmp/afterimage-verification`.
 8. **Notes answer residents** (after the first playtest): trusted residents ask questions that notes answer; answers teach new words.
+9. **Errands** (after the second playtest): the pinned note sends a trusted resident on an errand as the next run starts.
 
 ---
 
@@ -479,6 +480,38 @@ The room was uniformly grey-green; progress only showed in the HUD and journal. 
 - Cards sit just above the head and lift over the name label when you stand next to the resident. They hide once the resident has answered this run, once the run has had its 2 answers, after their last question, and after an ending.
 - The "wait · together" note is deliberately not marked.
 
+## As built: errands from the pinned note (milestone 9)
+
+The second playtest found no choices to weigh in runs 2–4: everything persists and the 70 budget over seven runs covers it all, so order never matters and lamps can wait. Errands make the handoff pin a decision. Plan: `plans/260926-1244-errands-from-the-pinned-note/plan.md`.
+
+- **Trigger:** the note pinned as a run ends names a resident who trusts you and uses the word they answer to, which is the first word they taught you. At the start of the next run they do the errand. The pin is used rather than "the newest note naming them", because every errand note also fits a question.
+- **When:** runs 2–5 only (the pins at the end of runs 1–4), so at most 4 errands a game. Pinning the same note again keeps an order going.
+
+  | Note | Errand | Needs |
+  |---|---|---|
+  | Juno · light | lights the next dark lamp for free: west stacks, then east stacks, then entrance | a dark lamp |
+  | Pell · keep | searches the first lit stacks and keeps an old card found there; it goes on the wall for free and counts towards the 12 | the west or east lamp lit, a card left there (2 each), a free wall slot |
+  | Wren · remember | waits at the door: first talks cost nothing this run | the entrance lamp lit |
+
+- **Busy:** the resident on an errand takes no answer that run. Their question card hides, and they stand where the errand is (the lamp, the mouth of the stacks aisle, the entrance pin).
+- **Choices it creates:**
+  - Wren's trust needs a pin naming Wren, which is the same pin an errand would use.
+  - Four errand runs can't cover every free lamp and every card.
+  - Pell and Wren need lamps already lit, so lighting late costs errands.
+- **Found cards:** 4 cards someone left before you, written from the starting words. They never name a resident and never say "wait · together". They don't answer questions and cost nothing. They render as old paper (`#cdbf9c`), never blue. Each has a line of history in the journal; this is where more story can plug in.
+- **Where it shows:**
+  - The pin dialog: each note that would send someone says what they'll do, or why nothing will happen.
+  - The opening pin: what the errand did.
+  - The busy resident's first line, and a talk dialog that says their question waits.
+  - The journal: an ERRAND line, and FOUND lines with each card's history.
+  - The lamp dialog ("Juno lit it…"), the run log, and the debug overlay.
+- **Save:** `errands: [{ id, run }]`. Lamps Juno lit carry `by: 'juno'`, and found cards carry `found: k`. A save without them loads with none.
+  - Validation replays each errand from the lamps, notes and trust from before its run, and requires exactly that effect.
+  - Spending leaves out Juno's lamp, found cards, and first talks while Wren waits at the door.
+  - Answers from a resident on an errand are rejected. Pins that would qualify now, in saves from before errands, need no errand.
+- **Secret untouched:** errands never change trust, and the secret still needs all three trusted plus "wait · together".
+- **Playtest watch:** do runs 2–4 now feel like decisions? Free lamps and talks add budget; if it feels loose, tighten the budget table.
+
 ## Decisions (2026-09-25)
 
 - No Bend for now. Rules live in plain JS.
@@ -492,3 +525,4 @@ The room was uniformly grey-green; progress only showed in the HUD and journal. 
 - After the first playtest: notes answer residents' questions and teach words (milestone 8). Ending C keeps its 12-note rule.
 - The secret's hints come only with each resident's last reply (repeated once all their questions are answered), never with the trust talk or the questions (26 Sep 2026). The alcove warmth counts these replies.
 - Second playtest (26 Sep 2026): pacing is reasonable. Answers are capped at 2 per run. The budget table stays as is: it may feel generous to someone who has played through several times, but new players may need it.
+- Errands (milestone 9, 26 Sep 2026): from the pinned note, one per run in runs 2–5; the resident on one is busy; Wren's makes first talks free; Pell's found cards count towards ending C.

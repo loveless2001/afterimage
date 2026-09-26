@@ -20,7 +20,8 @@
     // Time is added to whichever run is current; the menu does not pause it.
     if (key !== current) { if (current !== null) seconds[current] = (seconds[current] || 0) + performance.now() - since; current = key; since = performance.now(); }
     const live = { ...seconds, [current]: (seconds[current] || 0) + performance.now() - since };
-    const made = run => `notes ${state.notes.filter(n => n.run === run).length}  ans ${state.answers.filter(a => a.run === run).length}`;
+    const made = run => { const e = state.errands.find(x => x.run === run);
+      return `notes ${state.notes.filter(n => n.run === run && S.postedByYou(n)).length}  ans ${state.answers.filter(a => a.run === run).length}${e ? `  errand ${e.id}` : ''}`; };
     const rows = state.log.map(e => `RUN ${pad(e.run)}  ${(live[e.run] ? clock(live[e.run]) : '  -  ').padStart(5)}  ${e.end.padEnd(6)}  left ${e.budget - e.spent}/${e.budget}  ${made(e.run)}`);
     if (!state.finished) rows.push(`RUN ${pad(state.run)}  ${clock(live[state.run] || 0).padStart(5)}  now     left ${state.budget}/${S.budgetTable[state.run - 1]}  ${made(state.run)}`);
     const ended = state.log.filter(e => e.end !== 'ending'), byBudget = ended.filter(e => e.end === 'budget').length;

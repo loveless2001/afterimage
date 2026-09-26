@@ -10,11 +10,11 @@
   const steps = [['subjects', 'What is the note about?'], ['verbs', 'What should the next run do?'], ['qualifiers', 'When?']];
   // Wall notes as [index, note], newest first unless asked otherwise.
   const wallNotes = (oldestFirst = false) => { const list = S.onWall(G.state).map(i => [i, G.state.notes[i]]); return oldestFirst ? list : list.reverse(); };
-  const written = n => n.run === G.state.run ? 'Posted this run' : `Posted in run ${pad(n.run)}`;
+  const written = n => n.found !== undefined ? `Found by Pell in run ${pad(n.run)}` : n.run === G.state.run ? 'Posted this run' : `Posted in run ${pad(n.run)}`;
 
   A.openNoticeHall = function () {
     const state = G.state, wall = wallNotes();
-    const lines = wall.length ? wall.map(([, n]) => `${n.run === state.run ? 'THIS RUN' : 'RUN ' + pad(n.run)} / ${S.noteText(n.parts)}`)
+    const lines = wall.length ? wall.map(([, n]) => `${n.found !== undefined ? 'FOUND' : n.run === state.run ? 'THIS RUN' : 'RUN ' + pad(n.run)} / ${S.noteText(n.parts)}`)
       : ['Card holders line the wall in two neat rows. Nothing has been posted yet.'];
     lines.push(`[${wall.length} of ${S.wallSlots} slots used. Reading is free; a note costs ${S.noteCost}.]`);
     dialog('NOTICE HALL', wall.length ? `${wall.length} ${wall.length === 1 ? 'note' : 'notes'} on the wall.` : 'Twenty-four empty slots.', lines, [
@@ -62,12 +62,17 @@
     dialog('NOTICE HALL', 'Posted.', [`${quote(parts)} is on the wall.`, G.state.budget === 0 ? '[Budget spent. This run ends when you close this.]' : `[Budget left this run: ${G.state.budget}.]`], [leave('Continue')]);
   }
 
-  // As a run ends: pin one wall note for the next run, or none. Leaving through
-  // the exit can still be cancelled; a spent budget always ends the run.
+  // As a run ends: pin one wall note for the next run, or none. A note naming a
+  // resident with the word they taught you sends them on an errand, and each
+  // option says what it would do. Leaving through the exit can still be
+  // cancelled; a spent budget always ends the run.
   A.chooseHandoff = function (reason, done) {
-    const cancel = reason === 'left' ? A.closeDialog : () => done(null);
-    dialog(`RUN ${pad(G.state.run)} / HANDOFF`, 'Pin a note for the next run?', ['The next run starts at the entrance and reads whatever is pinned there first.', '[Pinning is free. The note also stays on the wall.]'], [
-      ...wallNotes().map(([i, n]) => ({ label: S.noteText(n.parts), detail: written(n), run: () => done(i) })),
+    const state = G.state, cancel = reason === 'left' ? A.closeDialog : () => done(null);
+    const notes = wallNotes().map(([i, n]) => [i, n, A.errandPreview(S.errandFor(state, i, state.run + 1), state)]);
+    dialog(`RUN ${pad(state.run)} / HANDOFF`, 'Pin a note for the next run?', ['The next run starts at the entrance and reads whatever is pinned there first.',
+      ...(notes.some(([, , e]) => e) ? ['[A note naming a resident with the word they taught you sends them on an errand next run. They take no answer that run.]'] : []),
+      '[Pinning is free. The note also stays on the wall.]'], [
+      ...notes.map(([i, n, e]) => ({ label: S.noteText(n.parts), detail: e ? `${written(n)} · ${e}` : written(n), run: () => done(i) })),
       { label: 'Pin nothing', run: () => done(null) },
       ...(reason === 'left' ? [{ label: 'Stay in this run', run: A.closeDialog }] : [])
     ], cancel);
@@ -80,6 +85,7 @@
     const by = state.run - 1; // pins are set as a run ends, never on the last run
     dialog('PINNED AT THE ENTRANCE', quote(note.parts), [
       `Run ${pad(by)} pinned this for you${note.run === by ? '.' : `. It was written in run ${pad(note.run)}.`}`,
+      ...[A.errandReport(state, opening)].filter(Boolean),
       '[It stays pinned for this whole run. Reading it again is free.]'
     ], [leave(opening ? `Begin run ${pad(state.run)}` : 'Step away')]);
   };

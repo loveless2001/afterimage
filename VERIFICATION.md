@@ -214,3 +214,26 @@ Trusted residents wear blue rings; a card above a resident shows an open questio
 - **Syntax:** `node --check` passed on all `js/*.js` and `tests/*.cjs`.
 - **State tests:** `node --test tests/*.test.cjs` passed 25/25. The fast route now answers 8 by run 4 and the 9th in run 5. A new test covers the cap: two answers in run 2, a fitting note for Pell that doesn't answer, a pre-cap save with three answers in a run that still loads, and Pell answering in run 3.
 - **Browser journeys:** new step: after Juno and Wren answer in run 2, the journal shows the ANSWERS line and Pell's dialog says the question waits, with no "Answer with a note". Passed, run by the user in their own shell.
+
+## Errands from the pinned note — 26 September 2026
+
+The pinned note can send a trusted resident on an errand as the next run starts (runs 2–5): Juno lights the next dark lamp, Pell keeps an old card found in the lit stacks, and Wren makes first talks free. The resident on an errand takes no answer that run. See "As built: errands from the pinned note" in `docs/design-guidelines.md`.
+
+- **Syntax:** `node --check` passed on all `js/*.js` and `tests/*.cjs`.
+- **State tests:** `node --test tests/*.test.cjs` passed 30/30. New file `state-errands-from-the-pinned-note.test.cjs` covers:
+  - Juno's free lamp, and a fitting note that doesn't answer while she's on the errand; the Juno pin means Wren doesn't recognise you.
+  - Pell's cards in order, re-pinning, running out, and nothing from the turn onwards.
+  - Wren's free talks, and no errand when the entrance lamp is dark.
+  - Pins that aren't errands.
+  - 14 forged saves, each rejected with the intended error (checked one by one).
+  - Legacy saves, including a pin that would now qualify.
+- **Browser check (agent-browser, seeded saves, 1440×960):**
+  - The pin dialog shows the errand line and the preview under "Juno · light" only.
+  - Pinning it opens run 2 with "Juno read it and lit the west stacks lamp…"; the lamp is lit and Juno stands by it with no card.
+  - Run 3 with Pell's card: an old-paper card on the wall, Pell at the mouth of the west aisle (moved there after the first screenshot showed Pell hidden behind a shelf), and the journal's ERRAND and FOUND lines.
+  - Run 3 with Wren at the entrance pin: the talk was free with no confirmation, and the dialog said her question waits.
+- **Code review** (`plans/reports/code-reviewer-260926-1244-errands-from-the-pinned-note-review.md`) found two problems, both fixed:
+  - **Critical:** validation checked that an errand's lamp or card existed, not that there was exactly one, so an edited save could add a second free lamp or card in the same run. It now requires exactly the effect; two new forgeries cover it.
+  - **High:** the "That isn't quite it" line counted Pell's found card as a failed answer, so in a Pell-errand run another resident said it wrongly. It now counts only your notes; checked in the browser.
+  - Accepted and commented: the wall-full case can't be replayed exactly (slots taken down later), so a forged card on a wall that was full gets through.
+- **Browser journeys:** two new steps in `browser-journey-residents-endings.cjs`: the pin preview, the opening line, the saved errand and free lamp, busy Juno's talk; then Pell's card in the journal, and Juno not counting it as your note. Passed, run by the user in their own shell.

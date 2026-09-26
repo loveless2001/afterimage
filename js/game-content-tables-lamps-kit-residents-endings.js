@@ -85,11 +85,17 @@
   const onWall = s => s.notes.map((n, i) => n.slot === null ? -1 : i).filter(i => i >= 0);
   const isOnWall = (s, i) => Number.isInteger(i) && i >= 0 && i < s.notes.length && s.notes[i].slot !== null;
   const wallHas = (s, test) => onWall(s).some(i => test(s.notes[i].parts));
+  // The first empty wall slot (the top row fills first), or undefined when full.
+  const freeSlot = s => { const used = new Set(onWall(s).map(i => s.notes[i].slot)); return [...Array(wallSlots).keys()].find(i => !used.has(i)); };
+  // Notes Pell found on an errand carry `found`; every other note is yours.
+  const postedByYou = n => n.found === undefined;
   const residentBySubject = subject => Object.keys(residents).find(id => residents[id].subject === subject);
 
   const hasMet = (s, id) => s.talks.some(t => t.id === id);
   const talkedThisRun = (s, id) => s.talks.some(t => t.id === id && t.run === s.run);
   const isTrusted = (s, id) => s.trusted.some(t => t.id === id);
+  // A resident sent on an errand by the pinned note (see the errands module).
+  const onErrand = (s, id) => s.errands.some(e => e.id === id && e.run === s.run);
   const pinnedNote = s => s.pinned === null ? null : s.notes[s.pinned];
   // A pinned note naming a resident means this run arrives already known to them.
   const recognizes = (s, id) => pinnedNote(s)?.parts[0] === residents[id].subject;
@@ -111,20 +117,21 @@
   // Questions: a trusted resident waits on the next unanswered one (null once
   // all are answered) and takes at most one answer per run. A run takes at most
   // `answersPerRun` answers in all, so the 9 questions last into run 5 (design §12a).
+  // A resident on an errand takes no answer that run.
   const answersPerRun = 2;
   const answersBy = (s, id) => s.answers.filter(a => a.id === id);
   const openQuestion = (s, id) => isTrusted(s, id) && answersBy(s, id).length < questions[id].length ? answersBy(s, id).length : null;
   const answeredThisRun = (s, id) => s.answers.some(a => a.id === id && a.run === s.run);
   const answersThisRun = s => s.answers.filter(a => a.run === s.run).length;
-  const canAnswerThisRun = (s, id) => openQuestion(s, id) !== null && !answeredThisRun(s, id) && answersThisRun(s) < answersPerRun;
+  const canAnswerThisRun = (s, id) => openQuestion(s, id) !== null && !answeredThisRun(s, id) && answersThisRun(s) < answersPerRun && !onErrand(s, id);
   // Words taught so far, or only in one run, in the order they were learned.
   const learnedWords = (s, run) => s.answers.filter(a => run === undefined || a.run === run).map(a => wordText(questions[a.id][a.q].teaches));
-  // The newest wall note posted this run that fits the open question and has
-  // not answered anything else, or -1 (also when the run can't take the answer).
+  // The newest wall note you posted this run that fits the open question and
+  // has not answered anything else, or -1 (also when the run can't take the answer).
   const answerNote = (s, id) => {
     if (!canAnswerThisRun(s, id)) return -1;
     const q = openQuestion(s, id);
-    return onWall(s).filter(i => s.notes[i].run === s.run && !s.answers.some(a => a.note === i) && questions[id][q].accept(s.notes[i].parts)).at(-1) ?? -1;
+    return onWall(s).filter(i => s.notes[i].run === s.run && postedByYou(s.notes[i]) && !s.answers.some(a => a.note === i) && questions[id][q].accept(s.notes[i].parts)).at(-1) ?? -1;
   };
   // Residents who have answered every question, so their last reply (with its
   // hint towards the secret) has been heard: 0–3. The alcove warms with it.
@@ -139,8 +146,8 @@
 
   const api = {
     budgetTable, runCount, turnRun, lamps, residents, kit, endings, wallSlots, noteCost, talkCost, wallEndingNotes, palettes, entrance,
-    isInt, isLit, lampCost, noteText, validParts, onWall, isOnWall, residentBySubject,
-    hasMet, talkedThisRun, isTrusted, pinnedNote, recognizes, requestMet, endingReady, endingAvailable,
+    isInt, isLit, lampCost, noteText, validParts, onWall, isOnWall, freeSlot, postedByYou, residentBySubject,
+    hasMet, talkedThisRun, isTrusted, onErrand, pinnedNote, recognizes, requestMet, endingReady, endingAvailable,
     baseWords, questions, questionCount, teacherOf, wordAvailable, partsAvailable, answersPerRun, openQuestion, answeredThisRun, answersThisRun, canAnswerThisRun, answerNote, wordText, learnedWords, hintsHeard
   };
   root.AfterimageContent = api;

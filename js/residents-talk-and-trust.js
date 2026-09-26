@@ -12,7 +12,15 @@
     turn: { wren: [560, 365], juno: [400, 250], pell: [560, 250] },
     alcove: { wren: [80, 440], juno: [140, 430], pell: [110, 470] }
   };
-  A.residentSpot = (id, state) => spots[state.ending === 'alcove' ? 'alcove' : state.run >= S.turnRun ? 'turn' : 'early'][id];
+  // On an errand (runs 2–5 only) a resident stands where it happens: Juno by
+  // the lamp lit, Pell in the stacks searched, Wren by the entrance pin.
+  const lampSpots = { west: [225, 315], east: [660, 230], entrance: [660, 575] }, stackSpots = { west: [250, 290], east: [615, 215] };
+  function errandSpot(id, state) {
+    const e = S.errandThisRun(state);
+    if (!e || e.id !== id) return null;
+    return id === 'juno' ? lampSpots[e.lamp] : id === 'pell' ? stackSpots[S.foundNotes[e.found].stacks] : [300, 585];
+  }
+  A.residentSpot = (id, state) => errandSpot(id, state) || spots[state.ending === 'alcove' ? 'alcove' : state.run >= S.turnRun ? 'turn' : 'early'][id];
   // Before you meet them, residents are described by what they are doing.
   const strangers = { wren: 'A resident with a pencil', juno: 'A resident polishing a lamp', pell: 'A resident, reading' };
   A.residentLabel = (id, state) => S.hasMet(state, id) ? S.residents[id].name : strangers[id];
@@ -20,7 +28,8 @@
   A.talkTo = function (id) {
     const state = G.state, name = S.residents[id].name;
     if (state.finished) return dialog(name.toUpperCase(), '“The runs are over.”', [A.residentClosing[state.ending]], [leave()]);
-    if (S.talkedThisRun(state, id)) return talk(id);
+    // Nothing to confirm when the talk is free: again this run, or while Wren keeps the door.
+    if (S.talkedThisRun(state, id) || S.talkCostIn(state) === 0) return talk(id);
     const met = S.hasMet(state, id);
     dialog(met ? name.toUpperCase() : 'A RESIDENT', met ? `Talk to ${name}?` : 'Talk to the resident?', [
       met ? `${name} ${S.residents[id].role}.` : 'Someone who lives in the room. They look up as you come near.',
@@ -45,7 +54,8 @@
     });
     const tail = [...(trusting ? [`[${name} has a question for you now. Talk to ${name} again to hear it.]`] : []),
       ...(state.budget === 0 ? ['[Budget spent. This run ends when you close this.]'] : [])];
-    dialog(met ? name.toUpperCase() : `A RESIDENT / ${name.toUpperCase()}`, title, [...lines, ...tail], [leave(`Leave ${name} be`)]);
+    const errand = [A.errandTalkLine(id, state)].filter(Boolean);
+    dialog(met ? name.toUpperCase() : `A RESIDENT / ${name.toUpperCase()}`, title, [...errand, ...lines, ...tail], [leave(`Leave ${name} be`)]);
   }
 
   // A trusted resident's side of the questions: the reply to the note that just
@@ -64,11 +74,12 @@
     const { ask, why, form } = A.questionLines[id][q], open = S.canAnswerThisRun(state, id);
     const missing = (S.questions[id][q].needs || []).filter(([set, i]) => !S.wordAvailable(state, set, i));
     // A note from this run that answered nobody was posted, but does not fit.
-    const tried = open && S.onWall(state).some(i => state.notes[i].run === state.run && !state.answers.some(a => a.note === i));
+    const tried = open && S.onWall(state).some(i => state.notes[i].run === state.run && S.postedByYou(state.notes[i]) && !state.answers.some(a => a.note === i));
     return [ask, [why, ...(tried ? ['“That isn’t quite it. Not yet.”'] : []),
       open ? `[Answer with a note: ${form}. Post it at the notice hall this run, then talk to ${name} again.]`
         : S.answeredThisRun(state, id) ? '[One answer per resident each run. This one can be answered in a later run.]'
-          : fullLine('This one can be answered in a later run.'),
+          : S.onErrand(state, id) ? `[${name} is on an errand this run. This one can be answered in a later run.]`
+            : fullLine('This one can be answered in a later run.'),
       ...missing.map(w => `[You don’t know the word ${word(w)} yet. ${S.residents[S.teacherOf(...w).id].name} uses it.]`)]];
   }
 })();

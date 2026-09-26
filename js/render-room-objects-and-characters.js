@@ -51,10 +51,12 @@
     if (look.marker) { const head = project(x, y, 85); polygon([{ x: head.x, y: head.y + 6 }, { x: head.x - 4, y: head.y }, { x: head.x + 4, y: head.y }], look.marker); }
   }
   // A note card facing the viewer along x: blue for this run (or kept by the wall ending), faded after.
-  function card(x, y, z, current) {
+  // Cards Pell found are old paper: someone else's, never blue.
+  function card(x, y, z, current, found) {
     const at = (dx, dz) => project(x + dx, y, z + dz);
-    polygon([at(0, 0), at(24, 0), at(24, 24), at(0, 24)], current ? '#5f7a86' : '#33362f38', current ? '#48606b' : '#33362f55');
-    for (let i = 0; i < 3; i++) line([at(4, 17 - i * 5), at(20 - i * 4, 17 - i * 5)], current ? '#dfe8ea' : '#f2f0e699', .8);
+    const [fill, edge, ink] = found ? ['#cdbf9c', '#9a8d6b', '#7f7458aa'] : current ? ['#5f7a86', '#48606b', '#dfe8ea'] : ['#33362f38', '#33362f55', '#f2f0e699'];
+    polygon([at(0, 0), at(24, 0), at(24, 24), at(0, 24)], fill, edge);
+    for (let i = 0; i < 3; i++) line([at(4, 17 - i * 5), at(20 - i * 4, 17 - i * 5)], ink, .8);
   }
   // Two rows of twelve card holders on the back wall, filled by posted notes.
   function noticeWall(state) {
@@ -62,7 +64,7 @@
     const bySlot = new Map(state.notes.filter(n => n.slot !== null).map(n => [n.slot, n]));
     for (let slot = 0; slot < S.wallSlots; slot++) {
       const { x, z } = slotAt(slot), note = bySlot.get(slot);
-      if (note) card(x, 0, z, note.run === state.run || state.ending === 'wall');
+      if (note) card(x, 0, z, note.run === state.run || state.ending === 'wall', !S.postedByYou(note));
       else polygon([project(x, 0, z), project(x + 24, 0, z), project(x + 24, 0, z + 24), project(x, 0, z + 24)], '#dfe2d3', '#aab39c');
     }
     label('NOTICE HALL', 445, 0, 122, '#71806199', 10);

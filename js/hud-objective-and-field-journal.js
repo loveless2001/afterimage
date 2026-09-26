@@ -28,7 +28,7 @@
     if (isLow(state)) return ['Your budget is nearly spent.', 'Post a note for the next run at the notice hall, or leave through the exit in the far corner.'];
     if (!state.lights.length && !state.notes.length && !state.talks.length) return ['Switch on a lamp.', 'Lamps stay on after a run ends. Each one costs budget; walking and reading are free.'];
     const unmet = residentIds.filter(id => !S.hasMet(state, id)).length;
-    if (unmet) return ['Meet the residents.', `${unmet} of 3 residents have not met you yet. A first talk each run costs ${S.talkCost}.`];
+    if (unmet) return ['Meet the residents.', `${unmet} of 3 residents have not met you yet. ${S.talkCostIn(state) ? `A first talk each run costs ${S.talkCost}.` : 'Talks are free this run.'}`];
     if (cheapest <= state.budget) return ['Light the archive.', `${dark.length} ${dark.length === 1 ? 'lamp is' : 'lamps are'} still dark. The cheapest costs ${cheapest}. A note costs ${S.noteCost}.`];
     const asking = residentIds.find(id => S.canAnswerThisRun(state, id));
     if (asking) { const name = S.residents[asking].name; return [`Answer ${name}.`, `${name} has a question (see the field journal). Answer it with a note posted this run, then talk to ${name} again.`]; }
@@ -55,7 +55,7 @@
     }));
     const low = !state.finished && isLow(state);
     $('budget-bar').classList.toggle('low', low); A.setLowHum(low && G.started);
-    const wall = S.onWall(state).length, thisRun = state.notes.filter(n => n.run === state.run).length, trust = state.trusted.length;
+    const wall = S.onWall(state).length, thisRun = state.notes.filter(n => n.run === state.run && S.postedByYou(n)).length, trust = state.trusted.length;
     const met = residentIds.filter(id => S.hasMet(state, id)).length;
     const dark = Object.keys(S.lamps).filter(id => !S.isLit(state, id)), cheapest = Math.min(...dark.map(id => S.lamps[id].cost));
     // Three short rows keep the panel clear of the room; the journal lists each lamp.
@@ -72,6 +72,8 @@
     if (!G.started || G.transitioning) return;
     const state = G.state, [title, hint] = A.objective();
     const record = [title + ' ' + hint, state.finished ? 'The runs are over.' : `RUN ${pad(state.run)} of ${pad(S.runCount)} · ${state.budget} of ${runBudget(state)} budget left.`];
+    const errand = A.errandReport(state);
+    if (errand) record.push(`ERRAND / ${errand}`);
     for (const id of residentIds) {
       const r = S.residents[id];
       const q = S.openQuestion(state, id), ready = S.answerNote(state, id) >= 0 ? ' ' + readyLine(r.name) : '';
@@ -88,6 +90,7 @@
     }
     const wall = S.onWall(state).length, toRow = S.wallEndingNotes - wall;
     record.push(`NOTES / ${wall} of ${S.wallSlots} on the wall. ${toRow > 0 ? `${toRow} more ${toRow === 1 ? 'fills' : 'fill'} the top row.` : 'The top row is full.'}`);
+    record.push(...A.foundLines(state));
     if (S.pinnedNote(state)) record.push(`PINNED / “${S.noteText(S.pinnedNote(state).parts)}”.`);
     // The alcove bench is only listed once it has been found.
     const places = A.roomObjects().filter(o => o.id !== 'bench' || state.benchSeen);
