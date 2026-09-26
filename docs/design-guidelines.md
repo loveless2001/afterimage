@@ -380,7 +380,7 @@ Tuning rules:
 - If a run is under 3 minutes, add 1–2 segments.
 - If players never leave early, shorten the short runs.
 - Keep the short/long alternation.
-- If players answer all 9 questions by run 4, give each resident a 4th question or cap answers at two per run.
+- If players answer all 9 questions by run 4, give each resident a 4th question or cap answers at two per run. *Done: capped at two per run (26 Sep 2026).*
 
 ---
 
@@ -429,6 +429,7 @@ The first playtest found that runs 3–5 dragged once the lamps were lit and all
 - **To answer:** post a fitting note this run, then talk to them again that run. It costs the usual first talk (1) plus the note (1); the answer itself is free.
 - **Limits:**
   - One answer per resident per run.
+  - At most 2 answers per run, whoever gives them (after the second playtest, 26 Sep 2026).
   - The talk that earns trust never also answers.
   - A note answers at most one question.
   - A note from an earlier run doesn't count.
@@ -451,14 +452,15 @@ The first playtest found that runs 3–5 dragged once the lamps were lit and all
 - **Where progress shows:**
   - the Residents row (`TRUST n/3 · ANSWERED n/9` once everyone is met)
   - the objective "Answer X." (after lamps, before "Leave something…")
-  - the journal (each open question and its note form, plus the words learned)
+  - the journal (each open question and its note form, the words learned, and a line once the run has had its 2 answers)
   - the run toast ("Learned last run: …")
   - the ending screens, which quote each resident's latest answer; ending C also quotes the wall's first and newest cards
 - **Note builder:** all three steps list only available words, in a two-column grid so 11 subjects fit at 390px.
 - **Save:** `answers: [{ id, q, run, note }]`. A save without it loads with none.
   - Validation checks question order, one answer per resident per run, trust by then, a talk that run, and a fitting note from that run used once.
+  - It does not check the 2-per-run cap, so saves made before the cap (up to 3 answers in a run) still load.
   - A note that uses a taught word must come after the note that earned it.
-- **Playtest watch:** a fast route finishes all 9 by run 4, which could leave run 5 empty again. If so, add a 4th question each or cap answers per run.
+- **Run 5 (resolved 26 Sep 2026):** a fast route finished all 9 by run 4, which could leave run 5 empty. Answers are now capped at 2 per run, so the fastest route answers 8 by run 4 and the last in run 5. Once the cap is reached, other residents' cards hide, the objective moves on, and their dialog says the question waits for a later run. Plan: `plans/260926-1227-cap-answers-per-run/plan.md`.
 
 ## As built: progress cues in the room (26 Sep 2026)
 
@@ -474,7 +476,7 @@ The room was uniformly grey-green; progress only showed in the HUD and journal. 
 | Warm pool at the alcove, one step per resident whose questions are all answered | the secret's hints, heard in each last reply | the hints themselves |
 
 - Cards and the wall cues are drawn after the night layer so they stay readable at night. Nothing animates. The alcove pool is part of the light pools, and from the turn it is the full alcove glow.
-- Cards sit just above the head and lift over the name label when you stand next to the resident. They hide once the resident has answered this run, after their last question, and after an ending.
+- Cards sit just above the head and lift over the name label when you stand next to the resident. They hide once the resident has answered this run, once the run has had its 2 answers, after their last question, and after an ending.
 - The "wait · together" note is deliberately not marked.
 
 ## Decisions (2026-09-25)
@@ -489,3 +491,4 @@ The room was uniformly grey-green; progress only showed in the HUD and journal. 
 - Milestones 4–6 are built as described above. Milestone 7 verification is recorded in `VERIFICATION.md`.
 - After the first playtest: notes answer residents' questions and teach words (milestone 8). Ending C keeps its 12-note rule.
 - The secret's hints come only with each resident's last reply (repeated once all their questions are answered), never with the trust talk or the questions (26 Sep 2026). The alcove warmth counts these replies.
+- Second playtest (26 Sep 2026): pacing is reasonable. Answers are capped at 2 per run. The budget table stays as is: it may feel generous to someone who has played through several times, but new players may need it.

@@ -94,7 +94,7 @@ Review: `plans/reports/code-reviewer-260925-1138-notes-answer-questions-review.m
 ## Risks
 - **Chains feel like chores:** several notes fit each question, and the aside always states the form.
 - **Longer word lists crowd the builder:** use the two-column grid and check it at 390px wide.
-- **Fast players still get an empty run 5:** watch this in the next playtest. The fix would be a 4th question each, or a cap of two answers per run.
+- **Fast players still get an empty run 5:** watch this in the next playtest. The fix would be a 4th question each, or a cap of two answers per run. Resolved 26 Sep 2026: capped at two per run (`plans/260926-1227-cap-answers-per-run/`).
 
 ## Decisions / open
 - Ending C keeps the 12-note rule (no answer given; "every question answered" would break finished saves).

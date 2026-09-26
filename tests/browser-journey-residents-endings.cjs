@@ -44,6 +44,20 @@ module.exports = async h => {
   await a.screenshot({ path: path.join(output, 'question-answered-word-learned.png') }); await a.context().close();
   console.log('PASS: answering a question with a note teaches a word the note builder offers');
 
+  // A run takes two answers: after Juno and Wren answer in run 2, Pell's question waits.
+  const capped = await newPage(seed([lightLamp('hall'), talk('juno'), talk('pell'), talk('wren'), talk('juno'), post([7, 0, null]), talk('pell'),
+    post([5, 4, 3]), post([2, 1, null]), talk('juno'), post([1, 0, 4]), talk('pell'), { type: 'EndRun', reason: 'budget', pin: 1 },
+    talk('wren'), post([0, 0, 4]), talk('wren'), talk('juno'), post([6, 6, null]), talk('juno')], { x: 290, y: 135 }));
+  await begin(capped);
+  assert.deepEqual((await stored(capped)).answers.map(x => [x.id, x.run]), [['juno', 1], ['pell', 1], ['wren', 2], ['juno', 2]]);
+  await capped.locator('#journal').click();
+  assert.match(await capped.locator('#dialog-body').innerText(), /ANSWERS \/ This run has had its 2 answers/); await close(capped);
+  await interact(capped, 'Pell'); await button(capped, 'Talk').click();
+  await capped.locator('#dialog-body').getByText('This run has had its 2 answers. This one can be answered in a later run.', { exact: false }).waitFor();
+  assert.doesNotMatch(await capped.locator('#dialog-body').innerText(), /isn’t quite it|Answer with a note/);
+  await capped.context().close();
+  console.log('PASS: a run takes two answers; the third resident’s question waits');
+
   // The turn: night palette, the bench secret, revisiting, then the desk's last entry.
   const t = await newPage(seed([...trustAll, leaveRun, leaveRun, leaveRun, leaveRun], { x: 150, y: 450 }));
   await begin(t);

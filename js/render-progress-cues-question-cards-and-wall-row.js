@@ -1,8 +1,8 @@
 // Progress cues drawn over the finished frame, after the night layer, so they
 // stay readable at night. They keep the colour rule that blue marks what
 // persists, and never move (nothing to switch off for reduced motion):
-// - a card above a trusted resident whose question is open: outlined while
-//   they wait for a note, solid once a note posted this run answers it;
+// - a card above a trusted resident whose question this run can still answer:
+//   outlined while they wait for a note, solid once a note posted this run answers it;
 // - the notice wall's top row, whose 12 slots are ending C's threshold (the
 //   row fills first): empty slots outlined from 9 notes, a rule under it at 12.
 // Trusted residents' blue rings are drawn with the figures, and the alcove's
@@ -17,7 +17,7 @@
   // the resident is nearby; kept legible on small screens where the room
   // scales down. The ready card's pale edge keeps it clear at night.
   function questionCard(o, state) {
-    if (S.openQuestion(state, o.resident) === null || S.answeredThisRun(state, o.resident)) return;
+    if (!S.canAnswerThisRun(state, o.resident)) return;
     const ready = S.answerNote(state, o.resident) >= 0, k = Math.max(G.scale, .6);
     const p = project(o.x, o.y, G.nearby?.id === o.id && !G.modalOpen ? 104 : 82);
     const w = 12 * k, h = 15 * k, left = p.x - w / 2, top = p.y - h;

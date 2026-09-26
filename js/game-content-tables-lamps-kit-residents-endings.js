@@ -109,17 +109,21 @@
   };
   const partsAvailable = (s, p) => p.every((i, set) => i === null || wordAvailable(s, set, i));
   // Questions: a trusted resident waits on the next unanswered one (null once
-  // all are answered) and takes at most one answer per run.
+  // all are answered) and takes at most one answer per run. A run takes at most
+  // `answersPerRun` answers in all, so the 9 questions last into run 5 (design §12a).
+  const answersPerRun = 2;
   const answersBy = (s, id) => s.answers.filter(a => a.id === id);
   const openQuestion = (s, id) => isTrusted(s, id) && answersBy(s, id).length < questions[id].length ? answersBy(s, id).length : null;
   const answeredThisRun = (s, id) => s.answers.some(a => a.id === id && a.run === s.run);
+  const answersThisRun = s => s.answers.filter(a => a.run === s.run).length;
+  const canAnswerThisRun = (s, id) => openQuestion(s, id) !== null && !answeredThisRun(s, id) && answersThisRun(s) < answersPerRun;
   // Words taught so far, or only in one run, in the order they were learned.
   const learnedWords = (s, run) => s.answers.filter(a => run === undefined || a.run === run).map(a => wordText(questions[a.id][a.q].teaches));
   // The newest wall note posted this run that fits the open question and has
-  // not answered anything else, or -1.
+  // not answered anything else, or -1 (also when the run can't take the answer).
   const answerNote = (s, id) => {
+    if (!canAnswerThisRun(s, id)) return -1;
     const q = openQuestion(s, id);
-    if (q === null || answeredThisRun(s, id)) return -1;
     return onWall(s).filter(i => s.notes[i].run === s.run && !s.answers.some(a => a.note === i) && questions[id][q].accept(s.notes[i].parts)).at(-1) ?? -1;
   };
   // Residents who have answered every question, so their last reply (with its
@@ -137,7 +141,7 @@
     budgetTable, runCount, turnRun, lamps, residents, kit, endings, wallSlots, noteCost, talkCost, wallEndingNotes, palettes, entrance,
     isInt, isLit, lampCost, noteText, validParts, onWall, isOnWall, residentBySubject,
     hasMet, talkedThisRun, isTrusted, pinnedNote, recognizes, requestMet, endingReady, endingAvailable,
-    baseWords, questions, questionCount, teacherOf, wordAvailable, partsAvailable, openQuestion, answeredThisRun, answerNote, wordText, learnedWords, hintsHeard
+    baseWords, questions, questionCount, teacherOf, wordAvailable, partsAvailable, answersPerRun, openQuestion, answeredThisRun, answersThisRun, canAnswerThisRun, answerNote, wordText, learnedWords, hintsHeard
   };
   root.AfterimageContent = api;
   if (typeof module !== 'undefined') module.exports = api;

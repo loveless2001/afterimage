@@ -135,6 +135,7 @@
     if (!trusted.every(t => earned[t.id](t))) fail('Invalid trust.');
     // Answers (added in milestone 8): each resident's questions in order, one per
     // run, after trust and at a talk that run, each by a fitting note from that run.
+    // The two-per-run cap is not checked, so saves made before it still load.
     const answers = list(v.answers, true).map(a => (a && Object.hasOwn(residents, a.id) && isInt(a.q, 0, C.questions[a.id].length - 1) && isInt(a.run, 1, v.run) &&
       isInt(a.note, 0, notes.length - 1)) ? { id: a.id, q: a.q, run: a.run, note: a.note } : fail('Invalid answers.'));
     for (const id of Object.keys(residents)) answers.filter(a => a.id === id).forEach((a, q, mine) => {

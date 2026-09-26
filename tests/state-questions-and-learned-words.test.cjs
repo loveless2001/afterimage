@@ -11,28 +11,37 @@ const roundTrip = s => S.validate(JSON.parse(JSON.stringify(s)));
 const copy = s => JSON.parse(JSON.stringify(s));
 const [subject, verb, qualifier] = [w => S.kit.subjects.indexOf(w), w => S.kit.verbs.indexOf(w), w => S.kit.qualifiers.indexOf(w)];
 
-// A fast route through every question: trust in runs 1–2, all nine answers by run 4.
-function playAllQuestions() {
+// Run 1 of the fast route: trust Juno and Pell, answer both, and pin
+// "Wren · wait · together" so Wren recognises you in run 2.
+function trustAndAnswerRunOne() {
   const s = S.fresh();
   light(s, 'hall'); talk(s, 'juno'); talk(s, 'pell'); talk(s, 'wren'); talk(s, 'juno');
   post(s, [subject('Pell'), verb('check'), null]); talk(s, 'pell');
   post(s, [subject('Wren'), verb('wait'), qualifier('together')]);
   post(s, [subject('west stacks'), verb('avoid'), null]); talk(s, 'juno');
-  end(s, 'left', 1);
-  // Run 2 (budget 6): Wren now recognises you; one answer each.
+  post(s, [subject('lamp'), verb('check'), qualifier('again')]); talk(s, 'pell');
+  end(s, 'budget', 1);
+  return s;
+}
+// A fast route through every question at two answers a run: 8 by run 4, the 9th in run 5.
+function playAllQuestions() {
+  const s = trustAndAnswerRunOne();
+  // Run 2 (budget 6): Wren now recognises you.
   talk(s, 'wren'); post(s, [subject('desk'), verb('check'), qualifier('again')]); talk(s, 'wren');
-  talk(s, 'pell'); post(s, [subject('lamp'), verb('check'), qualifier('again')]); talk(s, 'pell');
   talk(s, 'juno'); post(s, [subject('Juno'), verb('light'), null]); talk(s, 'juno');
-  end(s, 'budget');
-  // Run 3 (budget 12): the last lamps, then the second or third answers.
-  light(s, 'west'); light(s, 'east'); light(s, 'entrance');
-  talk(s, 'wren'); post(s, [subject('Juno'), verb('remember'), null]); talk(s, 'wren');
-  talk(s, 'pell'); post(s, [subject('west stacks'), verb('keep'), null]); talk(s, 'pell');
-  talk(s, 'juno'); post(s, [subject('the dark'), verb('leave'), null]); talk(s, 'juno');
   end(s, 'left');
-  // Run 4 (budget 7): the two questions that need another resident's word.
-  talk(s, 'wren'); post(s, [subject('log'), verb('keep'), null]); talk(s, 'wren');
+  // Run 3 (budget 12): the last lamps, then Pell and Wren.
+  light(s, 'west'); light(s, 'east'); light(s, 'entrance');
+  talk(s, 'pell'); post(s, [subject('west stacks'), verb('keep'), null]); talk(s, 'pell');
+  talk(s, 'wren'); post(s, [subject('Juno'), verb('remember'), null]); talk(s, 'wren');
+  end(s, 'left');
+  // Run 4 (budget 7): Juno's and Pell's last questions.
+  talk(s, 'juno'); post(s, [subject('the dark'), verb('leave'), null]); talk(s, 'juno');
   talk(s, 'pell'); post(s, [subject('wall'), verb('remember'), null]); talk(s, 'pell');
+  assert.equal(s.answers.length, 8); assert.equal(S.openQuestion(s, 'wren'), 2, 'a question is still open going into run 5');
+  end(s, 'left');
+  // Run 5 (budget 14): Wren's last question needs "log" (Wren) and "keep" (Pell).
+  talk(s, 'wren'); post(s, [subject('log'), verb('keep'), null]); talk(s, 'wren');
   return s;
 }
 
@@ -71,13 +80,32 @@ test('one note answers one question; cross-chain words name who teaches them', (
   assert.equal(S.teacherOf(0, subject('desk')), null, 'starting words have no teacher');
 });
 
-test('every question can be answered by run 4 on the budget table', () => {
+test('every question can be answered by run 5 on the budget table, and no sooner', () => {
   const s = playAllQuestions();
-  assert.equal(s.run, 4); assert.equal(s.answers.length, S.questionCount); assert.equal(S.questionCount, 9);
+  assert.equal(s.run, 5); assert.equal(s.answers.length, S.questionCount); assert.equal(S.questionCount, 9);
   for (const id of Object.keys(S.residents)) assert.equal(S.openQuestion(s, id), null);
   assert.equal(S.hintsHeard(s), 3, 'every last reply, with its hint, has been heard');
   for (const [set, words] of [[0, S.kit.subjects], [1, S.kit.verbs], [2, S.kit.qualifiers]]) words.forEach((_, i) => assert.ok(S.wordAvailable(s, set, i), `${words[i]} is known`));
   assert.deepEqual(roundTrip(s), s);
+});
+
+test('a run takes at most two answers, whoever gives them', () => {
+  const s = trustAndAnswerRunOne();
+  assert.deepEqual(s.answers.map(a => [a.id, a.run]), [['juno', 1], ['pell', 1]]);
+  talk(s, 'wren'); post(s, [subject('desk'), verb('check'), qualifier('again')]); talk(s, 'wren');
+  talk(s, 'juno'); post(s, [subject('Juno'), verb('light'), null]);
+  assert.equal(S.canAnswerThisRun(s, 'juno'), true); talk(s, 'juno');
+  assert.equal(S.answersThisRun(s), S.answersPerRun); assert.equal(S.answersPerRun, 2);
+  talk(s, 'pell'); post(s, [subject('west stacks'), verb('keep'), null]);
+  assert.equal(S.canAnswerThisRun(s, 'pell'), false); assert.equal(S.answerNote(s, 'pell'), -1, 'the note fits, but the run is full');
+  talk(s, 'pell');
+  assert.equal(s.answers.length, 4); assert.equal(S.openQuestion(s, 'pell'), 1, 'the question waits for a later run');
+  assert.deepEqual(roundTrip(s), s);
+  // Saves from before the cap could hold three answers in a run; they still load.
+  const early = copy(s); early.answers.push({ id: 'pell', q: 1, run: 2, note: s.notes.length - 1 });
+  assert.equal(S.validate(early).answers.length, 5);
+  end(s, 'budget'); post(s, [subject('west stacks'), verb('keep'), null]); talk(s, 'pell');
+  assert.equal(s.answers.at(-1).id, 'pell', 'a new run takes answers again');
 });
 
 test('the alcove warms one step per resident whose questions are all answered', () => {

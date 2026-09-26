@@ -30,7 +30,7 @@
     const unmet = residentIds.filter(id => !S.hasMet(state, id)).length;
     if (unmet) return ['Meet the residents.', `${unmet} of 3 residents have not met you yet. A first talk each run costs ${S.talkCost}.`];
     if (cheapest <= state.budget) return ['Light the archive.', `${dark.length} ${dark.length === 1 ? 'lamp is' : 'lamps are'} still dark. The cheapest costs ${cheapest}. A note costs ${S.noteCost}.`];
-    const asking = residentIds.find(id => S.openQuestion(state, id) !== null && !S.answeredThisRun(state, id));
+    const asking = residentIds.find(id => S.canAnswerThisRun(state, id));
     if (asking) { const name = S.residents[asking].name; return [`Answer ${name}.`, `${name} has a question (see the field journal). Answer it with a note posted this run, then talk to ${name} again.`]; }
     return ['Leave something for the next run.', `Post a note at the notice hall (costs ${S.noteCost}), or leave through the exit in the far corner.`];
   }
@@ -79,6 +79,8 @@
       const trust = !S.isTrusted(state, id) ? 'has not decided about you.' : q === null ? 'trusts you; every question answered.' : 'trusts you.';
       record.push(!S.hasMet(state, id) ? 'RESIDENT / Someone you have not met yet.' : `${r.name.toUpperCase()} / ${r.role}; ${trust}${asks}`);
     }
+    if (S.answersThisRun(state) >= S.answersPerRun && residentIds.some(id => S.openQuestion(state, id) !== null))
+      record.push(`ANSWERS / This run has had its ${S.answersPerRun} answers. The open questions wait for a later run.`);
     if (state.answers.length) record.push(`WORDS LEARNED / ${S.learnedWords(state).join(', ')}.`);
     for (const [id, lamp] of Object.entries(S.lamps)) {
       const lit = state.lights.find(l => l.id === id);

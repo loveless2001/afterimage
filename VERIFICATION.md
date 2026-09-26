@@ -204,4 +204,13 @@ Trusted residents wear blue rings; a card above a resident shows an open questio
 - **Syntax:** `node --check` passed on all `js/*.js` and `tests/*.cjs`.
 - **State tests:** `node --test tests/*.test.cjs` passed 24/24, including the new `hintsHeard` test (0 until a resident's last question is answered, then one per resident).
 - **Browser check (agent-browser, seeded saves, 1440×960):** screenshots in day and night of run 4 with Wren ready (solid card), Pell waiting (outlined card), 10 notes (two outlined slots) and one hint heard; 12 notes (rule under the row) with three hints heard; run 1 with Juno trusted next to Pell untrusted, the card lifted over Juno's label. The objective read "Answer Juno." with the ready line in run 1 ahead of "Meet the residents.", and the journal showed the ready line and "11 more fill the top row."
-- **Browser journeys:** `browser-journey-residents-endings.cjs` now asserts the ready objective before answering Juno. **Pending:** the Playwright run in the user's shell (`tests/browser.cjs`).
+- **Browser journeys:** `browser-journey-residents-endings.cjs` now asserts the ready objective before answering Juno. Passed, run by the user in their own shell.
+
+## Second playtest and the answer cap — 26 September 2026
+
+- **Human playtest:** the user played the full seven runs several times. Pacing was reasonable. The budget table stays: it may feel generous to someone who has played through several times, but new players may need it.
+- **Native Windows browser:** tested by the user.
+- **Change:** a run now takes at most 2 answers, whoever gives them, so the 9 questions last into run 5 (design §12a). Once the cap is reached, the other residents' question cards hide, the objective moves on, the journal says the open questions wait, and their dialog says so instead of asking for a note. Validation does not check the cap, so saves made before it still load. Plan: `plans/260926-1227-cap-answers-per-run/plan.md`.
+- **Syntax:** `node --check` passed on all `js/*.js` and `tests/*.cjs`.
+- **State tests:** `node --test tests/*.test.cjs` passed 25/25. The fast route now answers 8 by run 4 and the 9th in run 5. A new test covers the cap: two answers in run 2, a fitting note for Pell that doesn't answer, a pre-cap save with three answers in a run that still loads, and Pell answering in run 3.
+- **Browser journeys:** new step: after Juno and Wren answer in run 2, the journal shows the ANSWERS line and Pell's dialog says the question waits, with no "Answer with a note". Passed, run by the user in their own shell.

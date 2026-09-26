@@ -52,18 +52,23 @@
   // answered, or the open question and the kind of note that answers it.
   function questionTalk(id, answer) {
     const state = G.state, name = S.residents[id].name, q = S.openQuestion(state, id), word = w => `“${S.wordText(w)}”`;
+    // Once the run has all its answers, nobody else's question can be answered.
+    const full = S.answersThisRun(state) >= S.answersPerRun, fullLine = rest => `[This run has had its ${S.answersPerRun} answers. ${rest}]`;
     if (answer) {
       const [title, lines] = A.questionLines[id][answer.q].reply(S.noteText(state.notes[answer.note].parts));
+      const othersWait = full && Object.keys(S.residents).some(r => r !== id && S.openQuestion(state, r) !== null && !S.answeredThisRun(state, r));
       return [title, [...lines, `[New word: ${word(S.questions[id][answer.q].teaches)}. It is in the note builder now.]`,
-        q === null ? `[That was ${name}’s last question.]` : `[${name} has another question. It can be answered in a later run.]`]];
+        q === null ? `[That was ${name}’s last question.]` : `[${name} has another question. It can be answered in a later run.]`,
+        ...(othersWait ? [fullLine('Other questions wait for a later run.')] : [])]];
     }
-    const { ask, why, form } = A.questionLines[id][q], later = S.answeredThisRun(state, id);
+    const { ask, why, form } = A.questionLines[id][q], open = S.canAnswerThisRun(state, id);
     const missing = (S.questions[id][q].needs || []).filter(([set, i]) => !S.wordAvailable(state, set, i));
     // A note from this run that answered nobody was posted, but does not fit.
-    const tried = !later && S.onWall(state).some(i => state.notes[i].run === state.run && !state.answers.some(a => a.note === i));
+    const tried = open && S.onWall(state).some(i => state.notes[i].run === state.run && !state.answers.some(a => a.note === i));
     return [ask, [why, ...(tried ? ['“That isn’t quite it. Not yet.”'] : []),
-      later ? '[One answer per resident each run. This one can be answered in a later run.]'
-        : `[Answer with a note: ${form}. Post it at the notice hall this run, then talk to ${name} again.]`,
+      open ? `[Answer with a note: ${form}. Post it at the notice hall this run, then talk to ${name} again.]`
+        : S.answeredThisRun(state, id) ? '[One answer per resident each run. This one can be answered in a later run.]'
+          : fullLine('This one can be answered in a later run.'),
       ...missing.map(w => `[You don’t know the word ${word(w)} yet. ${S.residents[S.teacherOf(...w).id].name} uses it.]`)]];
   }
 })();
