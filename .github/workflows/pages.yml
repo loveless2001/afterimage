@@ -1,0 +1,44 @@
+# Publishes the game to GitHub Pages on every push to main, after the syntax
+# check and state tests pass. Only the files the page loads are deployed
+# (not plans, docs, tests or research).
+name: Publish game
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check syntax and run state tests
+        run: |
+          for f in js/*.js tests/*.cjs; do node --check "$f"; done
+          node --test tests/*.test.cjs
+      - name: Collect the game files
+        run: mkdir _site && cp -r index.html style.css js _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

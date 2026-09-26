@@ -6,3 +6,5 @@ __pycache__/
 *.pyc
 test-results/
 playwright-report/
+# Downloaded third-party reports stay local: downloads.json lists their URLs and SHA256SUMS checks them.
+research/incidents/*/originals/

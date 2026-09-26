@@ -12,6 +12,8 @@ Collected for AFTERIMAGE's future narrative and systems design. This is a dated 
 
 ## Offline reports
 
+The PDFs are kept locally in `originals/` and are not in the repository. Download them from the URLs in [downloads.json](downloads.json) and check them with `SHA256SUMS`.
+
 | ID | Local document | Pages |
 | --- | --- | ---: |
 | HF-01 | [OpenAI technical report](originals/openai-hugging-face-technical-report.pdf) | 38 |

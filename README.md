@@ -4,7 +4,9 @@ A small, original browser game about what survives a reset. You play seven runs 
 
 **Start with [docs/design-guidelines.md](docs/design-guidelines.md) for the current design and milestones.** [DESIGN.md](DESIGN.md) describes the retired Moth prologue and is kept for history.
 
-[Research library](research/README.md): incident reports, four offline PDFs, source provenance, a chronology, and fictional expansion notes collected on 7 September 2026.
+**Play online: https://loveless2001.github.io/afterimage/** (saves stay in your browser).
+
+[Research library](research/README.md): incident reports, four offline PDFs (kept locally, not in the repository), source provenance, a chronology, and fictional expansion notes collected on 7 September 2026.
 
 ## Play on Windows — no installation or compilation
 
