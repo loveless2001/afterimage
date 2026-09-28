@@ -13,6 +13,8 @@
   const legacyKey = 'afterimage.prologue.v1';
   A.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   A.pad = n => String(n).padStart(2, '0');
+  // A new element with a class and, optionally, text (for the paper views).
+  A.el = (tag, className, text) => { const e = document.createElement(tag); e.className = className; if (text !== undefined) e.textContent = text; return e; };
   // Runtime values that change during play. Modules read and write them here
   // so reassignments (a new run, an import) are visible everywhere.
   const G = A.game = {
@@ -61,6 +63,7 @@
     else G.loadWarning = 'The previous save could not be read. A new game is ready; you can import a backup from the menu.';
   }
   A.save = function () {
+    A.trails?.save(); // cosmetic, under its own key
     try { localStorage.setItem(A.storageKey, JSON.stringify(G.state)); }
     catch (_) { if (G.storageOK) A.toast('Browser saving is unavailable. Export your save from the menu.'); G.storageOK = false; }
   };

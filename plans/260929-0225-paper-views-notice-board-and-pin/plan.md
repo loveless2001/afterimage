@@ -7,7 +7,7 @@ Source: user request, 29 Sep 2026: "when viewing the notice board, let the game 
 | 1 | `A.dialog(..., scene)`: optional DOM scene above the paragraphs; a wall scene widens the dialog; focus prefers scene buttons | done |
 | 2 | `notice-board-and-pinned-card-views.js`: `noteCard`, `noticeBoard({ draft, pick, mark, fresh })`, `pinBoard(note)` | done |
 | 3 | Notice hall, builder steps, take-down, confirm, posted, handoff, entrance pin use the views | done |
-| 4 | CSS (day, night, 850/520px, reduced motion); browser journeys updated; agent-browser check | done (Playwright pending in the user's shell) |
+| 4 | CSS (day, night, 850/520px, reduced motion); browser journeys updated; agent-browser check | done (Playwright passed in the user's shell, 29 Sep 2026) |
 | 5 | Docs: README, design guidelines, VERIFICATION | done |
 
 ## Decisions

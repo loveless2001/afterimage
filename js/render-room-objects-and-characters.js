@@ -156,5 +156,16 @@
     if (active) label(o.label.toUpperCase(), o.x, o.y, o.type === 'gate' ? 183 : 89, '#704c40', 10);
   }
 
-  A.drawRoom = { shelf, desk, agent, agentGhost, noticeWall, object, slotAt, warmthOf };
+  // An earlier run's afterimage (see afterimages-earlier-runs-trails-and-ghosts.js):
+  // the player's shape, faint and still, pale-edged so it reads by day and at
+  // night. Drawn after the night layer, and skipped while a shelf hides it.
+  function afterimage(x, y, fade) {
+    if (hiddenAt(x, y, 40)) return;
+    const outline = bodyPoints(x, y, looks.player, 0);
+    const eyes = project(x, y, looks.player.top * .59), k = G.scale;
+    ctx.save(); ctx.globalAlpha = fade; polygon(outline, looks.player.body); line([...outline, outline[0]], '#f0eacb', 1.2 * k);
+    ctx.globalAlpha = Math.min(.85, fade * 2.5); ctx.fillStyle = '#f0eacb'; ctx.fillRect(eyes.x - 7 * k, eyes.y - 3 * k, 5 * k, 2 * k); ctx.fillRect(eyes.x + 3 * k, eyes.y - 3 * k, 5 * k, 2 * k); ctx.restore();
+  }
+
+  A.drawRoom = { shelf, desk, agent, agentGhost, afterimage, noticeWall, object, slotAt, warmthOf };
 })();

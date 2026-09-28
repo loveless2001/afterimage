@@ -63,6 +63,7 @@
       if (G.target && Math.hypot(p.x - before.x, p.y - before.y) < .01) { G.target = null; A.toast('The path is blocked. Choose another point or use the field journal.'); }
       if (G.time - G.lastSaved > 2) { A.save(); G.lastSaved = G.time; }
     }
+    A.trails.record(dt, Boolean(length)); // this run's path, for its afterimage later
     G.nearby = A.roomObjects().map(o => ({ ...o, distance: Math.hypot(o.x - p.x, o.y - p.y) })).filter(o => o.distance < 83).sort((a, b) => a.distance - b.distance)[0] || null;
     $('interaction').hidden = !G.nearby;
     if (G.nearby) $('interact-label').textContent = G.nearby.label;

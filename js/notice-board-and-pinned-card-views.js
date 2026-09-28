@@ -6,8 +6,7 @@
 // (take a note down, pin one), its cards become buttons.
 (function () {
   'use strict';
-  const A = window.Afterimage, G = A.game, S = A.S, pad = A.pad;
-  const el = (tag, className, text) => { const e = document.createElement(tag); e.className = className; if (text !== undefined) e.textContent = text; return e; };
+  const A = window.Afterimage, G = A.game, S = A.S, pad = A.pad, el = A.el;
   // Who posted a card and when, in its small print.
   const stamp = n => n.found !== undefined ? 'FOUND' : n.run === G.state.run ? 'THIS RUN' : `RUN ${pad(n.run)}`;
   const kindOf = n => n.found !== undefined ? 'found' : n.run === G.state.run ? 'current' : 'older';
@@ -28,7 +27,7 @@
     const state = G.state, bySlot = new Map(S.onWall(state).map(i => [state.notes[i].slot, i])), count = bySlot.size;
     // The top row is ending C's twelve, marked as the room marks it.
     const board = el('ol', 'board' + (count >= S.wallEndingNotes ? ' row-full' : count >= S.wallEndingNotes - 3 ? ' row-near' : ''));
-    board.setAttribute('aria-label', `The notice wall: ${count} of ${S.wallSlots} holders used`);
+    board.setAttribute('aria-label', `The notice wall: ${count} of ${S.wallSlots} holders used`); board.dataset.size = 'wide';
     for (let slot = 0; slot < S.wallSlots; slot++) {
       const holder = el('li', 'holder'), i = bySlot.get(slot), note = i === undefined ? null : state.notes[i];
       holder.style.setProperty('--tilt', `${((slot * 37) % 7 - 3) * .45}deg`);

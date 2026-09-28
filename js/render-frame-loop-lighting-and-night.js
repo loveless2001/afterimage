@@ -1,7 +1,8 @@
 // Draws the room each frame: floor and walls, light (dim for every dark lamp,
 // a warm pool for every lit one), every object and figure depth-sorted back to
 // front (see render-room-objects-and-characters.js), dust, vignette, the
-// night palette, the player's outline when a shelf hides them, then the
+// night palette, earlier runs' afterimages, the player's outline when a shelf
+// hides them, then the
 // progress cues (render-progress-cues-*.js). Also
 // owns the requestAnimationFrame loop and final startup.
 (function () {
@@ -66,6 +67,7 @@
       ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#4b5666'; ctx.fillRect(0, 0, width, height);
       ctx.globalCompositeOperation = 'screen'; lights(state, .8); ctx.restore();
     }
+    A.trails.ghosts(state).forEach(g => draw.afterimage(g.x, g.y, g.fade));
     draw.agentGhost(state.player.x, state.player.y);
     A.drawCues(state);
   }

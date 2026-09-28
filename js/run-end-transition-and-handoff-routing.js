@@ -24,13 +24,14 @@
     $('transition-title').textContent = `RUN ${pad(before.run)} ENDED`;
     $('transition-detail').textContent = next.finished ? 'The last entry is written.' : `Next: RUN ${pad(next.run)} · budget ${next.budget}`;
     $('transition').classList.add('on');
-    setTimeout(() => { G.state = next; G.target = null; A.save(); A.updateHUD(); }, A.reducedMotion ? 0 : 650);
+    setTimeout(() => { G.state = next; G.target = null; if (!next.finished) A.trails.begin(next.run); A.save(); A.updateHUD(); }, A.reducedMotion ? 0 : 650);
     setTimeout(() => {
       $('transition').classList.remove('on'); G.transitioning = false;
       if (next.finished) return A.showEnding();
+      const echo = next.run === 2 ? ' Something of your last run is still walking the room.' : '';
       const turn = next.run === S.turnRun ? ' The lights are different tonight; the residents have gathered at the desk.' : '';
       const learned = S.learnedWords(before, before.run).map(w => `“${w}”`), words = learned.length ? ` Learned last run: ${learned.join(', ')}.` : '';
-      A.toast(`Run ${pad(next.run)}. Budget ${next.budget}. The room kept ${next.lights.length} of ${Object.keys(S.lamps).length} lamps and ${S.onWall(next).length} ${S.onWall(next).length === 1 ? 'note' : 'notes'}.${words}${turn}`);
+      A.toast(`Run ${pad(next.run)}. Budget ${next.budget}. The room kept ${next.lights.length} of ${Object.keys(S.lamps).length} lamps and ${S.onWall(next).length} ${S.onWall(next).length === 1 ? 'note' : 'notes'}.${words}${echo}${turn}`);
       if (next.pinned !== null) A.showPinned(true);
     }, A.reducedMotion ? 30 : 1600);
   };

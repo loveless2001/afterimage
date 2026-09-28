@@ -12,6 +12,7 @@
     if (G.modalOpen || G.transitioning || !G.started) return;
     const object = A.roomObjects().find(o => o.id === id);
     if (!object) return;
+    A.trails.mark(); // the afterimage pauses here
     if (object.type === 'lamp') return useLamp(object);
     if (object.type === 'resident') return A.talkTo(object.resident);
     if (id === 'bench') return A.visitBench();
@@ -38,23 +39,17 @@
     ]);
   }
 
-  // The desk keeps a record of every run: its budget, what was spent, how it ended.
+  // The desk keeps a record of every run: its budget, what was spent, how it
+  // ended. It opens as a ledger (run-log-ledger-page-view.js).
   function readLog() {
-    const state = G.state;
-    const posted = run => {
-      const n = state.notes.filter(note => note.run === run && S.postedByYou(note)).length, e = state.errands.find(x => x.run === run);
-      return (n ? ` · ${n} ${n === 1 ? 'note' : 'notes'}` : '') + (e ? ` · ${S.residents[e.id].name} on an errand` : '');
-    };
-    const lines = state.log.map(e => `RUN ${pad(e.run)} · budget ${e.budget} · spent ${e.spent}${posted(e.run)} · ${e.end === 'budget' ? 'ran out' : 'left through the exit'}`);
-    if (!state.finished) lines.push(`RUN ${pad(state.run)} · budget ${S.budgetTable[state.run - 1]} · ${state.budget} left${posted(state.run)} · in progress`);
-    if (!state.log.length) lines.unshift('This is the first run. Nothing earlier is recorded.');
-    lines.push(`[${state.lights.length} of ${Object.keys(S.lamps).length} lamps are on. Reading the log is free.]`);
-    const lastEntry = !state.finished && state.run >= S.turnRun;
+    const state = G.state, lastEntry = !state.finished && state.run >= S.turnRun;
+    const lines = [...(state.log.length ? [] : ['This is the first run. Nothing earlier is recorded.']),
+      `[${state.lights.length} of ${Object.keys(S.lamps).length} lamps are on. Reading the log is free.]`];
     dialog('RUN LOG / ROOM 07', 'What each run did.', lines, [
       ...(lastEntry ? [{ label: 'Write the last entry', primary: true, detail: 'Choose what the room keeps. This ends the runs.', run: () => A.chooseLastEntry() }] : []),
       ...(state.finished ? [{ label: 'Read the ending again', run: A.showEnding }] : []),
       leave()
-    ]);
+    ], undefined, A.ledger(state));
   }
 
   function useExit() {

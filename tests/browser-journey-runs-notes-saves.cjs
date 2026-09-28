@@ -50,8 +50,9 @@ module.exports = async h => {
   assert.equal(await p.locator('#budget-count').innerText(), '12 / 12');
   assert.match(await p.locator('#kept').innerText(), /4 OF 4 LIT/);
   await walk(p, 475, 405); await interact(p, 'The run log');
-  const logText = await p.locator('#dialog-body').innerText();
-  assert.match(logText, /RUN 01 · budget 10 · spent 3 · 1 note · left through the exit/); assert.match(logText, /RUN 02 · budget 6 · spent 6 · ran out/);
+  // The log opens as a ledger: one row per run (run, budget, spent, notes, how it ended).
+  const rows = await p.locator('.ledger tbody tr:not(.margin-row)').allInnerTexts();
+  assert.match(rows[0], /^\s*01\s+10\s+3\s+1 note\s+left\s*$/); assert.match(rows[1], /^\s*02\s+6\s+6\s+—\s+ran out\s*$/);
   await p.screenshot({ path: path.join(output, 'run-log.png') }); await close(p);
   await p.locator('#help').click();
   const downloadPromise = p.waitForEvent('download'); await p.getByRole('button', { name: 'Export save (.json)', exact: true }).click();

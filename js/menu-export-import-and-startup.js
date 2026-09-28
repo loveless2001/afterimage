@@ -24,7 +24,7 @@
       { label: `Palette: ${G.state.palette}`, detail: 'Auto follows your system, and turns to night from run 06.', run: () => { S.advance(G.state, { type: 'SetPalette', palette: S.palettes[(S.palettes.indexOf(G.state.palette) + 1) % S.palettes.length] }); A.save(); A.updateHUD(); A.menu(); } },
       ...(G.state.ending ? [{ label: 'Revisit the ending', detail: A.revisitDetail(), run: A.revisitEnding }] : []),
       { label: 'Begin a new set of runs', run: () => dialog('NEW GAME', 'Start again from run 01?', ['This replaces the current save in this browser, including every lamp the room has kept. Export it first if you want to keep it.'], [
-        { label: 'Begin again', run: () => { G.state = S.fresh(); G.target = null; A.save(); A.closeDialog(); startGame(true); } }, { label: 'Cancel', run: A.menu }
+        { label: 'Begin again', run: () => { G.state = S.fresh(); G.target = null; A.trails.reset(); A.save(); A.closeDialog(); startGame(true); } }, { label: 'Cancel', run: A.menu }
       ], A.menu) }
     ]);
   };
@@ -36,7 +36,7 @@
       if (file.size > 20000) throw new Error('That file is too large to be a save.');
       const imported = S.validate(JSON.parse(await file.text()));
       dialog('IMPORT SAVE', `Resume run ${pad(imported.run)}?`, ['This replaces the active browser save. Export your current save first if you want to keep it.'], [
-        { label: 'Import and resume', primary: true, run: () => { G.state = imported; G.target = null; A.save(); A.closeDialog(); resume(); } }, { label: 'Cancel', run: A.menu }
+        { label: 'Import and resume', primary: true, run: () => { G.state = imported; G.target = null; A.trails.reset(); A.save(); A.closeDialog(); resume(); } }, { label: 'Cancel', run: A.menu }
       ], A.menu);
     } catch (error) { dialog('IMPORT FAILED', 'This save could not be read.', [error.message, 'Your current game has not been changed.'], [{ label: 'Return to menu', run: A.menu }]); }
   });

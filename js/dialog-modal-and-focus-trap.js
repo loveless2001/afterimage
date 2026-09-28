@@ -1,7 +1,8 @@
 // Modal conversation window: speaker, title, paragraphs and choice buttons.
 // Paragraphs written as "[...]" render as system asides. An optional scene (a
 // paper view such as the notice wall, see notice-board-and-pinned-card-views.js)
-// sits above the paragraphs; a wall scene widens the dialog. While a dialog is
+// sits above the paragraphs; its data-size ('wide' for the wall, 'book' for the
+// run log) sets the dialog's width. While a dialog is
 // open the rest of the page is inert, Tab stays inside it, and Escape runs
 // the dialog's escape action (close by default).
 (function () {
@@ -14,7 +15,7 @@
     G.modalOpen = true; G.target = null; G.keys.clear(); G.escapeAction = onEscape || A.closeDialog;
     $('speaker').textContent = speaker; $('dialog-title').textContent = title;
     $('dialog-body').replaceChildren(...(scene ? [scene] : [])); $('choices').replaceChildren(); $('choices').className = '';
-    document.querySelector('.dialog').classList.toggle('wide', Boolean(scene?.classList.contains('board')));
+    const box = document.querySelector('.dialog'); box.classList.remove('wide', 'book'); if (scene?.dataset.size) box.classList.add(scene.dataset.size);
     paragraphs.forEach(text => {
       const p = document.createElement('p');
       if (text.startsWith('[')) { p.className = 'aside'; text = text.slice(1, -1); }

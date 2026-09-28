@@ -287,7 +287,7 @@ The notice hall, each writing step, full-wall take-down, confirm, posted, the en
   - Pin chooser: "Juno · light" and "Pell · keep" have gold outlines with "ERRAND · JUNO" and "ERRAND · PELL", and their previews are listed below. Focus starts on the first card.
   - Entrance pin: one blue card on a cork board with a pushpin.
   - Phone (390×844): the wall wraps to 4 columns and the dialog scrolls. At night the wall and older cards go dark, and this run's and found cards stay readable.
-- **Browser journeys:** the full-wall step now clicks the first card on the wall. The errand step reads the preview from the card's accessible name and checks the card shows "ERRAND · JUNO". Pending: the Playwright run in the user's shell.
+- **Browser journeys:** the full-wall step now clicks the first card on the wall. The errand step reads the preview from the card's accessible name and checks the card shows "ERRAND · JUNO". Passed, run by the user in their own shell (29 Sep 2026).
 
 ## Field note link — 29 September 2026
 
@@ -296,3 +296,15 @@ The essay "The agent learned the judge" is now at `notes/the-agent-learned-the-j
 - **Checks:** `node --check` clean; `node --test tests/*.test.cjs` 34/34.
 - **Browser (agent-browser):** the link shows at 1440×960 and 390×844, below the start button. `notes/the-agent-learned-the-judge.html` served 200 text/html, and ending A lists the new button after "Revisit the choice".
 - **The page itself:** self-contained, with no external scripts, stylesheets, fonts or images (only citation links).
+
+## Run log ledger and afterimages — 29 September 2026
+
+The run log now opens as a ledger. Each earlier run replays as a faint afterimage walking the route you took. Neither changes rules or the validated save; trails live under their own storage key.
+
+- **Syntax and tests:** `node --check` clean. `node --test tests/*.test.cjs` passed 36/36. The new `state-afterimage-trails.test.cjs` covers gliding, a 5-step pause, the 8-step rest and loop, thinning that keeps pauses, and rejecting damaged trails.
+- **Ledger (agent-browser, real-rules saves):**
+  - At run 6: rows 01–05 plus 06 in pencil. Between the rows: "“desk · check · again”, copied by Wren" under run 02 and "Juno on an errand" under run 03. The last-entry line is blank.
+  - After ending A: 06 ends "last entry", and the last line reads "The record.", checked on a 390×844 phone.
+  - At night: dark paper and single ruled lines (the doubled ruling from the first version was removed). The caption is visually hidden but read by screen readers.
+- **Afterimages (agent-browser, a fresh game):** in run 1 I walked to the west lamp, lit it and walked on. That saved 21 points and 1 pause. Leaving opened run 2 with the new message, and one figure retraced the route. The first version read like a grey stone, so it now has pale eye slits.
+- **Browser journeys:** the run-log step now reads the ledger rows. Passed, run by the user in their own shell (29 Sep 2026).
