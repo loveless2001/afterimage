@@ -2,7 +2,7 @@
 
 A small, original browser game about what survives a reset. You play seven runs in one isometric room. Each run starts fresh at the entrance with a small budget, and the room keeps what you change: lamps, notes on the wall, and what three residents think of you. They remember the room but never your face, unless a note tells them. From run 6 you decide what the room keeps. There are three endings and a secret one, and none is scored. A full playthrough takes about 25–40 minutes.
 
-**Start with [docs/design-guidelines.md](docs/design-guidelines.md) for the current design and milestones.** [DESIGN.md](DESIGN.md) describes the retired Moth prologue and is kept for history.
+**Start with [docs/design-guidelines.md](docs/design-guidelines.md) for the current design and milestones, and [docs/design-pillars.md](docs/design-pillars.md) for the pillars every new idea is checked against.** [DESIGN.md](DESIGN.md) describes the retired Moth prologue and is kept for history.
 
 **Play online: https://loveless2001.github.io/afterimage/** (saves stay in your browser).
 
