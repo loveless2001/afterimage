@@ -22,7 +22,7 @@
       { label: 'Export save (.json)', run: A.exportSave },
       { label: 'Import save (.json)', run: () => $('import-file').click() },
       { label: `Palette: ${G.state.palette}`, detail: 'Auto follows your system, and turns to night from run 06.', run: () => { S.advance(G.state, { type: 'SetPalette', palette: S.palettes[(S.palettes.indexOf(G.state.palette) + 1) % S.palettes.length] }); A.save(); A.updateHUD(); A.menu(); } },
-      ...(G.state.ending ? [{ label: 'Revisit the ending', detail: 'Return to the run where the last entry was written.', run: A.revisitEnding }] : []),
+      ...(G.state.ending ? [{ label: 'Revisit the ending', detail: A.revisitDetail(), run: A.revisitEnding }] : []),
       { label: 'Begin a new set of runs', run: () => dialog('NEW GAME', 'Start again from run 01?', ['This replaces the current save in this browser, including every lamp the room has kept. Export it first if you want to keep it.'], [
         { label: 'Begin again', run: () => { G.state = S.fresh(); G.target = null; A.save(); A.closeDialog(); startGame(true); } }, { label: 'Cancel', run: A.menu }
       ], A.menu) }

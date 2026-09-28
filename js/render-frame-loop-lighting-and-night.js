@@ -1,21 +1,23 @@
 // Draws the room each frame: floor and walls, light (dim for every dark lamp,
 // a warm pool for every lit one), every object and figure depth-sorted back to
 // front (see render-room-objects-and-characters.js), dust, vignette, the
-// night palette, then the progress cues (render-progress-cues-*.js). Also
+// night palette, the player's outline when a shelf hides them, then the
+// progress cues (render-progress-cues-*.js). Also
 // owns the requestAnimationFrame loop and final startup.
 (function () {
   'use strict';
   const A = window.Afterimage, G = A.game, S = A.S, ctx = A.ctx, draw = A.drawRoom;
   const { project, polygon, line, label, ring } = A;
 
-  function lightPool(x, y, radius, color) {
-    const p = project(x, y), glow = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, radius * G.scale);
+  function lightPool(x, y, radius, color, z = 0) {
+    const p = project(x, y, z), glow = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, radius * G.scale);
     glow.addColorStop(0, color); glow.addColorStop(1, '#fbf7d600'); ctx.fillStyle = glow;
     ctx.fillRect(p.x - radius * G.scale, p.y - radius * G.scale, radius * 2 * G.scale, radius * 2 * G.scale);
   }
   // Warm pools: the desk lamp always, each lit lamp, and the alcove: before the
   // turn it warms one faint step per secret hint heard, from the turn it glows.
-  // The lights ending leaves every pool wider and brighter.
+  // The lights ending leaves every pool wider and brighter. Trusted residents
+  // glow faintly at mid-body, a little more with each answer, so they shine at night.
   function lights(state, strength = 1) {
     const kept = state.ending === 'lights', alpha = a => Math.round(Math.min(255, a * strength * (kept ? 1.3 : 1))).toString(16).padStart(2, '0');
     lightPool(475, 330, 190, '#fbf7d6' + alpha(125));
@@ -23,6 +25,10 @@
     const heard = S.hintsHeard(state);
     if (state.run >= S.turnRun || state.ending === 'alcove') lightPool(110, 450, 110, '#f6dca4' + alpha(90));
     else if (heard) lightPool(110, 450, 70 + heard * 15, '#f6dca4' + alpha(30 + heard * 20));
+    A.roomObjects().filter(o => o.type === 'resident').forEach(o => {
+      const warmth = draw.warmthOf(state, o.resident);
+      if (warmth) lightPool(o.x, o.y, 44 + 30 * warmth, '#f4cf8c' + alpha(60 + 80 * warmth), 36);
+    });
   }
   function render() {
     const state = G.state, { width, height, time } = G, floor = [project(0, 0), project(960, 0), project(960, 680), project(0, 680)];
@@ -60,6 +66,7 @@
       ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#4b5666'; ctx.fillRect(0, 0, width, height);
       ctx.globalCompositeOperation = 'screen'; lights(state, .8); ctx.restore();
     }
+    draw.agentGhost(state.player.x, state.player.y);
     A.drawCues(state);
   }
   // Animation time only advances while the room is actually visible and playable.

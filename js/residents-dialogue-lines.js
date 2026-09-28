@@ -64,4 +64,30 @@
     wall: '“I’ll keep reading. It sounds like one long conversation.”',
     alcove: '“Stay a while. Nobody is counting.”'
   };
+
+  // Once you chose another ending, each resident speaks for their own (see
+  // endingCallout). c = { kind: 'ready'|'reachable'|'late', dark: lamp names, gaps, cards }.
+  const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+    'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+  const spell = n => n <= 20 ? words[n] : `twenty-${words[n - 20]}`, cap = w => w[0].toUpperCase() + w.slice(1);
+  A.residentCallouts = {
+    wren: () => ['“I left the last line of the log blank. It would take one plain sentence: every run, in order.”'],
+    juno(c) {
+      if (c.kind === 'ready') return ['“Every lamp is lit, and you kept something else. That’s all right. They’re still warm.”'];
+      const one = c.dark.length === 1, dark = one ? `The ${c.dark[0]} is still dark.` : `${cap(spell(c.dark.length))} lamps are still dark.`;
+      return c.kind === 'reachable' ? [`“${dark} I keep checking anyway.”`, '“The last entry is only ink. Wren crosses things out all the time.”']
+        : [`“${dark} Whoever comes next might light ${one ? 'it' : 'them'}.”`];
+    },
+    pell(c) {
+      if (c.kind === 'ready') return [`“${cap(spell(c.cards))} cards. I could have read them to you, first to last.”`, '“I still might.”'];
+      const one = c.gaps === 1, gaps = `The top row still has ${spell(c.gaps)} ${one ? 'gap' : 'gaps'}. I read around ${one ? 'it' : 'them'}.`;
+      return c.kind === 'reachable' ? [`“${gaps}”`, '“Cards go up faster than you’d think, if someone’s still writing.”']
+        : [`“${gaps} The next reader might fill ${one ? 'it' : 'them'}.”`];
+    }
+  };
+  // Said after the closing line by the resident whose ending you chose (see benchHint).
+  A.benchHints = {
+    hint: '“There’s a bench behind the west shelves. Four seats. We never did sit down together.”',
+    ready: '“We kept a seat for you on the bench. It’s still there.”'
+  };
 })();

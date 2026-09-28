@@ -1,20 +1,56 @@
 // Drawing for the things in the room: shelves, the desk, the notice wall and
 // its cards, lamps, the exit, the pin board, the alcove bench, and the ring-
-// bodied figures (the player and the three residents). Endings leave traces
+// bodied figures (the player and the three residents, each with a shape and
+// something held), and the player's outline behind shelves. Endings leave traces
 // here too: a closed log on the desk, or a wall of cards kept blue.
 (function () {
   'use strict';
   const A = window.Afterimage, G = A.game, S = A.S, ctx = A.ctx;
   const { project, polygon, line, box, label, ring } = A;
-  // Body, ring and marker colours per figure. Untrusted rings stay neutral so
-  // that blue, the colour of what persists, only ever means trust.
+  // Body, ring and marker colours per figure; `warm` is where trust takes a
+  // resident (see warmthOf). Blue stays for notes, the cards you leave. Shapes differ
+  // too, so no one is told apart by colour alone: `top` is the head's height,
+  // `half` the half-width, `lean` how far the head leans forward. Pell is tall
+  // and thin, Juno low and wide, Wren hunched over the log.
   const looks = {
-    player: { body: '#353e34', rings: '#b9c4b1', marker: '#984e40' },
-    wren: { body: '#69745f', rings: '#bbc5a6' },
-    juno: { body: '#7d6b4c', rings: '#d8c9a3' },
-    pell: { body: '#566a7a', rings: '#cfd0c2' }
+    player: { body: '#353e34', rings: '#b9c4b1', marker: '#984e40', top: 66, half: 17, lean: 0 },
+    wren: { body: '#69745f', rings: '#bbc5a6', warm: '#8c7a4e', top: 60, half: 17, lean: 7 },
+    juno: { body: '#7d6b4c', rings: '#d8c9a3', warm: '#a06c3c', top: 58, half: 21, lean: 0 },
+    pell: { body: '#566a7a', rings: '#cfd0c2', warm: '#84677a', top: 76, half: 13, lean: 0 }
   };
-  const trustedRings = '#a9c3cf';
+  const bobOf = who => A.reducedMotion ? 0 : Math.sin(G.time * 1.8 + Object.keys(looks).indexOf(who) * 1.3) * 2.5;
+  const bodyPoints = (x, y, look, b) => [project(x + look.lean, y + look.lean, look.top + b), project(x + look.half, y - 5, look.top * .58 + b),
+    project(x + look.half - 2, y + 8, 15 + b), project(x - look.half * .53, y + 10, 10 + b), project(x - look.half, y, look.top * .55 + b)];
+  // What each resident holds, matching how strangers are labelled: Wren's log and
+  // the pencil behind one ear, Juno's unlit lantern, and the card Pell is reading.
+  const at = (c, s, dx, dy) => ({ x: c.x + dx * s, y: c.y + dy * s });
+  const props = {
+    wren(x, y, b, s) {
+      // The log lies open and flat on Wren's arm, in the red of the closed log on the desk.
+      const flat = (x0, y0, x1, y1, z) => [project(x0, y0, z), project(x1, y0, z), project(x1, y1, z), project(x0, y1, z)], z = 24 + b, head = project(x + 7, y + 7, 60 + b);
+      polygon(flat(x + 4, y + 10, x + 28, y + 24, z), '#7b4236');
+      polygon(flat(x + 6, y + 12, x + 16, y + 22, z + 1), '#efe8cf'); polygon(flat(x + 16, y + 12, x + 26, y + 22, z + 1), '#e4dcc0');
+      line([project(x + 16, y + 12, z + 1), project(x + 16, y + 22, z + 1)], '#7b4236', .8);
+      line([at(head, s, 3, 6), at(head, s, 12, 1)], '#c9a247', 1.8 * s);
+    },
+    juno(x, y, b, s) {
+      line([project(x - 19, y + 2, 30 + b), project(x - 14, y + 14, 30 + b), project(x - 14, y + 14, 22 + b)], '#5e5038', 1.2 * s);
+      box(x - 18, y + 10, 8, 8, 10, ['#e6d9a8', '#b9a26c', '#cdb883'], 10 + b);
+      box(x - 18, y + 10, 8, 8, 2, ['#9c8552', '#6d5c38', '#7f6b42'], 20 + b);
+    },
+    pell(x, y, b, s) {
+      const c = project(x + 16, y - 8, 50 + b);
+      polygon([at(c, s, -4, -6), at(c, s, 5, -7), at(c, s, 5, 5), at(c, s, -4, 6)], '#e4dcc4', '#7f7458');
+      for (let i = 0; i < 3; i++) line([at(c, s, -2, -3 + i * 3), at(c, s, 3 - i, -3.5 + i * 3)], '#7f7458aa', .8);
+    }
+  };
+  // Trust warms a resident: a first step when they trust you, one more for each
+  // answer, so 0 (not trusted) then 1/4 up to 1. Like trust, it never goes back.
+  // The body and rings shift warm here; the glow is drawn with the light pools.
+  const warmthOf = (state, id) => S.isTrusted(state, id) ? (1 + state.answers.filter(a => a.id === id).length) / 4 : 0;
+  const warmRings = '#ecd6a4';
+  // Mixes two #rrggbb colours: t = 0 gives a, t = 1 gives b.
+  const mix = (a, b, t) => '#' + [1, 3, 5].map(i => Math.round(parseInt(a.slice(i, i + 2), 16) * (1 - t) + parseInt(b.slice(i, i + 2), 16) * t).toString(16).padStart(2, '0')).join('');
   // Where a notice-wall card sits: twelve per row, the top row (slots 0–11) first.
   const slotAt = slot => ({ x: 250 + (slot % 12) * 33, z: 79 - Math.floor(slot / 12) * 34 });
 
@@ -39,16 +75,37 @@
     if (G.state.ending === 'record') box(s.x + 45, s.y + 10, 28, 20, 6, ['#8a4a3c', '#6d392e', '#7b4236'], s.h);
   }
   // A floating, ring-bodied figure. Only the player carries the red marker;
-  // a resident who trusts you wears slightly heavier blue rings.
-  function agent(x, y, who = 'player', trusted = false) {
-    const look = looks[who], scale = G.scale, time = G.time, phase = Object.keys(looks).indexOf(who) * 1.3;
-    const bob = A.reducedMotion ? 0 : Math.sin(time * 1.8 + phase) * 2.5, p = project(x, y), center = project(x, y, 39 + bob);
-    ctx.fillStyle = '#3e4d3822'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 22 * scale, 10 * scale, 0, 0, Math.PI * 2); ctx.fill();
-    polygon([project(x, y, 66 + bob), project(x + 17, y - 5, 38 + bob), project(x + 15, y + 8, 15 + bob), project(x - 9, y + 10, 10 + bob), project(x - 17, y, 36 + bob)], look.body);
-    ctx.save(); ctx.translate(center.x, center.y); ctx.strokeStyle = trusted ? trustedRings : look.rings; ctx.lineWidth = trusted ? .9 : .65;
-    for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.ellipse(0, 0, (9 + i) * scale, (21 - i) * scale, i * .55 + phase + (A.reducedMotion ? 0 : time * .09), 0, Math.PI * 2); ctx.stroke(); }
+  // a resident's body and rings warm, and the rings thicken, with their warmth.
+  function agent(x, y, who = 'player', warmth = 0) {
+    const look = looks[who], scale = G.scale, phase = Object.keys(looks).indexOf(who) * 1.3, wide = look.half / 17, tall = look.top / 66;
+    const bob = bobOf(who), p = project(x, y), center = project(x, y, look.top * .59 + bob);
+    ctx.fillStyle = '#3e4d3822'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 22 * wide * scale, 10 * scale, 0, 0, Math.PI * 2); ctx.fill();
+    polygon(bodyPoints(x, y, look, bob), warmth ? mix(look.body, look.warm, warmth * .8) : look.body);
+    ctx.save(); ctx.translate(center.x, center.y); ctx.strokeStyle = warmth ? mix(look.rings, warmRings, warmth) : look.rings; ctx.lineWidth = .65 + .35 * warmth;
+    for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.ellipse(0, 0, (9 + i) * wide * scale, (21 - i) * tall * scale, i * .55 + phase + (A.reducedMotion ? 0 : G.time * .09), 0, Math.PI * 2); ctx.stroke(); }
     ctx.fillStyle = '#f0eacb'; ctx.fillRect(-7 * scale, -3 * scale, 5 * scale, 2 * scale); ctx.fillRect(3 * scale, -3 * scale, 5 * scale, 2 * scale); ctx.restore();
-    if (look.marker) { const head = project(x, y, 85); polygon([{ x: head.x, y: head.y + 6 }, { x: head.x - 4, y: head.y }, { x: head.x + 4, y: head.y }], look.marker); }
+    props[who]?.(x, y, bob, scale);
+    if (look.marker) marker(x, y);
+  }
+  const marker = (x, y) => { const head = project(x, y, 85); polygon([{ x: head.x, y: head.y + 6 }, { x: head.x - 4, y: head.y }, { x: head.x + 4, y: head.y }], looks.player.marker); };
+  // Whether a point is hidden behind a shelf: walking from it towards the viewer
+  // along (1, 1, 0.96) keeps the same screen position, so it is hidden when
+  // that ray passes through a shelf's box.
+  const hiddenAt = (x, y, z) => A.shelves.some(s => {
+    let near = 0, far = Infinity;
+    for (const [from, step, lo, hi] of [[x, 1, s.x, s.x + s.w], [y, 1, s.y, s.y + s.d], [z, .96, 0, s.h]]) {
+      near = Math.max(near, (lo - from) / step); far = Math.min(far, (hi - from) / step);
+    }
+    return near < far;
+  });
+  // The player, outlined over the shelf that hides them. Drawn after the night
+  // layer, dark then pale so it reads on any shelf face.
+  function agentGhost(x, y) {
+    if (![20, 40, 60].some(z => hiddenAt(x, y, z))) return;
+    const outline = bodyPoints(x, y, looks.player, bobOf('player'));
+    polygon(outline, '#353e3430');
+    line([...outline, outline[0]], '#20271fa0', 2.4 * G.scale); line([...outline, outline[0]], '#f0eacbd0', G.scale);
+    marker(x, y);
   }
   // A note card facing the viewer along x: blue for this run (or kept by the wall ending), faded after.
   // Cards Pell found are old paper: someone else's, never blue.
@@ -72,7 +129,7 @@
   function object(o) {
     const state = G.state, active = G.nearby?.id === o.id && !G.modalOpen;
     if (active) ring(o.x, o.y, 34, '#9a574a');
-    if (o.type === 'resident') agent(o.x, o.y, o.resident, S.isTrusted(state, o.resident));
+    if (o.type === 'resident') agent(o.x, o.y, o.resident, warmthOf(state, o.resident));
     if (o.type === 'hall') box(o.x - 22, o.y - 8, 44, 16, 18, ['#c9cfbb', '#8f9c83', '#a9b39b']);
     if (o.type === 'bench') { box(o.x - 34, o.y - 10, 68, 20, 12, ['#b9ae92', '#8f8568', '#a39a7d']); box(o.x - 34, o.y - 14, 68, 5, 30, ['#c4b99c', '#968b6d', '#aca283'], 12); }
     if (o.type === 'pin') {
@@ -99,5 +156,5 @@
     if (active) label(o.label.toUpperCase(), o.x, o.y, o.type === 'gate' ? 183 : 89, '#704c40', 10);
   }
 
-  A.drawRoom = { shelf, desk, agent, noticeWall, object, slotAt };
+  A.drawRoom = { shelf, desk, agent, agentGhost, noticeWall, object, slotAt, warmthOf };
 })();

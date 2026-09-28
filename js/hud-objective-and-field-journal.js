@@ -17,7 +17,14 @@
   };
   function nextStep(state) {
     const dark = Object.keys(S.lamps).filter(id => !S.isLit(state, id)), cheapest = Math.min(...dark.map(id => S.lamps[id].cost));
-    if (state.finished) return [`Ending ${S.endings[state.ending].letter}: ${S.endings[state.ending].title.toLowerCase()}.`, 'Look around, or revisit the ending from the menu.'];
+    if (state.finished) {
+      // After endings A–C, the two residents whose endings you passed over point
+      // to them. Names only once met, as in the room.
+      const waiting = residentIds.filter(id => S.endingCallout(state, id)), named = waiting.every(id => S.hasMet(state, id));
+      return [`Ending ${S.endings[state.ending].letter}: ${S.endings[state.ending].title.toLowerCase()}.`,
+        !waiting.length ? 'Look around, or revisit the ending from the menu.'
+          : named ? `${waiting.map(id => S.residents[id].name).join(' and ')} are at the desk and still have something to say.` : 'Two residents at the desk still have something to say.'];
+    }
     if (state.run >= S.turnRun) {
       const ready = ['record', 'lights', 'wall'].filter(id => S.endingReady(state, id)).length;
       return ['Decide what the room keeps.', `Write the last entry in the run log at the desk. ${ready} of 3 endings are ready; lamps and notes can still change that.`];

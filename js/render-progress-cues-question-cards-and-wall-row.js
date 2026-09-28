@@ -5,7 +5,7 @@
 //   outlined while they wait for a note, solid once a note posted this run answers it;
 // - the notice wall's top row, whose 12 slots are ending C's threshold (the
 //   row fills first): empty slots outlined from 9 notes, a rule under it at 12.
-// Trusted residents' blue rings are drawn with the figures, and the alcove's
+// Trusted residents' warmth is drawn with the figures and light pools, and the alcove's
 // warmth (one step per secret hint heard) with the light pools.
 (function () {
   'use strict';

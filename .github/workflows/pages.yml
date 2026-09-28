@@ -1,6 +1,6 @@
 # Publishes the game to GitHub Pages on every push to main, after the syntax
-# check and state tests pass. Only the files the page loads are deployed
-# (not plans, docs, tests or research).
+# check and state tests pass. Only the files the page loads are deployed,
+# plus the field notes it links to (not plans, docs, tests or research).
 name: Publish game
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
           for f in js/*.js tests/*.cjs; do node --check "$f"; done
           node --test tests/*.test.cjs
       - name: Collect the game files
-        run: mkdir _site && cp -r index.html style.css js _site/
+        run: mkdir _site && cp -r index.html style.css js notes _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

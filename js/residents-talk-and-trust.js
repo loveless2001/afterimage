@@ -27,7 +27,7 @@
 
   A.talkTo = function (id) {
     const state = G.state, name = S.residents[id].name;
-    if (state.finished) return dialog(name.toUpperCase(), '“The runs are over.”', [A.residentClosing[state.ending]], [leave()]);
+    if (state.finished) return dialog(name.toUpperCase(), '“The runs are over.”', closingLines(id, state), [leave()]);
     // Nothing to confirm when the talk is free: again this run, or while Wren keeps the door.
     if (S.talkedThisRun(state, id) || S.talkCostIn(state) === 0) return talk(id);
     const met = S.hasMet(state, id);
@@ -39,6 +39,14 @@
       leave()
     ]);
   };
+
+  // After an ending: a resident whose ending you passed over points to it; the
+  // one whose ending you chose keeps the closing line, and may hint at the bench.
+  function closingLines(id, state) {
+    const kind = S.endingCallout(state, id), bench = S.benchHint(state, id);
+    if (kind) return A.residentCallouts[id]({ kind, dark: S.darkLamps(state).map(l => S.lamps[l].title.toLowerCase()), gaps: S.wallGaps(state), cards: S.onWall(state).length });
+    return [A.residentClosing[state.ending], ...(bench ? [A.benchHints[bench]] : [])];
+  }
 
   function talk(id) {
     const met = S.hasMet(G.state, id), wasTrusted = S.isTrusted(G.state, id), answers = G.state.answers.length;

@@ -143,11 +143,38 @@
     : id === 'alcove' ? Object.keys(residents).every(r => isTrusted(s, r)) && wallHas(s, p => p[1] === secretWords.verb && p[2] === secretWords.qualifier)
     : false;
   const endingAvailable = (s, id) => Object.hasOwn(endings, id) && !s.finished && s.run >= turnRun && endingReady(s, id);
+  // After an ending. Revisit rewinds to the run the last entry was written in,
+  // with the budget that run had left; any later runs are then still to play.
+  const revisitTarget = s => { const last = s.log.at(-1); return { run: last.run, budget: last.budget - last.spent }; };
+  const budgetAfterRevisit = s => revisitTarget(s).budget + budgetTable.slice(revisitTarget(s).run).reduce((sum, b) => sum + b, 0);
+  // Each resident speaks for one ending; the secret one belongs to all three.
+  const endingOwners = { wren: 'record', juno: 'lights', pell: 'wall' };
+  const darkLamps = s => Object.keys(lamps).filter(id => !isLit(s, id));
+  const wallGaps = s => Math.max(0, wallEndingNotes - onWall(s).length);
+  const costToReady = { record: () => 0, lights: s => darkLamps(s).reduce((sum, id) => sum + lamps[id].cost, 0), wall: s => wallGaps(s) * noteCost };
+  // How a resident points to their ending once you chose another: 'ready' (choose
+  // it after a revisit), 'reachable' (a revisit leaves enough budget to meet its
+  // need) or 'late' (only a new set of runs can). null for the resident whose
+  // ending you chose, after the secret ending, and before any ending.
+  const endingCallout = (s, id) => {
+    const own = endingOwners[id];
+    if (!s.finished || !own || s.ending === own || s.ending === 'alcove') return null;
+    return endingReady(s, own) ? 'ready' : costToReady[own](s) <= budgetAfterRevisit(s) ? 'reachable' : 'late';
+  };
+  // The resident whose ending you chose hints at the bench once you have seen it
+  // or heard a last reply: 'ready' when a revisit can still reach it, else 'hint'.
+  // Only a spent last run is out of reach: it reopens the last entry at once.
+  const benchHint = (s, id) => {
+    if (!s.finished || endingOwners[id] !== s.ending || !(s.benchSeen || hintsHeard(s) > 0)) return null;
+    const t = revisitTarget(s);
+    return endingReady(s, 'alcove') && (t.run < runCount || t.budget > 0) ? 'ready' : 'hint';
+  };
 
   const api = {
     budgetTable, runCount, turnRun, lamps, residents, kit, endings, wallSlots, noteCost, talkCost, wallEndingNotes, palettes, entrance,
     isInt, isLit, lampCost, noteText, validParts, onWall, isOnWall, freeSlot, postedByYou, residentBySubject,
     hasMet, talkedThisRun, isTrusted, onErrand, pinnedNote, recognizes, requestMet, endingReady, endingAvailable,
+    revisitTarget, budgetAfterRevisit, endingOwners, darkLamps, wallGaps, endingCallout, benchHint,
     baseWords, questions, questionCount, teacherOf, wordAvailable, partsAvailable, answersPerRun, openQuestion, answeredThisRun, answersThisRun, canAnswerThisRun, answerNote, wordText, learnedWords, hintsHeard
   };
   root.AfterimageContent = api;

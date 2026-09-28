@@ -64,8 +64,9 @@ module.exports = async h => {
   const e = await newPage(seed(runOne));
   await begin(e); await heading(e, 'Pin a note for the next run?');
   assert.match(await e.locator('#dialog-body').innerText(), /sends them on an errand/);
-  assert.match(await button(e, 'Juno · light').innerText(), /Next run Juno lights the west stacks lamp for free; Juno takes no answer then/);
-  assert.doesNotMatch(await button(e, 'Pell · check').innerText(), /Next run/, 'check is not the word Pell answers to');
+  assert.match(await button(e, 'Juno · light').getAttribute('aria-label'), /Next run Juno lights the west stacks lamp for free; Juno takes no answer then/);
+  assert.match(await button(e, 'Juno · light').innerText(), /ERRAND · JUNO/, 'the card on the wall carries the errand');
+  assert.doesNotMatch(await button(e, 'Pell · check').getAttribute('aria-label'), /Next run/, 'check is not the word Pell answers to');
   await button(e, 'Juno · light').click();
   await e.locator('#dialog-body').getByText('Juno read it and lit the west stacks lamp before you came in.', { exact: false }).waitFor();
   const sent = await stored(e);
@@ -110,13 +111,14 @@ module.exports = async h => {
   assert.equal(await button(t, 'Keep the wall').isDisabled(), true);
   await button(t, 'Keep the record').click(); await button(t, 'Write it').click(); await heading(t, 'Everything, in order.');
   assert.equal((await stored(t)).ending, 'record'); await close(t);
+  assert.equal(await t.locator('#hint').innerText(), 'Juno and Pell are at the desk and still have something to say.', 'residents point to the endings passed over');
   await t.locator('#help').click(); await button(t, 'Revisit the ending').click();
   assert.equal((await stored(t)).ending, null, 'endings can be revisited from the menu');
   await t.locator('#help').click(); await button(t, 'Palette: auto').click();
   assert.equal((await stored(t)).palette, 'day'); await close(t);
   assert.equal(await t.evaluate(() => document.documentElement.dataset.theme), 'day', 'the manual palette overrides the turn');
   await t.context().close();
-  console.log('PASS: turn at run 6, secret bench ending, revisit, last entry at the desk, palette override');
+  console.log('PASS: turn at run 6, secret bench ending, revisit, last entry at the desk, ending call-outs, palette override');
 
   // An empty-budget save with notes on the wall, imported mid-game, opens the handoff.
   const spentWithNotes = seed([post([0, 0, null]), leaveRun, ...Array(6).fill(post([1, 0, null]))]);

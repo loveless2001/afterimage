@@ -80,7 +80,7 @@ module.exports = async h => {
   await full.getByRole('button', { name: /^Write a note/ }).click();
   for (const word of ['exit', 'wait', 'No qualifier']) await full.getByRole('button', { name: word, exact: true }).click();
   await full.getByRole('heading', { name: 'Take one note down?', exact: true }).waitFor();
-  await full.locator('#choices button').first().click();
+  await full.locator('.board button.card').first().click(); // the oldest card, in slot 0
   await full.getByRole('button', { name: 'Post it', exact: true }).click();
   s = await stored(full);
   assert.equal(s.notes[0].slot, null); assert.deepEqual(s.notes.at(-1), { run: 3, parts: [4, 4, null], slot: 0 });

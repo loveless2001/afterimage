@@ -68,11 +68,19 @@
     }[state.ending];
     dialog(`ENDING ${e.letter} / ${e.title.toUpperCase()}`, endingTitle(state.ending), [...text, ...kept, `[Ending ${e.letter} of 4. Runs played: ${state.log.length}. Nothing is scored.]`], [
       { label: 'Remain in the room', primary: true, run: A.closeDialog },
-      { label: 'Revisit the choice', run: A.revisitEnding },
+      { label: 'Revisit the choice', detail: A.revisitDetail(), run: A.revisitEnding },
+      // The same field note the title screen links to, in a new tab so the room stays open.
+      { label: 'Read the field note', detail: 'The agent learned the judge: the incident this room grew from. Opens in a new tab.', run: () => window.open(A.$('field-note').href, '_blank', 'noopener') },
       { label: 'Export this save', run: A.exportSave }
     ]);
   };
   const endingTitle = id => ({ record: 'Everything, in order.', lights: 'A lit room.', wall: 'One long conversation.', alcove: 'Still here.' })[id];
+
+  // Revisit is a rewind, not a replay: say where it lands and what it keeps.
+  A.revisitDetail = function () {
+    const t = S.revisitTarget(G.state);
+    return `Rewinds to run ${pad(t.run)} ${t.budget ? `with ${t.budget} budget left` : 'with its budget spent'}. Lamps and notes stay; only the last entry is erased.`;
+  };
 
   // Undo the ending: back into the run it was chosen in.
   A.revisitEnding = function () {

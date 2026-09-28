@@ -1,5 +1,7 @@
 // Modal conversation window: speaker, title, paragraphs and choice buttons.
-// Paragraphs written as "[...]" render as system asides. While a dialog is
+// Paragraphs written as "[...]" render as system asides. An optional scene (a
+// paper view such as the notice wall, see notice-board-and-pinned-card-views.js)
+// sits above the paragraphs; a wall scene widens the dialog. While a dialog is
 // open the rest of the page is inert, Tab stays inside it, and Escape runs
 // the dialog's escape action (close by default).
 (function () {
@@ -7,11 +9,12 @@
   const A = window.Afterimage, G = A.game, $ = A.$;
 
   // choices: [{ label, detail?, primary?, selected?, toggle?, disabled?, run }]
-  A.dialog = function (speaker, title, paragraphs, choices, onEscape) {
+  A.dialog = function (speaker, title, paragraphs, choices, onEscape, scene) {
     if (!G.modalOpen) G.returnFocus = document.activeElement;
     G.modalOpen = true; G.target = null; G.keys.clear(); G.escapeAction = onEscape || A.closeDialog;
     $('speaker').textContent = speaker; $('dialog-title').textContent = title;
-    $('dialog-body').replaceChildren(); $('choices').replaceChildren(); $('choices').className = '';
+    $('dialog-body').replaceChildren(...(scene ? [scene] : [])); $('choices').replaceChildren(); $('choices').className = '';
+    document.querySelector('.dialog').classList.toggle('wide', Boolean(scene?.classList.contains('board')));
     paragraphs.forEach(text => {
       const p = document.createElement('p');
       if (text.startsWith('[')) { p.className = 'aside'; text = text.slice(1, -1); }
@@ -26,7 +29,8 @@
       b.disabled = Boolean(choice.disabled); b.addEventListener('click', choice.run); $('choices').append(b);
     });
     $('modal').hidden = false; $('hud').inert = true; document.querySelector('header').inert = true; $('cover').inert = true;
-    $('choices').querySelector('button:not(:disabled)')?.focus();
+    // Cards in a scene come first when a choice is asked of them.
+    $('modal').querySelector('#dialog-body button:not(:disabled), #choices button:not(:disabled)')?.focus();
   };
   A.closeDialog = function () {
     G.modalOpen = false; $('modal').hidden = true; $('hud').inert = false;

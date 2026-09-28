@@ -22,7 +22,13 @@ Generic design note for the next version: theme, color, type, world, UI, mechani
 - Flat-shaded isometric boxes with three tones per object (top light, left mid, right dark). No outlines except for thin 0.7px seams.
 - One warm radial light pool marking the "heart" of the room. A cool vignette at the edges.
 - Slow dust motes (disabled under reduced motion).
-- Characters are abstract. A floating body made of layered ellipse rings, with two small light slits for eyes. There are no faces, hands or clothes, so identity comes from color, ring count and a name plate.
+- Characters are abstract. A floating body made of layered ellipse rings, with two small light slits for eyes. There are no faces, hands or clothes.
+  - *As built (29 Sep 2026):* identity never rests on colour alone. Each resident has a body shape and something held, matching how strangers are labelled:
+    - Wren is hunched, with the log open and flat on one arm (in the red of the closed log) and a pencil behind one ear.
+    - Juno is low and wide, with an unlit lantern.
+    - Pell is tall and thin, holding a card up to read.
+  - Trust shows as warmth, not colour alone. A trusted resident takes one step, and each answered question adds another, up to 4. The body and rings shift warm and the rings thicken. A faint glow, drawn with the light pools (so it shines at night), grows in size and brightness. Warmth never goes back. The player is never trusted, so never warms.
+  - When a shelf hides the player, a dark-and-pale outline of the player is drawn over it after the night layer. The test traces from three points on the body towards the viewer (along 1, 1, 0.96) through each shelf's box.
 
 ### 2.1 Palette
 
@@ -46,8 +52,8 @@ Canvas palette:
 | Book spines (cycle) | `#d4d7c9` `#a9b49e` `#c0c7b6` `#8e9e89` | | |
 | Lamp light | `#fbf7d6` at 50% → 0% | | |
 | Player body | `#353e34`, marker `#984e40` | | |
-| Resident body | `#69745f`, rings `#bbc5a6` (Pell's untrusted rings are neutral `#cfd0c2`) | | |
-| Trusted resident rings | `#a9c3cf` (light `--note`), 0.9px | | |
+| Resident body | Wren `#69745f`, Juno `#7d6b4c`, Pell `#566a7a`; untrusted rings neutral (`#bbc5a6`, `#d8c9a3`, `#cfd0c2`) | | |
+| Trust warmth (29 Sep 2026) | body mixes towards Wren `#8c7a4e`, Juno `#a06c3c`, Pell `#84677a` (×0.8); rings towards `#ecd6a4`, 0.65→1px; glow `#f4cf8c` | | |
 | Interaction ring / label | `#9a574a` / `#704c40` | | |
 
 Proposed additions:
@@ -159,10 +165,16 @@ Implement it as `:root[data-theme="night"]`.
 | Bottom center | Interaction prompt; toast above it |
 | Footer | Location, control hints, run ID |
 | Header | Wordmark, Journal, Sound, Menu |
-| Modal | Speaker eyebrow, title, paragraphs, vertical choice buttons |
+| Modal | Speaker eyebrow, title, optional scene (a paper view), paragraphs, vertical choice buttons |
 
 **Rules:**
 - Choice buttons read label first, with an optional `small` detail line stating the cost or effect.
+- *As built (29 Sep 2026):* notes are shown as paper, not lists.
+  - **The notice hall** is the wall itself: 24 holders in two rows of 12, as the room draws them, widening the dialog. Cards are blue for this run, faded paper for older runs, and old paper for found cards. Empty top-row holders are outlined from 9 notes, and a rule runs under the top row at 12.
+  - **Writing** shows one large ruled card that fills in word by word; the word buttons stay below it. **Confirm** shows the card in its slot (dashed, NEW). **Posted** pins it in with a short drop, skipped under reduced motion.
+  - **Choices on the wall:** taking a note down and choosing the pin are made by clicking a card. A card that would send someone on an errand gets a gold outline and "ERRAND · NAME". The full preview is listed below the wall and is part of the card's accessible name.
+  - **The entrance pin** is one card on a cork board with a pushpin.
+  - Built as DOM inside the dialog (`notice-board-and-pinned-card-views.js`), so text stays sharp and focus, Escape and screen readers work as before. Initial focus goes to the first card when cards are the choice. The wall wraps to 6 columns under 850px and 4 under 520px.
 - Toggle choices use `aria-pressed`. A confirm step follows any irreversible choice.
 - The HUD is `inert` while a modal is open, focus is trapped inside the modal, and Esc closes or goes back.
 - Mobile (≤520px): the panel shrinks to 127px, the footer hints are hidden, and the budget bar shows the number only.
@@ -413,7 +425,8 @@ Tuning rules:
   | D, still here (secret) | all 3 residents trusted, plus a wall note with "wait" and "together" | the residents on the bench |
 
   - Each ending leaves the trace listed above.
-  - Revisiting pops the last log entry and restores that run and its budget.
+  - Revisiting pops the last log entry and restores that run and its budget. Its button says so: "Rewinds to run 07 with 5 budget left. Lamps and notes stay; only the last entry is erased."
+  - After an ending, residents point to the endings you passed over (see "As built: ending call-outs").
   - The alcove bench ("A quiet corner") is listed in the journal only after it has been found.
 - **Palette:**
   - The menu cycles auto, day and night, and the choice is saved.
@@ -469,7 +482,7 @@ The room was uniformly grey-green; progress only showed in the HUD and journal. 
 
 | Cue | Shows | Text equivalent |
 |---|---|---|
-| Blue rings (`#a9c3cf`, slightly heavier) | the resident trusts you; trust persists, so it takes the blue | journal "trusts you", HUD `TRUST n/3` |
+| Warmth (replaced the blue rings, 29 Sep 2026) | the resident trusts you; each answer warms them further | journal "trusts you", HUD `TRUST n/3` |
 | Outlined card above a resident | their question is open and waits for a note | journal "Asks: …", objective "Answer X." |
 | Solid blue card, pale edge | a note posted this run answers it; talk to them now | objective "Answer X." (ahead of every step but the turn) and the journal line |
 | Blue outlines on the wall's empty top-row slots (from 9 notes) | ending C's 12 = the top row, which fills first | journal "n more fill the top row." |
@@ -512,6 +525,25 @@ The second playtest found no choices to weigh in runs 2–4: everything persists
 - **Secret untouched:** errands never change trust, and the secret still needs all three trusted plus "wait · together".
 - **Playtest watch:** do runs 2–4 now feel like decisions? Free lamps and talks add budget; if it feels loose, tighten the budget table.
 
+## As built: ending call-outs (29 Sep 2026)
+
+After an ending, only "Ending A of 4" hinted that others existed. Now the residents say it, in speech only, with no bracketed hints. Plan: `plans/260929-0104-ending-callouts-and-revisit-hint/plan.md`.
+
+- **Owners:** Wren speaks for the record, Juno for the lights, Pell for the wall. The secret belongs to all three.
+- **After endings A–C:** the resident whose ending you chose keeps the closing line. The other two point to theirs:
+
+  | State | Meaning | Juno (lamps) | Pell (wall) |
+  |---|---|---|---|
+  | ready | the need is met; choose it after a revisit | "Every lamp is lit, and you kept something else…" | "Fourteen cards. I could have read them to you…" |
+  | reachable | a revisit leaves enough budget (the rewound run's leftover plus later runs) | "Three lamps are still dark. I keep checking anyway." + "The last entry is only ink…" | "The top row still has four gaps…" + "Cards go up faster than you'd think…" |
+  | late | only a new set of runs can | "…Whoever comes next might light them." | "…The next reader might fill them." |
+
+  Wren's record is always ready: "I left the last line of the log blank…"
+- **Bench hint:** once you have seen the bench or heard a resident's last reply, the resident whose ending you chose adds one line. It says "We kept a seat for you" when the secret is met and a revisit leaves any budget; otherwise it gives the oblique "Four seats. We never did sit down together." A spent last run reopens the last entry at once, so the bench is out of reach.
+- **After ending D:** nobody points anywhere.
+- **Objective:** "Juno and Pell are at the desk and still have something to say." It says "Two residents…" if either is unmet, so names don't leak.
+- **Revisit** stays a rewind rather than a review, because it is the only way to another ending without replaying the whole game. Its button text says what it keeps.
+
 ## Decisions (2026-09-25)
 
 - No Bend for now. Rules live in plain JS.
@@ -526,3 +558,8 @@ The second playtest found no choices to weigh in runs 2–4: everything persists
 - The secret's hints come only with each resident's last reply (repeated once all their questions are answered), never with the trust talk or the questions (26 Sep 2026). The alcove warmth counts these replies.
 - Second playtest (26 Sep 2026): pacing is reasonable. Answers are capped at 2 per run. The budget table stays as is: it may feel generous to someone who has played through several times, but new players may need it.
 - Errands (milestone 9, 26 Sep 2026): from the pinned note, one per run in runs 2–5; the resident on one is busy; Wren's makes first talks free; Pell's found cards count towards ending C.
+- Ending call-outs (29 Sep 2026): after endings A–C, residents point to the endings passed over, in speech only. Revisit stays a rewind and says so on its button.
+- Figures (29 Sep 2026): residents differ by shape and a held prop, not colour alone; the player is outlined when a shelf hides them. Larger figures were left for later.
+- Trust warmth (29 Sep 2026): trust shows as warmth, not blue rings; blue now marks only notes. Trusted counts, then each answer; meeting a resident does not.
+- Paper views (29 Sep 2026): the notice hall, note writing and the pins show the wall, a card and a cork board instead of text lists. Next in line: the run log as a ledger, then afterimages of earlier runs.
+- Field note (29 Sep 2026): the essay behind the room, `notes/the-agent-learned-the-judge.html`, is linked quietly from the title screen (under the intro, never beside the start button), every ending screen and the README. It is published with the game.

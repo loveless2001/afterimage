@@ -237,3 +237,62 @@ The pinned note can send a trusted resident on an errand as the next run starts 
   - **High:** the "That isn't quite it" line counted Pell's found card as a failed answer, so in a Pell-errand run another resident said it wrongly. It now counts only your notes; checked in the browser.
   - Accepted and commented: the wall-full case can't be replayed exactly (slots taken down later), so a forged card on a wall that was full gets through.
 - **Browser journeys:** two new steps in `browser-journey-residents-endings.cjs`: the pin preview, the opening line, the saved errand and free lamp, busy Juno's talk; then Pell's card in the journal, and Juno not counting it as your note. Passed, run by the user in their own shell.
+
+## Ending call-outs and the Revisit hint — 29 September 2026
+
+After endings A–C, the two residents whose endings you passed over point to them (ready, reachable after a revisit, or late). The resident whose ending you chose may add a bench hint. The objective names the two residents, and the Revisit buttons say they rewind. See "As built: ending call-outs" in `docs/design-guidelines.md`.
+
+- **Syntax:** `node --check` passed on all `js/*.js` and `tests/*.cjs`.
+- **State tests:** `node --test tests/*.test.cjs` passed 34/34. New file `state-ending-callouts.test.cjs` covers:
+  - finishing at run 6: Juno and Pell reachable, Wren's bench hint once the bench is seen, and Revisit landing exactly on `revisitTarget`
+  - a spent last run: lamps met → Juno ready, Pell late; wall met → Pell ready, Juno late
+  - the bench hint ready only once seen, and silence after the secret ending
+  - line wording: one lamp, two lamps, one gap, four gaps, twenty-one cards
+- **Browser check (agent-browser, seeded saves):**
+  - Ending A at run 6 (1 lamp, empty wall, bench seen): the Revisit detail reads "Rewinds to run 06 with 9 budget left…" on the ending screen and in the menu. Wren gives the closing line plus the bench hint. Juno says "Three lamps are still dark…", Pell says "…twelve gaps…" (both reachable).
+  - The first objective named unmet residents. It now says "Two residents at the desk…" until both are met.
+  - Ending A at run 7, budget spent, all lamps lit: "…with its budget spent…"; Juno ready, Pell late ("eight gaps"). Revisiting reopened the last entry with "Keep the lights" available and "Keep the wall" disabled.
+- **Browser journeys:** one new assertion in `browser-journey-residents-endings.cjs` checks the objective after ending A. Passed, run by the user in their own shell (29 Sep 2026).
+
+## Resident shapes, props and the player outline — 29 September 2026
+
+Residents now differ by shape and a held prop, not colour alone. Wren is hunched, with the open log and a pencil. Juno is low and wide, with a lantern. Pell is tall and thin, reading a card. When a shelf hides the player, their outline is drawn over it. Rendering only: no rules or save changes.
+
+- **Syntax and state tests:** `node --check` clean; `node --test tests/*.test.cjs` 34/34.
+- **Browser check (agent-browser, seeded saves, 1280×581 and 1920×1080, day and night):**
+  - Each resident is recognisable by shape and prop at both sizes. The first version of Wren's book (two tilted pages) read as a grin at the small size, so it is now a flat open book.
+  - With the player at (620, 300) behind the east stacks, the outline shows on the shelf's dark and light faces, by day and at night.
+  - Known and unchanged: the player's red marker can overlap a resident standing just behind them, and Juno's lantern crosses the desk-lamp post at the turn spot.
+- **Browser journeys:** not affected (no text or rules changed). Passed with the ending call-outs, run by the user in their own shell (29 Sep 2026).
+
+## Trust warmth — 29 September 2026
+
+Trust now shows as warmth instead of blue rings. A trusted resident takes one step, and each answer adds one more, up to 4. Their body and rings shift warm, the rings thicken, and a faint glow grows. The glow is drawn with the light pools, so it shines at night. Meeting a resident doesn't count. Rendering only.
+
+- **Syntax and state tests:** `node --check` clean; `node --test tests/*.test.cjs` 34/34.
+- **Browser check (agent-browser, 1920×1080):** a save built with the real rules, with Wren at step 1, Pell at step 2 and Juno at step 4 (run 3 by day, run 6 at night).
+  - The colours step up visibly: Wren's rings just touched, Pell's body mauve, Juno fully amber.
+  - The first glow was invisible on the pale floor. It is now about twice as strong, and shows as a soft halo by day and a clear glow at night.
+  - The player stays dark.
+- **Browser journeys:** passed, run by the user in their own shell (29 Sep 2026).
+
+## Paper views for the notice hall and the pin — 29 September 2026
+
+The notice hall, each writing step, full-wall take-down, confirm, posted, the end-of-run pin chooser and the entrance pin now show paper instead of text lists: the wall of 24 holders, a large card being written, and a cork board. Taking a note down and choosing the pin are done by clicking cards. No rules or save changes.
+
+- **Syntax and state tests:** `node --check` clean on all `js/*.js` and `tests/*.cjs`; `node --test tests/*.test.cjs` 34/34.
+- **Browser check (agent-browser, a real-rules save in run 3: 5 older cards, 1 found, 2 this run's):**
+  - Wall at 1440×960: colours match the room, and the empty top-row holders are outlined once 9 notes are up.
+  - Writing: the card fills in word by word. Confirm shows the dashed NEW card in the next free slot, and posting turned it blue in that slot.
+  - Pin chooser: "Juno · light" and "Pell · keep" have gold outlines with "ERRAND · JUNO" and "ERRAND · PELL", and their previews are listed below. Focus starts on the first card.
+  - Entrance pin: one blue card on a cork board with a pushpin.
+  - Phone (390×844): the wall wraps to 4 columns and the dialog scrolls. At night the wall and older cards go dark, and this run's and found cards stay readable.
+- **Browser journeys:** the full-wall step now clicks the first card on the wall. The errand step reads the preview from the card's accessible name and checks the card shows "ERRAND · JUNO". Pending: the Playwright run in the user's shell.
+
+## Field note link — 29 September 2026
+
+The essay "The agent learned the judge" is now at `notes/the-agent-learned-the-judge.html` (renamed from `the-agent-learned-the-judge-revised.html`). It is linked quietly under the title screen's intro text, by a "Read the field note" button on every ending screen (new tab, reusing the title link's URL), and from the README. The Pages workflow now also copies `notes/`.
+
+- **Checks:** `node --check` clean; `node --test tests/*.test.cjs` 34/34.
+- **Browser (agent-browser):** the link shows at 1440×960 and 390×844, below the start button. `notes/the-agent-learned-the-judge.html` served 200 text/html, and ending A lists the new button after "Revisit the choice".
+- **The page itself:** self-contained, with no external scripts, stylesheets, fonts or images (only citation links).
