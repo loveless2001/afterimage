@@ -54,6 +54,7 @@
   };
 
   A.showEnding = function () {
+    A.unlock('room08'); // any ending, played or imported, opens the next room
     const state = G.state, e = S.endings[state.ending], quote = i => `“${S.noteText(state.notes[i].parts)}”`, wall = S.onWall(state);
     // Each resident's latest answer, and the wall from its oldest card to its newest.
     const answers = Object.keys(S.residents).map(id => state.answers.filter(a => a.id === id).at(-1)).filter(Boolean).map(a => quote(a.note));
@@ -71,6 +72,7 @@
       { label: 'Revisit the choice', detail: A.revisitDetail(), run: A.revisitEnding },
       // The same field note the title screen links to, in a new tab so the room stays open.
       { label: 'Read the field note', detail: 'The agent learned the judge: the incident this room grew from. Opens in a new tab.', run: () => window.open(A.$('field-note').href, '_blank', 'noopener') },
+      ...(A.unlocked('room08') ? [{ label: 'Another room is open', detail: 'Room 08 · the evaluation room', run: () => { A.save(); window.location.href = 'room-08.html'; } }] : []),
       { label: 'Export this save', run: A.exportSave }
     ]);
   };

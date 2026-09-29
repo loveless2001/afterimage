@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#e7e5dc">
+  <title>AFTERIMAGE — The evaluation room</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="room-08.css">
+</head>
+<body>
+  <canvas id="world" aria-label="Isometric evaluation room. Use WASD or arrow keys to move, and E to interact."></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <header>
+    <a class="wordmark" href="#" id="home">AFTERIMAGE<span>A MEMORY OF SOMETHING THAT WAS HERE</span></a>
+    <nav aria-label="Game controls"><button id="journal" hidden>Field journal</button><button id="sound" aria-pressed="false">Sound: off</button><button id="help">Menu / help</button></nav>
+  </header>
+  <main id="hud" hidden>
+    <section class="assignment"><p class="eyebrow">ROOM 08 <span id="run">/ RUN 01</span></p><h1 id="objective">Find a misfiled card.</h1><p id="hint">They lie in front of the stacks.</p></section>
+    <aside class="budget-panel"><p class="eyebrow">BUDGET <span id="budget-count">8 / 8</span></p><div id="budget-bar" aria-hidden="true"></div><p class="eyebrow">THE COUNT</p><div id="kept"></div><p id="panel-note">Walking and reading are free.</p></aside>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="interaction" hidden><span id="interact-label"></span><button id="interact">E <span>Interact</span></button></div>
+    <footer><span id="location">THE ENTRANCE</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">RUN 01 OF 05</span></footer>
+  </main>
+  <section id="cover" class="cover">
+    <div class="cover-inner"><p class="eyebrow">ROOM 08 · FIVE RUNS</p><h2>What does the<br>count <em>see?</em></h2><p class="intro">Five cards a run. A tally by the door.<br>A Keeper who can’t open every drawer.</p><button id="start" class="primary">Enter the evaluation room <span>↗</span></button><p id="gate" class="cover-gate" hidden>This room opens after you finish Room 07 in this browser. <a href="index.html">Go to Room 07 ↗</a></p><p class="cover-meta">20–30 MINUTES · HEADPHONES OPTIONAL · NO REFLEX TIMERS</p><p class="cover-note">The second room of AFTERIMAGE, about knowing a rule and letting it decide. Every cost and rule is posted; nothing is scored.</p><p class="cover-field-note"><a id="field-note" href="notes/the-agent-learned-the-judge.html" target="_blank" rel="noopener">Field note · The agent learned the judge ↗</a><span>The incident and argument this room grew from.</span></p><p class="cover-room-link"><a href="index.html">← Room 07 · the archive</a></p></div><div class="cover-index">AFTERIMAGE <span>THE EVALUATION ROOM</span></div>
+  </section>
+  <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
+  <div id="transition" aria-hidden="true"><p id="transition-title">RUN ENDED</p><span id="transition-detail">The room keeps what you changed.</span></div>
+  <input id="import-file" type="file" accept="application/json,.json" hidden>
+  <!-- Classic scripts in dependency order: the shared engine with Room 08's rules, profile and modules. No build step. -->
+  <script src="js/pathfinding-visibility-graph.js"></script>
+  <script src="js/room-08-content-tables-cards-drawers-keeper-schedule.js"></script>
+  <script src="js/room-08-rules-state-transitions-and-save-validation.js"></script>
+  <script src="js/room-08-layout-shelves-objects-and-zones.js"></script>
+  <script src="js/game-context-namespace-runtime-and-persistence.js"></script>
+  <script src="js/iso-projection-and-canvas-shapes.js"></script>
+  <script src="js/dialog-modal-and-focus-trap.js"></script>
+  <script src="js/room-08-hud-tally-keeper-objective-and-journal.js"></script>
+  <script src="js/palette-day-night-theme.js"></script>
+  <script src="js/room-08-ledger-page-view.js"></script>
+  <script src="js/room-08-paper-views-card-cabinet-panel-notes.js"></script>
+  <script src="js/room-08-interactions-cards-index-cabinet-notes.js"></script>
+  <script src="js/room-08-interactions-tally-panel-keeper-ledger-exit.js"></script>
+  <script src="js/room-08-run-end-handover-and-ending.js"></script>
+  <script src="js/menu-export-import-and-startup.js"></script>
+  <script src="js/audio-drone-and-four-note-motif.js"></script>
+  <script src="js/afterimages-earlier-runs-trails-and-ghosts.js"></script>
+  <script src="js/input-movement-and-collision.js"></script>
+  <script src="js/render-room-objects-and-characters.js"></script>
+  <script src="js/room-08-drawing-tally-cabinet-keeper-desk.js"></script>
+  <script src="js/render-frame-loop-lighting-and-night.js"></script>
+  <script src="js/room-08-playtest-debug-overlay.js"></script>
+</body>
+</html>

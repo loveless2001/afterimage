@@ -4,7 +4,7 @@
 // Outputs are written under os.tmpdir(), never into another project's files.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const h = require('./browser-test-helpers.cjs');
-const journeys = [require('./browser-journey-runs-notes-saves.cjs'), require('./browser-journey-residents-endings.cjs')];
+const journeys = [require('./browser-journey-runs-notes-saves.cjs'), require('./browser-journey-residents-endings.cjs'), require('./browser-journey-room-08-slice.cjs')];
 
 (async () => {
   h.browser = await chromium.launch({ headless: true });

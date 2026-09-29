@@ -34,6 +34,12 @@
   A.label = function (text, x, y, z = 0, color = '#6d7565', size = 9) {
     const p = A.project(x, y, z); ctx.font = `${Math.max(size * G.scale, 8)}px monospace`; ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.fillText(text, p.x, p.y);
   };
+  // A soft round pool of light (a radial gradient to transparent), centred at height z.
+  A.lightPool = function (x, y, radius, color, z = 0) {
+    const p = A.project(x, y, z), glow = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, radius * G.scale);
+    glow.addColorStop(0, color); glow.addColorStop(1, '#fbf7d600'); ctx.fillStyle = glow;
+    ctx.fillRect(p.x - radius * G.scale, p.y - radius * G.scale, radius * 2 * G.scale, radius * 2 * G.scale);
+  };
   // A floor ellipse, used for the interaction ring and the walk target.
   A.ring = function (x, y, radius, color) {
     const p = A.project(x, y); ctx.beginPath(); ctx.ellipse(p.x, p.y, radius * G.scale, radius * .48 * G.scale, 0, 0, Math.PI * 2); ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke();

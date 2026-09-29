@@ -22,7 +22,7 @@
     <footer><span id="location">THE ENTRANCE</span><span>WASD / ARROWS — MOVE <b>·</b> E — INTERACT <b>·</b> ESC — MENU</span><span id="status">RUN 01 OF 07</span></footer>
   </main>
   <section id="cover" class="cover">
-    <div class="cover-inner"><p class="eyebrow">SEVEN RUNS IN ONE ROOM</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">Every run starts fresh, with a small budget.<br>The room keeps what you change.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><p class="cover-meta">25–40 MINUTES · HEADPHONES OPTIONAL · NO REFLEX TIMERS</p><p class="cover-note">An original game about what survives a reset: lamps, notes, and the residents who remember the room but not your face.</p><p class="cover-field-note"><a id="field-note" href="notes/the-agent-learned-the-judge.html" target="_blank" rel="noopener">Field note · The agent learned the judge ↗</a><span>The incident and argument this room grew from.</span></p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
+    <div class="cover-inner"><p class="eyebrow">SEVEN RUNS IN ONE ROOM</p><h2>What will you<br>leave <em>behind?</em></h2><p class="intro">Every run starts fresh, with a small budget.<br>The room keeps what you change.</p><button id="start" class="primary">Enter the archive <span>↗</span></button><p class="cover-meta">25–40 MINUTES · HEADPHONES OPTIONAL · NO REFLEX TIMERS</p><p class="cover-note">An original game about what survives a reset: lamps, notes, and the residents who remember the room but not your face.</p><p class="cover-field-note"><a id="field-note" href="notes/the-agent-learned-the-judge.html" target="_blank" rel="noopener">Field note · The agent learned the judge ↗</a><span>The incident and argument this room grew from.</span></p><p class="cover-room-link" data-unlocks="room08" hidden><a href="room-08.html">Room 08 · the evaluation room ↗</a></p></div><div class="cover-index">AFTERIMAGE <span>THE ROOM THAT REMEMBERS</span></div>
   </section>
   <section id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="dialog-title"><div class="dialog"><p id="speaker" class="eyebrow"></p><h2 id="dialog-title"></h2><div id="dialog-body"></div><div id="choices"></div></div></section>
   <div id="transition" aria-hidden="true"><p id="transition-title">RUN ENDED</p><span id="transition-detail">The room keeps what you changed.</span></div>
@@ -32,7 +32,8 @@
   <script src="js/game-content-tables-lamps-kit-residents-endings.js"></script>
   <script src="js/errands-pinned-note-tables-and-helpers.js"></script>
   <script src="js/game-rules-state-transitions-and-save-validation.js"></script>
-  <script src="js/game-context-world-layout-and-persistence.js"></script>
+  <script src="js/room-07-layout-shelves-objects-and-zones.js"></script>
+  <script src="js/game-context-namespace-runtime-and-persistence.js"></script>
   <script src="js/iso-projection-and-canvas-shapes.js"></script>
   <script src="js/dialog-modal-and-focus-trap.js"></script>
   <script src="js/hud-objective-and-field-journal.js"></script>
@@ -52,6 +53,7 @@
   <script src="js/afterimages-earlier-runs-trails-and-ghosts.js"></script>
   <script src="js/input-movement-and-collision.js"></script>
   <script src="js/render-room-objects-and-characters.js"></script>
+  <script src="js/room-07-drawing-notice-wall-lamps-pin-bench-and-props.js"></script>
   <script src="js/render-progress-cues-question-cards-and-wall-row.js"></script>
   <script src="js/render-frame-loop-lighting-and-night.js"></script>
   <script src="js/playtest-debug-overlay.js"></script>

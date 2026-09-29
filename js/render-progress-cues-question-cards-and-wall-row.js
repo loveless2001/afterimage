@@ -1,4 +1,4 @@
-// Progress cues drawn over the finished frame, after the night layer, so they
+// Room 07's progress cues (A.room.cues), drawn over the finished frame, after the night layer, so they
 // stay readable at night. They keep the colour rule that blue marks what
 // persists, and never move (nothing to switch off for reduced motion):
 // - a card above a trusted resident whose question this run can still answer:
@@ -10,7 +10,7 @@
 (function () {
   'use strict';
   const A = window.Afterimage, G = A.game, S = A.S, ctx = A.ctx;
-  const { project, line } = A, { slotAt } = A.drawRoom;
+  const { project, line } = A, slotAt = slot => A.room.slotAt(slot); // added by room-07-drawing-*.js
   const blue = '#5f7a86', nearFull = S.wallEndingNotes - 3;
 
   // Screen-space card just above the head, lifted over the name label when
@@ -40,7 +40,7 @@
     }
   }
 
-  A.drawCues = function (state) {
+  A.room.cues = function (state) {
     if (state.finished) return;
     wallRow(state);
     A.roomObjects().filter(o => o.type === 'resident').forEach(o => questionCard(o, state));

@@ -31,7 +31,7 @@
   const api = { step, trailPosition, thin, validTrail };
   if (typeof module !== 'undefined') { module.exports = api; return; }
 
-  const A = root.Afterimage, G = A.game, key = 'afterimage.v2.trails';
+  const A = root.Afterimage, G = A.game, key = A.room.storageKey + '.trails'; // Room 07: afterimage.v2.trails
   let trails = {}, clock = 0, dirty = false;
   try { const saved = JSON.parse(localStorage.getItem(key) || '{}'); if (saved && typeof saved === 'object') trails = saved; } catch (_) { /* cosmetic: start empty */ }
   const persist = () => { try { localStorage.setItem(key, JSON.stringify(trails)); } catch (_) { /* cosmetic: skip */ } dirty = false; };

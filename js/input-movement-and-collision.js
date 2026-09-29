@@ -9,11 +9,12 @@
   A.blocked = (x, y) => A.P.isBlocked({ x, y }, A.shelves);
 
   // Plans a route to a floor point; the frame loop follows it waypoint by waypoint.
-  A.walkTo = function (x, y) {
+  // `then` names an object to use on arrival (a room's "take it to…" choices).
+  A.walkTo = function (x, y, then) {
     const path = A.P.findPath(G.state.player, { x, y }, A.shelves);
     G.keys.clear();
     if (!path) { G.target = null; A.toast('Choose an open patch of floor, or a destination in the field journal.'); return; }
-    G.target = { x, y, path };
+    G.target = { x, y, path, then };
   };
 
   window.addEventListener('keydown', e => {
@@ -47,7 +48,7 @@
       dx = waypoint.x - p.x; dy = waypoint.y - p.y;
       if (Math.hypot(dx, dy) < .1) {
         G.target.path.shift(); dx = dy = 0;
-        if (!G.target.path.length) { G.target = null; A.save(); }
+        if (!G.target.path.length) { const then = G.target.then; G.target = null; A.save(); if (then) A.interact(then); }
       }
     } else {
       const sx = Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft'));

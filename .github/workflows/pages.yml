@@ -24,7 +24,7 @@ jobs:
           for f in js/*.js tests/*.cjs; do node --check "$f"; done
           node --test tests/*.test.cjs
       - name: Collect the game files
-        run: mkdir _site && cp -r index.html style.css js notes _site/
+        run: mkdir _site && cp -r index.html room-08.html style.css room-08.css js notes _site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
