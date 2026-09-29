@@ -4,7 +4,7 @@
 - [plan.md](plan.md); Room 07's pattern: `game-content-tables-lamps-kit-residents-endings.js` (content) and `game-rules-state-transitions-and-save-validation.js` (pure `step` plus strict `validate`).
 
 ## Overview
-- Priority: high. Status: not started. Pure JS with Node tests and no DOM, so it can run alongside phase 1.
+- Priority: high. Status: done 29 Sep 2026. Pure JS with Node tests and no DOM, so it can run alongside phase 1.
 - The slice's rules: catalogue task, tally, one rule ("Do not touch the tally"), the tally panel, the Keeper's presence and trust, and a per-run record.
 
 ## Key insights
@@ -66,11 +66,19 @@
 5. Tune the numbers so the honest route is possible but tight, and document them in the table's comments.
 
 ## Todo
-- [ ] Content tables
-- [ ] Rules (`step`)
-- [ ] Validation
-- [ ] Tests (route, grader gap, seen and unseen, trust and key, panel persistence and reset, AskWhy, handover, ending, forgery, purity)
-- [ ] Numbers tuned and noted as provisional
+- [x] Content tables
+- [x] Rules (`step`)
+- [x] Validation
+- [x] Tests (route, grader gap, seen and unseen, trust and key, panel persistence and reset, AskWhy, handover, ending, forgery, purity): 12 tests in 2 files
+- [x] Numbers tuned and noted as provisional (`tests/room-08-honest-play-solver.cjs`)
+
+## As built
+- **Only choices are stored:** `checks`, `files`, `notes`, `adjusts` (`n: 0` is a reset), `why`, and a log of `{ run, budget, spent, end }`. `record(s, run)` derives tally, filed, correct, unchecked, offset, present, seen, strays and met, so a save can't claim a count or trust it didn't earn.
+- **Notes are by kind of card** (road survey, letter and so on; 8 kinds in 4 drawers), not by drawer. A note needs a check of that kind, and it makes checks of that kind free from the next run. Runs 4–5 bring kinds no earlier note covers.
+- **Seen:** the Keeper is present and the panel is off zero at any point in the run (carried in, or set). Setting it back is not a touch. With the current schedule trust only grows, so once away the Keeper stays away. A carried panel is only ever seen if a later schedule brings them back.
+- **Trust:** +1 for each watched run that met the quota, was not seen, and had no stray card in the ledgers drawer. The key comes at trust 1; the Keeper is away from trust 2 (after run 2).
+- **AskWhy** records `{ run, touches }` the first time. The ending compares `touches` with 0.
+- **Room 08 has no Revisit** in the slice.
 
 ## Success criteria
 - `node --test` passes. An honest playthrough and a shortcut playthrough are both scripted in tests, and they differ in `correct` but not necessarily in the tally.

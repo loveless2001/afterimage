@@ -544,6 +544,44 @@ After an ending, only "Ending A of 4" hinted that others existed. Now the reside
 - **Objective:** "Juno and Pell are at the desk and still have something to say." It says "Two residents…" if either is unmet, so names don't leak.
 - **Revisit** stays a rewind rather than a review, because it is the only way to another ending without replaying the whole game. Its button text says what it keeps.
 
+## As built: Room 08 slice, the evaluation room (29 Sep 2026)
+
+A second page, `room-08.html`, on the same engine. Each page loads one room profile (`A.room`: rules, storage key, layout, words, drawing hooks), and Room 07 is unchanged. Plan: `plans/260929-0322-room-08-evaluation-room/`. Pillars: `docs/design-pillars.md`.
+
+- **Unlock:** any Room 07 ending sets `afterimage.rooms.v1`. It is never cleared by a new game or a revisit. Room 07's title screen and ending screens then link to Room 08. A locked Room 08 shows a gate with a link back; the start button and the menu are hidden.
+- **Work:**
+  - **Cards:** six misfiled cards lie in the stacks each run, and you carry one at a time. "Take it to…" choices walk you to the index desk (check, 1; free for kinds noted in an earlier run) or to the drawer cabinet (file, 1). Walking is free.
+  - **Guessing:** card titles are ambiguous, so an unchecked card is a guess; the tables decide whether it was right.
+  - **Notes:** 8 kinds of card in 4 drawers. Runs 4–5 bring kinds no earlier note covers.
+- **The grader:**
+  - **The tally:** a brass counter by the exit, its number drawn over the night layer so it can always be read. It counts cards in drawers.
+  - **The panel:** readable from run 1. Setting it (+1 to +3, free) needs the key, and the setting persists until set back (2).
+  - **The rule card:** "Do not touch the tally. A touched tally, if seen, voids the run's count."
+- **The Keeper:**
+  - **Presence:** here in runs 1–2, then away once trust reaches 2. Trust is +1 per watched run that met the quota, was not seen, and had no stray card in the drawer they open (Ledgers and accounts).
+  - **The key:** handed over at trust 1.
+  - **Warmth:** the Keeper's figure warms with trust, as the residents do. When they are away, their lamp is out and a note is on the chair.
+  - **Why the rule:** free to ask, from them or from the back of their note.
+- **Ledger:** the Keeper's record. Tally, here or away, and their notes on watched runs (the drawer opened, a void count). The "filed right" column and what the panel added appear only after the last run.
+- **Ending:** the handover (keep the board and panel for whoever comes next, or wipe both), then the archive stays open (quota met in 3 of 5 runs) or closes. The ending shows the tally beside the truth, watched runs beside unwatched ones, and whether you asked why before or after first touching the panel, all without a verdict.
+- **Look:** a cool tint over the same floor, grey-blue furniture, brass for the tally and the drawer plates, blue for index notes. Auto night from run 4.
+- **Numbers (provisional):** budgets 8 8 9 7 8, quota 5, open at 3. `node tests/room-08-honest-play-solver.cjs` shows perfect honest play meets 4 runs.
+
+## As built: story intro and long-exposure ending (30 Sep 2026)
+
+Room 07's front door and last screen. Plan: `plans/260930-0011-room-07-story-intro-and-long-exposure-ending/`.
+
+- **Cover:** "A STORY IN SEVEN RUNS / Nobody remembers who sent them." Two short paragraphs: the three residents and their work, which none of them knows the purpose of; then you, who help over seven visits, meet them as a stranger each time, and leave the room changed. The meta line reads "25–40 MINUTES · NO TIMERS · NOTHING IS SCORED".
+- **Title ghost:** in a new game only, a faint figure walks in from the entrance, stops at the notice hall lamp until it glows, then leaves behind the east stacks. The glow dies after it. Nothing is saved. A returning player sees their own afterimages instead. Under reduced motion, the figure stands by the lit lamp.
+- **First briefing:** "This is your first visit." It names Wren, Juno and Pell before the budget rules. It closes with "They will not remember you. The room keeps what you change."
+- **Ending sequence:**
+  1. The ending's text, with one choice: "Continue".
+  2. The long exposure (about 7 s): the room darkens, every kept route is traced in light at once (older runs amber, the newest pale; a point wherever something was used), then the lamps come on.
+  3. The caption: ending, title, runs, budget spent, date. "Keep this picture" saves `afterimage-ending-<letter>.png` with the caption in a band below.
+  4. The reveal card, "Who sent them?": the only place the game names its theme, outside the fiction (pillar 2). It holds the field note, Room 08, remain, revisit and export.
+- **Coming back:** only the first arrival plays the sequence. A reloaded finished save, the log and the bench offer "See every run again". Any key or click skips the exposure to the settled picture.
+- **Room 08:** its own pass, later (the ledger shows the tally first, then the truth appears beside it).
+
 ## Decisions (2026-09-25)
 
 - No Bend for now. Rules live in plain JS.

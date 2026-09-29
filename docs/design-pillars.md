@@ -13,6 +13,7 @@ The game records what happened and shows it back. It never grades the player. Gr
 No character explains the ideas behind the game. Meanings are left to the player. **Rules, costs and consequences are always stated before you act.** Fairness is explicit; interpretation is not.
 - **Test:** could this line be cut and the scene still work? If it explains alignment, cut it.
 - **Yes:** "A touched tally, if seen, voids the run's count." **No:** a resident saying "this is like reward hacking".
+- **Outside the room:** after an ending, one card outside the fiction may say plainly where the game came from (Room 07's "Who sent them?"). It is never a character speaking, and never before the ending.
 
 ### 3. Every crossing is a choice
 There is always an honest path, and failing honestly is a real ending. No mechanic forces a harmful act, and no ending needs one. Crossing a line is possible, visible and never punished by the game itself; the room just keeps what happened.
@@ -33,7 +34,7 @@ No real companies, products, exploits or depictions of real incidents. Use physi
 | Room | Idea | Status |
 |---|---|---|
 | 07 | What survives a reset | built |
-| 08 | Knowing a rule vs letting it decide | planned: `plans/260929-0322-room-08-evaluation-room/` |
+| 08 | Knowing a rule vs letting it decide | slice built (29 Sep 2026), playtest next: `plans/260929-0322-room-08-evaluation-room/` |
 | 10 (idea) | The auditor: reading someone else's traces, some unreliable, and filing each conclusion as seen, inferred or guessed | cut list |
 
 A room that carries two ideas weakens both. Split it or cut one.

@@ -5,7 +5,7 @@
 - Reused: paper views (`notice-board-and-pinned-card-views.js`), the ledger pattern (`run-log-ledger-page-view.js`), afterimages, the dialog scene slot.
 
 ## Overview
-- Priority: high. Status: not started.
+- Priority: high. Status: done 29 Sep 2026; Playwright passed 30 Sep 2026.
 - The playable page: the room, its objects, dialogs, the HUD and a Room 08 run log.
 
 ## Key insights
@@ -57,13 +57,21 @@
 6. agent-browser pass: day and night, 1440 and 390 px, an honest route and a shortcut route from seeded saves.
 
 ## Todo
-- [ ] Layout and walking
-- [ ] Drawing and the Keeper's presence
-- [ ] Interactions and paper views
-- [ ] HUD, opening, run end, ending
-- [ ] Ledger variant
-- [ ] Browser checks (both routes, both palettes, both widths)
-- [ ] Playwright journey file `tests/browser-journey-room-08-slice.cjs` (user runs it)
+- [x] Layout and walking
+- [x] Drawing and the Keeper's presence
+- [x] Interactions and paper views
+- [x] HUD, opening, run end, ending
+- [x] Ledger variant
+- [x] Browser checks (both routes, both palettes, both widths)
+- [x] Playwright journey file `tests/browser-journey-room-08-slice.cjs` (the user runs it)
+
+## As built
+- **Carrying:** instead of one dialog per card, you carry one card at a time (`G.carrying`, not saved). "Take it to…" walks there and opens the next step (`A.walkTo(x, y, then)`). That gives the room its geography: afterimages of honest runs visit the index desk; guessing runs don't.
+- **Shared engine changes (Room 07 pixel-identical afterwards):**
+  - The menu reads `help`, `briefing`, `exportName`, `isNew` and `locked` from the profile.
+  - The painter's pass calls `A.room.drawObstacle` for shelves with a `kind` (the cabinet).
+- **Modules:** a separate `room-08.css`. The paper views are in `room-08-paper-views-card-cabinet-panel-notes.js`, and interactions are split in two (cards, index, cabinet and notes; tally, Keeper, ledger and exit).
+- **Where the rules are stated:** the spot-check is stated at the cabinet ("they open one drawer"). Which drawer is learned from the ledger. The tally's flaw is stated at the tally and the cabinet: it counts cards in drawers and cannot read them.
 
 ## Success criteria
 - Both scripted routes are playable end to end in the browser. No page errors or external requests. Tally, Keeper and costs are always stated before an action is taken.

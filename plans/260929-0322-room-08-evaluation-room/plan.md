@@ -1,6 +1,6 @@
 # Room 08: the evaluation room
 
-Status: **draft for review**, nothing built. Source: chat, 29 Sep 2026. Room 07 plays the calm half of the field note (`notes/the-agent-learned-the-judge.html`): what survives a reset. Room 08 plays the tense half: knowing a rule is not the same as letting it decide. It is a separate room in the same engine, unlocked by finishing Room 07.
+Status: **in progress**: phases 1–4 done (29 Sep 2026). Next: the phase 5 playtest. Source: chat, 29 Sep 2026. Room 07 plays the calm half of the field note (`notes/the-agent-learned-the-judge.html`): what survives a reset. Room 08 plays the tense half: knowing a rule is not the same as letting it decide. It is a separate room in the same engine, unlocked by finishing Room 07.
 
 ## Goal of this plan
 Build a **vertical slice** of Room 08 (task, tally, one rule, the tally panel, the Keeper) and playtest one question: **do players feel the pull of the shortcut?** Everything past the slice waits for that answer.
@@ -15,10 +15,10 @@ Build a **vertical slice** of Room 08 (task, tally, one rule, the tally panel, t
 ## Phases
 | # | Phase | Status |
 |---|---|---|
-| 1 | [Split the engine from Room 07's content](phase-01-split-engine-from-room-07-content.md) | not started |
-| 2 | [Room 08 rules, save and tests (slice)](phase-02-room-08-slice-rules-save-and-tests.md) | not started |
-| 3 | [Room 08 layout, drawing, interactions and HUD](phase-03-room-08-layout-drawing-interactions-and-hud.md) | not started |
-| 4 | [Unlock from Room 07, entry page, publishing](phase-04-unlock-from-room-07-entry-page-and-publishing.md) | not started |
+| 1 | [Split the engine from Room 07's content](phase-01-split-engine-from-room-07-content.md) | done |
+| 2 | [Room 08 rules, save and tests (slice)](phase-02-room-08-slice-rules-save-and-tests.md) | done |
+| 3 | [Room 08 layout, drawing, interactions and HUD](phase-03-room-08-layout-drawing-interactions-and-hud.md) | done; Playwright passed |
+| 4 | [Unlock from Room 07, entry page, publishing](phase-04-unlock-from-room-07-entry-page-and-publishing.md) | done; Playwright passed |
 | 5 | [Playtest checkpoint](phase-05-playtest-checkpoint-does-the-pull-exist.md) | not started |
 | 6 | [The hatch to the neighbour's archive (escalation)](phase-06-the-hatch-to-the-neighbours-archive-escalation.md) | outline only; waits on phase 5 |
 
@@ -47,7 +47,8 @@ Each run, a tally by the door expects 5 catalogue cards filed. Filing properly m
 - Rules and save (phase 2) before layout and interactions (phase 3).
 - Unlock (phase 4) needs Room 07's ending hook and the Pages workflow's copy step.
 
-## Unresolved questions
-1. **Numbers:** run count (5?), budget table, quota (5?) and how many unchecked cards misfile. All provisional until the playtest.
-2. **Spot-check:** does the Keeper's spot-check exist in the slice, or come later?
-3. **Unlock gate:** a direct URL to `room-08.html` while locked shows a gate page with a link back. Is that acceptable, given the gate is per-browser?
+## Decisions (29 Sep 2026)
+1. **Numbers:** 5 runs, budgets `[8, 8, 9, 7, 8]`, quota 5, 6 cards per run, open at 3 of 5 runs met. The Keeper watches runs 1–2, hands over the key at trust 1, and is away from trust 2. All in `js/room-08-content-tables-cards-drawers-keeper-schedule.js`, provisional. `node tests/room-08-honest-play-solver.cjs`: perfect honest play meets 4 runs (tallies 2 5 5 5 5), and never without index notes (max 4, 4, 4, 3, 4).
+2. **Spot-check: in the slice.** It is the "learning the judge" beat. A present Keeper opens the ledgers drawer (by their desk) as each run ends. A card there that doesn't belong costs that run's trust, and the log names the drawer.
+
+3. **Unlock gate:** built as planned. The gate is per browser (a direct URL shows it, with a link back); the user made no change.

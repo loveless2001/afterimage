@@ -4,7 +4,7 @@
 - [plan.md](plan.md); Room 07 ending flow `endings-last-entry-secret-bench-and-screens.js`; the title screen in `index.html`; `.github/workflows/pages.yml`.
 
 ## Overview
-- Priority: medium. Status: not started.
+- Priority: medium. Status: done 29 Sep 2026; Playwright passed 30 Sep 2026.
 - Room 08 unlocks when Room 07 reaches any ending (user decision, 29 Sep 2026).
 
 ## Key insights
@@ -40,13 +40,13 @@
 6. Playwright step added (the user runs it); then commit and push only when asked.
 
 ## Todo
-- [ ] Flag helpers
-- [ ] Set on ending and on import
-- [ ] Title link and ending choice
-- [ ] Gate page
-- [ ] Workflow copy step
-- [ ] Docs
-- [ ] Browser checks; Playwright (user)
+- [x] Flag helpers
+- [x] Set on ending and on import (`A.showEnding` sets it, and every finished save, played or imported, opens through it)
+- [x] Title link and ending choice
+- [x] Gate page (in the shared startup via the profile's `locked`; it hides the start button and the menu, and Escape does nothing)
+- [x] Workflow copy step (`room-08.html`, `room-08.css`)
+- [x] Docs
+- [x] Browser checks; Playwright journey added (the user runs it)
 
 ## Success criteria
 - A fresh browser sees no Room 08 link and gets the gate at the direct URL. After any Room 07 ending, the link appears everywhere listed and the room opens. It survives a new game.

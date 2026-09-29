@@ -4,7 +4,7 @@
 - [plan.md](plan.md); the Room 07 playtest practice in `docs/design-guidelines.md` §12a; `js/playtest-debug-overlay.js` (`?debug`).
 
 ## Overview
-- Priority: high; it decides everything after the slice. Status: not started.
+- Priority: high; it decides everything after the slice. Status: overlay ready (29 Sep 2026); sessions not yet run.
 - Watch real players go through the slice and decide whether to continue, retune or rethink.
 
 ## Key insights
@@ -34,7 +34,7 @@
 3. Record the answers; apply the decision rule; update this plan.
 
 ## Todo
-- [ ] Debug overlay fields
+- [x] Debug overlay fields (`js/room-08-playtest-debug-overlay.js`: open `room-08.html?debug`)
 - [ ] Sessions run (user)
 - [ ] Playtest report
 - [ ] Decision recorded; next plan drafted or numbers retuned

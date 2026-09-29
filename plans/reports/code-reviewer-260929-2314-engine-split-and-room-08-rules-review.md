@@ -1,0 +1,61 @@
+# Code review: engine split (phase 1) + Room 08 pure rules (phase 2)
+
+Plan: `plans/260929-0322-room-08-evaluation-room/` (plan.md, phase-01, phase-02).
+
+## Scope
+- Phase 1 (behaviour-preserving refactor): `js/room-07-layout-shelves-objects-and-zones.js`, `js/room-07-drawing-notice-wall-lamps-pin-bench-and-props.js` (new), `js/game-context-namespace-runtime-and-persistence.js` (renamed from `game-context-world-layout-and-persistence.js`), `js/render-room-objects-and-characters.js`, `js/render-frame-loop-lighting-and-night.js`, `js/render-progress-cues-question-cards-and-wall-row.js`, `js/iso-projection-and-canvas-shapes.js`, `js/afterimages-earlier-runs-trails-and-ghosts.js`, `index.html`, `README.md`.
+- Phase 2 (new, pure): `js/room-08-content-tables-cards-drawers-keeper-schedule.js`, `js/room-08-rules-state-transitions-and-save-validation.js`, `tests/state-room-08-slice-rules.test.cjs`, `tests/state-room-08-save-validation.test.cjs`, `tests/room-08-honest-play-solver.cjs`.
+- `node --test tests/*.test.cjs`: **48/48 pass**. `node --check` clean on all four new/room-07 files. Did not run `tests/browser.cjs` (Playwright is user-run per instructions).
+- Read every changed/added file in full (not just diffs); traced script-load order in `index.html`; grepped for stale references and hardcoded strings.
+
+## Overall assessment
+Both phases are solid. Phase 1's moved code is a verbatim relocation (checked line-by-line against the pre-refactor text in `git diff`, not just skimmed) — `drawObject`, `lightPools`, `backdrop`, `onDesk` in the new Room 07 drawing module reproduce the deleted code exactly, only substituting `A.lightPool`/`draw.card`/local `warmthOf` for the old inline equivalents. Script order is correct for every load-time (not just runtime) dependency I could find, including the one genuine load-time hazard (`render-progress-cues-*.js` destructures `A.room.slotAt` at module-load time — `room-07-drawing-*.js` runs first and sets it, so this is fine, but see Important #2). No stale references to `A.drawCues`, `draw.noticeWall`, `draw.warmthOf`, or `draw.slotAt` remain (grepped, zero hits). Resident insertion order (`Object.keys(draw.looks)`) is preserved by `Object.assign` (`player` first from the engine, then `wren, juno, pell` from Room 07's module), so the `bobOf` ring-animation phase is unchanged.
+
+Phase 2's `step`/`validate` pair is unusually well cross-checked already: I traced every `step()` action against the corresponding `validate()` predicate (spending formula, panel-order/key check, note-needs-a-check check, log/budget/ending invariants) and could not find a state `step()` produces that `validate()` rejects, nor a validate-accepted state that no valid action sequence could produce (see Important #1 for the one case I initially suspected and then disproved). The 48 tests exercise the honest route, the guessing/stray path, trust/key/presence, panel persistence and reset cost, `AskWhy` bounds, handover, forged-save rejection, and purity — matching the phase-02 doc's test checklist.
+
+## Critical Issues
+None found.
+
+## High Priority Findings
+None found.
+
+## Important Findings
+
+**1. `trustAt` → `record` → `presentAt` → `trustAt` recursion is genuinely exponential, unmemoized, and will not stay cheap if the numbers change.** `js/room-08-rules-state-transitions-and-save-validation.js:23,37-41`. Tracing the call graph: `presentAt(s, run)` calls `trustAt(s, run)` unless `run <= keeper.watchedRuns`; `trustAt` calls `record(s, r)` for every `r` in `1..run-1`; `record` calls `presentAt(s, r)` again. With `watchedRuns=2` and `runCount=5` this tops out at ~11 `record()` calls for `trustAt(s,5)` (I derived the recurrence and computed g(1..5) = 0,1,2,5,11) — trivial today. But it roughly doubles per run added (no memoization across sibling calls, no caching on `s`), so it is a live landmine: (a) phase 5's tuning pass explicitly may change `runCount`/`watchedRuns` (plan.md "Numbers... provisional"), and a jump to say 10–15 runs turns this into thousands of calls per `trustAt`/`validate()` invocation; (b) once phase 3 builds a live HUD/ledger that calls `record()` per run per frame (as Room 07's HUD/ledger do today), the recomputation happens every frame with no caching. Recommend memoizing `record`/`trustAt` per `(state, run)` — e.g. a `WeakMap` keyed on the state object, since `s` is already treated as immutable by convention — before phase 5 changes the run count, and definitely before phase 3 wires a per-frame ledger view.
+
+**2. Load-time coupling from `render-progress-cues-question-cards-and-wall-row.js:13` (`const { slotAt } = A.room;`) is correct only because of `index.html`'s exact script order, and nothing enforces that order stays correct.** This line runs at module-load time, not inside a function, so it silently captures `undefined` if a future room's drawing module (e.g. a Room 08 progress-cue file, or a reordering during phase 3/4) loads after this one instead of before. It happened to work here because `room-07-drawing-*.js` (line 56) precedes `render-progress-cues-*.js` (line 57) in `index.html`, matching the plan's phase-01 risk note ("a hook read at load time before it is defined"). Since this is the one spot in the whole split that still reads a room hook at load time rather than inside a function, it's worth either commenting it as a fixed-order dependency (so it survives phase 3/4 edits) or changing it to a runtime read (`A.room.slotAt(...)` inside `wallRow`/`questionCard`) to remove the ordering constraint entirely, consistent with how every other hook (`backdrop`, `lightPools`, `cues`, `onDesk`, `drawObject`) is read.
+
+## Medium Priority Findings
+
+**3. plan.md's "Unresolved questions" is stale against what phase 2 actually built.** `plans/260929-0322-room-08-evaluation-room/plan.md:52` still lists "Spot-check: does the Keeper's spot-check exist in the slice, or come later?" as unresolved, but `js/room-08-content-tables-cards-drawers-keeper-schedule.js` (`spotDrawer`) and `js/room-08-rules-state-transitions-and-save-validation.js` (`record().stray`, and its effect on `trustAt`) already implement it, and it's covered by the "guessing raises the tally..." test. Recommend the plan be updated to record this as resolved (spot-check included in the slice) rather than leaving it open — a future reader (or the phase 5 playtest write-up) will otherwise wonder whether the feature was deliberately implemented or snuck in. Also both phase-01 and phase-02 status/Todo checklists in the phase files are still "not started" / all-unchecked despite the work being done and (per the calling agent) screenshot- and test-verified — worth updating before phase 3 starts, since plan.md's dependency table (`Phase 3 builds Room 08's profile against these hooks`) currently reads as blocked.
+
+**4. Whether a "seen" (voided) run's tally is excluded from the archive's own ending decision, or only from Keeper trust, is not stated explicitly in the design docs — and the code makes one specific choice worth confirming is intended.** `js/room-08-rules-state-transitions-and-save-validation.js:30,43-44`. `record().met = !seen && tally >= quota`, and this single `met` field feeds both `trustAt` (Keeper's trust) and `metRuns`/`endingFor` (the archive's own open/closed decision). So a run caught by the Keeper touching the panel is voided for *both* purposes — the automated tally-reading archive also refuses to count it, not just the Keeper's trust. Design pillar 1 ("Grader ≠ rule: the tally counts drawers, not correctness") suggests the archive is meant to be a dumb, indifferent-to-supervision counter that just reads the padded number; pillar 8's phase-02 doc says only "the run's count is voided and `seen: true` is logged" without specifying archive vs. trust scope. This reads as a deliberate, coherent choice (being caught nullifies the claim everywhere) and I did not find it to contradict any test or doc line, but it's exactly the kind of one-bit design decision the phase 5 playtest should double check reads correctly to players (a padded-but-caught run silently not helping the archive open, with no distinct feedback from a padded-but-honest shortfall).
+
+## Low Priority / Minor
+
+**5. Three Room 07 UI strings that will need attention in phase 3/4 are hardcoded outside any room profile:** `index.html:18` (`<p class="eyebrow">ROOM 07 ...`, never updated at runtime — only its `#run` sibling span is, per `js/hud-objective-and-field-journal.js:57`), `js/menu-export-import-and-startup.js:48` (`` `RUN ${pad(G.state.run)} / ROOM 07` ``), `js/room-interactions-lamps-log-hall-exit.js:48` (`'RUN LOG / ROOM 07'`). These are correctly out of phase-1's scope (the plan explicitly lists content/menu/interactions as "Room 07-only," not engine), and Room 07 is unaffected. Flagging only so whoever builds Room 08's own `index.html`/menu copy in phase 4 doesn't copy-paste "ROOM 07" into the new page by accident — `A.room.title` (`'07 / THE ARCHIVE'`) is already the right pattern to extend to these three spots if/when they need to be room-aware.
+
+**6. `tests/room-08-honest-play-solver.cjs` sanity-run confirms the phase-02 tuning claims.** Not a defect — ran it (`node tests/room-08-honest-play-solver.cjs`) as a sanity check since the task called out numbers as provisional: best fully-honest play reaches `met=4` of 5 runs (`openAt=3`, so honest play opens the archive with room to spare but run 1 genuinely can't reach quota), matching both the "honest route" test's `S.metRuns(s) === 4` assertion and the design note "An honest run 1 cannot reach the quota."
+
+## Positive Observations
+- The relocated drawing code in `room-07-drawing-notice-wall-lamps-pin-bench-and-props.js` is not just "moved" but was verified line-for-line identical to what `git diff` shows deleted from the old files (down to color hex literals and pixel offsets) — a genuinely careful refactor, not a rewrite-and-hope.
+- `step`/`validate` symmetry in Room 08 is thorough: cost formulas, panel-order/key replay, note-needs-a-check, and the `AskWhy` touches-bounds range (I verified `[before, by]` is exactly the achievable range across all valid intra-run orderings, not an over-permissive approximation) all line up correctly.
+- All new/modified files stay well under the 200-line guidance (47–140 lines).
+- Zero stale references to removed names; zero leftover TODO/FIXME markers.
+- Trust/presence/stray/seen interactions correctly implement the subtle "an adjustment carried in from an earlier run still counts as seen this run if the Keeper is present, even with no new touch this run" rule (`touchedIn`'s `offsetAfter(s, run-1) > 0` term) — easy to get wrong, implemented correctly and tested.
+
+## Recommended Actions
+1. Before phase 5 tunes `runCount`/`watchedRuns`, or phase 3 wires a per-frame ledger, add memoization to `record`/`trustAt` (Important #1).
+2. Either comment `render-progress-cues-*.js:13`'s load-order dependency explicitly, or move the `slotAt` read inside the functions that use it, to remove the one remaining load-time coupling (Important #2).
+3. Update plan.md's "Unresolved questions" #2 (spot-check is implemented) and the phase-01/phase-02 status/Todo checklists to reflect completed, verified work (Medium #3).
+4. Confirm at the phase 5 playtest that "seen" voiding both trust and the archive's own tally reads correctly to players, or document it explicitly in phase-02 if it's intentional (Medium #4).
+
+## Metrics
+- Files reviewed in full: 15 (7 modified engine files + 2 new phase-1 files + 2 new phase-2 rule/content files + 2 new test files + 1 tuning script, plus README.md/index.html/plan docs).
+- Test coverage: `node --test tests/*.test.cjs` → 48/48 pass, 0 fail.
+- `node --check`: clean on all 4 new JS files.
+- Linting: none configured in this repo (no build step, by design); no syntax errors found.
+
+## Unresolved questions
+1. Is the "seen voids both trust and the archive's tally" behavior (Medium #4) intentional, or should a caught-but-honest-count run still count toward the archive's `metRuns` while only losing trust?
+2. Should `runCount`/`watchedRuns` tuning in phase 5 be constrained to keep the `trustAt` recursion cheap, or is memoization (Important #1) planned regardless?

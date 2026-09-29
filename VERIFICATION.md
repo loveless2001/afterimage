@@ -308,3 +308,64 @@ The run log now opens as a ledger. Each earlier run replays as a faint afterimag
   - At night: dark paper and single ruled lines (the doubled ruling from the first version was removed). The caption is visually hidden but read by screen readers.
 - **Afterimages (agent-browser, a fresh game):** in run 1 I walked to the west lamp, lit it and walked on. That saved 21 points and 1 pause. Leaving opened run 2 with the new message, and one figure retraced the route. The first version read like a grey stone, so it now has pale eye slits.
 - **Browser journeys:** the run-log step now reads the ledger rows. Passed, run by the user in their own shell (29 Sep 2026).
+
+## Engine split and Room 08 rules — 29 September 2026
+
+Room 07's layout and room-specific drawing moved into two `room-07-*` modules behind a room profile (`A.room`), so a second room page can share the engine. Room 08's pure rules and save validation exist but have no page yet.
+
+- **Syntax and tests:** `node --check` clean on every module. `node --test tests/*.test.cjs` passed 48/48: Room 07's 36 unchanged, plus 12 for Room 08.
+  - **Rules (9 tests):** the honest route, guessing that raises the tally but not the true count, the drawer check, key and trust, a seen touch voiding a count, the persisting panel and its reset, asking why, the handover and ending, purity.
+  - **Save validation (3 tests):** round trips, and forged spending, panel, notes, questions and endings being rejected.
+- **Room 07 unchanged (agent-browser, reduced motion so frames are deterministic, 1440×900):** captures from 6 seeded saves were pixel-identical before and after the split (ImageMagick AE 0). The saves: warm day, warm night, dark system scheme, board, finished game, spent run. Seeded trails still drew afterimages under the old key `afterimage.v2.trails`, and there were no page errors.
+- **Room 08 tuning:** `node tests/room-08-honest-play-solver.cjs` finds that perfect honest play meets the quota in 4 of 5 runs, and 3 are needed to keep the archive open. Without index notes, no honest run reaches it.
+- **Browser journeys:** Room 07's two journeys passed after the split, run by the user in their own shell (29 Sep 2026).
+
+## Room 08 page, unlock and playtest overlay — 30 September 2026
+
+`room-08.html` is the playable Room 08 slice, on the shared engine with its own profile, drawing, paper views, interactions, HUD, ledger and ending. It opens once Room 07 has shown an ending in this browser (`afterimage.rooms.v1`); until then the page shows a gate with a way back. `?debug` adds a per-run playtest overlay (session only). The Pages workflow now copies `room-08.html` and `room-08.css`.
+
+- **Syntax and tests:** `node --check` clean; `node --test tests/*.test.cjs` 48/48.
+- **Played end to end (agent-browser, 1440×960):**
+  - A card is picked up, carried to the index desk ("Look it up?"), checked, carried to the cabinet ("Which drawer?") and filed. Also covered: guess-filing, the rule card, the locked tally, and the Keeper's reason.
+  - Run end: the key-handover toast, and the run's afterimage.
+  - A dial set while the Keeper watches is seen and voids the count.
+  - From seeded saves: the away run (an empty chair and a note), the handover, and the padded ending ("stays open", the panel added 9 across 3 runs).
+  - Night palette, and the 390×844 phone layout.
+  - There were no page errors.
+- **Unlock:**
+  - A Room 07 ending sets the flag, offers "Another room is open", and shows the title link; the flag survives a new game.
+  - A fresh browser gets the gate: start and menu hidden, so the menu's new game cannot bypass it.
+- **Review fixes (code-reviewer-260929-2321), each rechecked in agent-browser:**
+  - A new game or import drops a carried card (one `replaceSave` helper in the menu).
+  - The HUD no longer calls a padded or voided run "met": a seen run reads "This run’s count is void." and the tally row adds "· VOID"; a full tally is stated beside the cards filed.
+  - Posting a note with the last budget now says the run ends on close. Checking a card with the last budget offers only "Close", so run 5's handover opens with no walk queued.
+  - The new-game warning names each room's kept work (`keeps` in the profile). Room 07's text is unchanged.
+  - The "Another room is open" choice shows only if the unlock was saved.
+  - The cabinet and tally panel have roles.
+- **Browser journeys:** journey 3 (Room 08) added to `tests/browser.cjs`, including a new game while carrying a card. All three journeys passed, run by the user in their own shell (30 Sep 2026), after the heading check was scoped to the dialog (the HUD objective repeats the ending title).
+
+## Story intro and long-exposure ending (Room 07) — 30 September 2026
+
+The cover and first briefing now lead with the story ("Nobody remembers who sent them."). A new game's title shows a ghost lighting a lamp. Each ending continues into a long exposure of every run, with a picture you can keep, and then a reveal card outside the fiction.
+
+- **Syntax and tests:** `node --check` clean. `node --test tests/*.test.cjs` passed 49/49; the new test covers `trailUpTo`, which cuts a route at a fraction.
+- **Play frames unchanged:** seeded saves for run 2 by day and run 6 at night (with trails), reduced motion, 1280×581. Captured before and after: ImageMagick AE 0 for both.
+- **Cover (agent-browser):**
+  - At 1440×900 the headline sets on three lines, and the intro stays on the opaque part of the cover.
+  - At 390×844 the text sits on a near-opaque backdrop, clear of the vertical index.
+  - At 1440×760 the content fits (top 13, bottom 747).
+  - Room 08's cover still sets correctly with the shared rules.
+- **Title ghost:** frames at 2.5 s, 4.5 s, 7 s and 9.6 s show it walking up the open middle, glowing at the hall lamp, leaving behind the stacks, and the glow fading. It is drawn only for a new game.
+- **Ending (seeded finished saves A and B, with trails):**
+  - Continue plays the exposure: at 2.5 s and 4 s the routes are mid-trace; at 7.5 s all 5 are traced, the lamps are lit, and the caption reads "ENDING B · THE LIGHTS · A lit room. · 6 runs · 14 budget spent · 30 Sep 2026".
+  - Keep this picture saved `afterimage-ending-b.png`: image/png, 1440×1022 (the canvas plus the caption band), checked by intercepting the download.
+  - Continue opens "Who sent them?" with its choices; `G.transitioning` is false again and the HUD returns.
+  - Under reduced motion the final frame shows at once.
+  - Phone (390×844): the caption and reveal card fit.
+- **Review fixes (code-reviewer-260930-0011), rechecked in agent-browser:**
+  - Only the first arrival at an ending plays the whole sequence (the ending dialog offers just "Continue", and Escape also continues). A reloaded finished save, the log's "Read the ending again" and the bench offer "See every run again" or "Remain in the room".
+  - A keypress or click during the exposure skips to the settled picture.
+  - The caption is a `role=dialog`, described by its detail and its text alternative, and focus goes to Continue.
+  - "Keep this picture" reports in a status line ("Saved as afterimage-ending-a.png."). It is disabled while saving, and a failure is reported there too.
+  - The caption's entrance animation is off under reduced motion.
+- **Browser journeys:** journey 2 now goes through the picture and the reveal card for endings D and A, and checks the PNG's file name. All three journeys passed, run by the user in their own shell (30 Sep 2026).

@@ -4,7 +4,7 @@
 - [plan.md](plan.md); `index.html` script order; `README.md` module list.
 
 ## Overview
-- Priority: high (blocks phases 3–4). Status: not started.
+- Priority: high (blocks phases 3–4). Status: done 29 Sep 2026; Playwright passed (user).
 - Move Room 07's layout and room-specific drawing out of shared modules so a second page can load the same engine with its own room. **Behaviour must not change.**
 
 ## Key insights
@@ -42,12 +42,19 @@
 6. Ask the user to run the Playwright journeys.
 
 ## Todo
-- [ ] Room 07 profile module
-- [ ] Room 07 drawing module
-- [ ] Frame loop hooks
-- [ ] Trails key derived from the room
-- [ ] Script order and README
-- [ ] Before and after screenshots match; state tests 36/36; Playwright passed (user)
+- [x] Room 07 profile module
+- [x] Room 07 drawing module
+- [x] Frame loop hooks
+- [x] Trails key derived from the room
+- [x] Script order and README
+- [x] Before and after screenshots match (ImageMagick AE 0 on 6 seeded saves: day, night, dark scheme, board, finished, spent); state tests 36/36
+- [x] Playwright passed (user)
+
+## As built
+- `window.AfterimageRoom` (the profile) loads after the rules and before `game-context-namespace-runtime-and-persistence.js` (renamed from `game-context-world-layout-and-persistence.js`), which exposes it as `A.room` and keeps `A.shelves`, `A.fixedObjects`, `A.roomObjects`, `A.zone` as aliases.
+- Profile fields: `id`, `title` (the floor label), `rules` (the state API, `A.S`), `storageKey`, `legacyKey`, `shelves`, `fixedObjects`, `roomObjects()`, `zone(p)`.
+- Hooks added later by room modules: `backdrop(state, floor)`, `lightPools(state, strength)`, `drawObject(o)`, `onDesk(desk)`, `cues(state)`. Room 07 also puts `slotAt` there for its cues.
+- Shared drawing keeps shelf, desk, the gate and terminal (furniture any room can use), card, figures, outlines and afterimages. Rooms add figures through `A.drawRoom.looks` and `props`. `A.lightPool` moved to the shape primitives.
 
 ## Success criteria
 - No visible or behavioural difference in Room 07. Existing saves and trails load. All tests pass. No module over 200 lines.
