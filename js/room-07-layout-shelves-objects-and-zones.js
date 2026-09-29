@@ -36,10 +36,11 @@
     isNew: s => s.run === 1 && !s.lights.length && !s.log.length,
     keeps: 'every lamp the room has kept', // named in the new-game warning
     help: 'Each run has a budget. Walking and reading are free; lamps, notes and a first talk with each resident cost budget. A run ends when the budget is spent or when you leave through the exit. There are no reflex timers. Sound is optional; every clue is also written.',
-    briefing: state => ['You have a small budget.', [
+    briefing: state => ['This is your first visit.', [
+      'Wren keeps the run log at the desk. Juno tends the lamps. Pell reads the notice wall. None of them has met you yet.',
       `This run has a budget of ${state.budget}. Walking and reading are free. Switching things on costs budget.`,
       'When the budget is spent, or when you leave through the exit, this run ends. The next run starts at the entrance with a new budget.',
-      'The room keeps what you change.'
+      'They will not remember you. The room keeps what you change.'
     ]],
     // Everything interactable right now: fixed objects plus the residents, whose
     // places and labels depend on the run (see the residents module).

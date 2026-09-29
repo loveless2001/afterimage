@@ -23,3 +23,13 @@ test('long trails thin out but keep every pause; damaged trails are rejected', (
   assert.equal(T.validTrail([[1, 2], [3, 4, 1]]), true);
   for (const bad of [null, {}, [[1]], [['a', 2]], [[1, NaN]]]) assert.equal(T.validTrail(bad), false);
 });
+
+// The ending's long exposure traces each route from its start.
+test('a trail can be cut at a fraction, ending between two points', () => {
+  const trail = [[0, 0], [10, 0, 1], [10, 20]];
+  assert.deepEqual(T.trailUpTo(trail, 0), [[0, 0], [0, 0]]);
+  assert.deepEqual(T.trailUpTo(trail, .25), [[0, 0], [5, 0]]);
+  assert.deepEqual(T.trailUpTo(trail, .75), [[0, 0], [10, 0, 1], [10, 10]]);
+  assert.deepEqual(T.trailUpTo(trail, 1), trail);
+  assert.deepEqual(T.trailUpTo(trail, 2), trail, 'clamped');
+});

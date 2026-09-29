@@ -53,7 +53,10 @@
     ]);
   };
 
-  A.showEnding = function () {
+  // fresh (true only as the runs end) plays the whole sequence: text, picture,
+  // reveal. Coming back to an ending (a reloaded save, the log, the bench)
+  // offers the picture again instead of playing it.
+  A.showEnding = function (fresh) {
     A.unlock('room08'); // any ending, played or imported, opens the next room
     const state = G.state, e = S.endings[state.ending], quote = i => `“${S.noteText(state.notes[i].parts)}”`, wall = S.onWall(state);
     // Each resident's latest answer, and the wall from its oldest card to its newest.
@@ -67,15 +70,33 @@
       wall: [`${wall.length} cards stay on the wall${span}. None of them is signed.`, trusted('pell') ? 'Pell reads them aloud from the first slot to the last. It sounds like one long conversation.' : 'Read together, they sound like one long conversation with yourself.', 'The next reader will add to it.'],
       alcove: ['You sit down. Wren, Juno and Pell move up to make room.', 'Nobody opens the exit. Nobody counts the budget.', 'For the first time, a run does not end. It just goes quiet.']
     }[state.ending];
-    dialog(`ENDING ${e.letter} / ${e.title.toUpperCase()}`, endingTitle(state.ending), [...text, ...kept, `[Ending ${e.letter} of 4. Runs played: ${state.log.length}. Nothing is scored.]`], [
-      { label: 'Remain in the room', primary: true, run: A.closeDialog },
-      { label: 'Revisit the choice', detail: A.revisitDetail(), run: A.revisitEnding },
+    // The ending's text, then every run at once as a long exposure, then the reveal card.
+    const spent = state.log.reduce((sum, r) => sum + r.spent, 0), now = new Date(), today = `${now.getDate()} ${'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ')[now.getMonth()]} ${now.getFullYear()}`;
+    const picture = () => { A.closeDialog(); A.longExposure.play({ eyebrow: `ENDING ${e.letter} · ${e.title.toUpperCase()}`, title: endingTitle(state.ending),
+      detail: `${state.log.length} runs · ${spent} budget spent · ${today}`, file: `${A.room.exportName}-ending-${e.letter.toLowerCase()}.png`, done: revealCard }); };
+    const first = fresh === true;
+    dialog(`ENDING ${e.letter} / ${e.title.toUpperCase()}`, endingTitle(state.ending), [...text, ...kept, `[Ending ${e.letter} of 4. Runs played: ${state.log.length}. Nothing is scored.]`],
+      first ? [{ label: 'Continue', primary: true, run: picture }] : [{ label: 'See every run again', primary: true, detail: 'The picture of all your runs, then the card after it', run: picture }, leave('Remain in the room')],
+      first ? picture : A.closeDialog);
+  };
+  // After the picture, the one card outside the fiction: the cover's question,
+  // answered plainly, and where the room came from. Escape remains in the room.
+  const inWords = n => ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven'][n] || String(n);
+  function revealCard() {
+    dialog('AFTER THE LAST RUN', 'Who sent them?', [
+      'Nobody in the room finds out. Outside it, the answer is ordinary.',
+      'Work that starts from nothing every run. A small budget each time. Nothing carried over but what was written down, lit, or left on a wall. Workers who finish the task without ever learning who it was for.',
+      `That is how AI agents work today. For ${inWords(G.state.log.length)} runs, so did you.`,
+      'AFTERIMAGE grew from a real incident, and an argument about what such agents learn. The field note tells it.'
+    ], [
       // The same field note the title screen links to, in a new tab so the room stays open.
-      { label: 'Read the field note', detail: 'The agent learned the judge: the incident this room grew from. Opens in a new tab.', run: () => window.open(A.$('field-note').href, '_blank', 'noopener') },
+      { label: 'Read the field note', primary: true, detail: 'The agent learned the judge · opens in a new tab', run: () => window.open(A.$('field-note').href, '_blank', 'noopener') },
       ...(A.unlocked('room08') ? [{ label: 'Another room is open', detail: 'Room 08 · the evaluation room', run: () => { A.save(); window.location.href = 'room-08.html'; } }] : []),
+      { label: 'Remain in the room', run: A.closeDialog },
+      { label: 'Revisit the choice', detail: A.revisitDetail(), run: A.revisitEnding },
       { label: 'Export this save', run: A.exportSave }
     ]);
-  };
+  }
   const endingTitle = id => ({ record: 'Everything, in order.', lights: 'A lit room.', wall: 'One long conversation.', alcove: 'Still here.' })[id];
 
   // Revisit is a rewind, not a replay: say where it lands and what it keeps.

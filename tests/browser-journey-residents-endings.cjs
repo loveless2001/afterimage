@@ -103,6 +103,11 @@ module.exports = async h => {
   await button(t, 'Sit with them').click(); await heading(t, 'Still here.');
   assert.equal((await stored(t)).ending, 'alcove');
   await t.screenshot({ path: path.join(output, 'ending-d-secret.png') });
+  // The ending's text, then every run at once in light, then the one card outside the fiction.
+  await button(t, 'Continue').click(); await t.locator('.exposure-caption').waitFor();
+  assert.match(await t.locator('.exposure-caption').innerText(), /ENDING D · STILL HERE[\s\S]*Still here\.[\s\S]*\d runs · \d+ budget spent/);
+  await t.screenshot({ path: path.join(output, 'ending-d-picture.png') });
+  await button(t, 'Continue').click(); await heading(t, 'Who sent them?');
   await button(t, 'Revisit the choice').click();
   s = await stored(t); assert.equal(s.ending, null); assert.equal(s.run, 6); assert.equal(s.benchSeen, true);
   await t.locator('#journal').click(); assert.equal(await button(t, 'Walk to a quiet corner').count(), 1); await close(t);
@@ -110,7 +115,12 @@ module.exports = async h => {
   await button(t, 'Write the last entry').click(); await heading(t, 'What should the room keep?');
   assert.equal(await button(t, 'Keep the wall').isDisabled(), true);
   await button(t, 'Keep the record').click(); await button(t, 'Write it').click(); await heading(t, 'Everything, in order.');
-  assert.equal((await stored(t)).ending, 'record'); await close(t);
+  assert.equal((await stored(t)).ending, 'record');
+  await button(t, 'Continue').click(); await t.locator('.exposure-caption').waitFor();
+  const [picture] = await Promise.all([t.waitForEvent('download'), button(t, 'Keep this picture').click()]);
+  assert.equal(picture.suggestedFilename(), 'afterimage-ending-a.png');
+  await button(t, 'Continue').click(); await heading(t, 'Who sent them?');
+  await button(t, 'Remain in the room').click(); await t.locator('#modal').waitFor({ state: 'hidden' });
   assert.equal(await t.locator('#hint').innerText(), 'Juno and Pell are at the desk and still have something to say.', 'residents point to the endings passed over');
   await t.locator('#help').click(); await button(t, 'Revisit the ending').click();
   assert.equal((await stored(t)).ending, null, 'endings can be revisited from the menu');
@@ -118,7 +128,7 @@ module.exports = async h => {
   assert.equal((await stored(t)).palette, 'day'); await close(t);
   assert.equal(await t.evaluate(() => document.documentElement.dataset.theme), 'day', 'the manual palette overrides the turn');
   await t.context().close();
-  console.log('PASS: turn at run 6, secret bench ending, revisit, last entry at the desk, ending call-outs, palette override');
+  console.log('PASS: turn at run 6, secret bench ending, the long exposure and its picture, the reveal card, revisit, last entry at the desk, ending call-outs, palette override');
 
   // An empty-budget save with notes on the wall, imported mid-game, opens the handoff.
   const spentWithNotes = seed([post([0, 0, null]), leaveRun, ...Array(6).fill(post([1, 0, null]))]);

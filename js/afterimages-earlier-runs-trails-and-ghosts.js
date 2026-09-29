@@ -28,7 +28,14 @@
   const thin = trail => trail.length > cap ? trail.filter((p, i) => i % 2 === 0 || p[2]) : trail;
   const validTrail = t => Array.isArray(t) && t.every(p => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]));
 
-  const api = { step, trailPosition, thin, validTrail };
+  // The start of a trail, up to fraction f (0–1) of its points, ending on an
+  // in-between point: a route drawn as it is being traced (the ending's long exposure).
+  function trailUpTo(trail, f) {
+    const n = Math.max(0, Math.min(1, f)) * (trail.length - 1), i = Math.floor(n), p = trail[i], q = trail[i + 1];
+    return q ? [...trail.slice(0, i + 1), [p[0] + (q[0] - p[0]) * (n - i), p[1] + (q[1] - p[1]) * (n - i)]] : trail.slice();
+  }
+
+  const api = { step, trailPosition, thin, validTrail, trailUpTo };
   if (typeof module !== 'undefined') { module.exports = api; return; }
 
   const A = root.Afterimage, G = A.game, key = A.room.storageKey + '.trails'; // Room 07: afterimage.v2.trails
@@ -52,6 +59,9 @@
     begin(run) { delete trails[run]; dirty = true; },
     save() { if (dirty) persist(); },
     reset() { trails = {}; persist(); },
+    // Every kept route up to this run, by run number (for the ending's long exposure).
+    all(state) { return Object.fromEntries(Object.entries(trails).filter(([run, t]) => run >= 1 && run <= state.run && validTrail(t) && t.length > 1)); },
+    upTo: trailUpTo,
     // Earlier runs' figures now: [{ x, y, fade }], the most recent run the clearest.
     ghosts(state) {
       return Object.keys(trails).map(Number).filter(run => run >= 1 && (run < state.run || (state.finished && run === state.run)) && validTrail(trails[run]) && trails[run].length > 1)

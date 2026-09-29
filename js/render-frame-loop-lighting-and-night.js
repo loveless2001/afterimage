@@ -2,7 +2,8 @@
 // (A.room.backdrop), the entrance mat and room name, every object and figure
 // depth-sorted back to front (see render-room-objects-and-characters.js),
 // dust, vignette, the night palette with the room's light pools glowing
-// through (A.room.lightPools), earlier runs' afterimages, the player's outline
+// through (A.room.lightPools), earlier runs' afterimages (and, behind the
+// title, the room's cover scene), the player's outline
 // when a shelf hides them, then the room's progress cues (A.room.cues). Also
 // owns the requestAnimationFrame loop and final startup.
 (function () {
@@ -44,8 +45,10 @@
       ctx.globalCompositeOperation = 'screen'; room.lightPools(state, .8); ctx.restore();
     }
     A.trails.ghosts(state).forEach(g => draw.afterimage(g.x, g.y, g.fade));
+    if (!G.started) room.coverScene?.(state); // behind the title only
     draw.agentGhost(state.player.x, state.player.y);
     room.cues(state);
+    if (G.exposure && A.longExposure) A.longExposure.draw(); // the ending's long exposure, over everything
   }
   // Animation time only advances while the room is actually visible and playable.
   function frame(timestamp) {

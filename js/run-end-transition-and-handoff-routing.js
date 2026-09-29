@@ -27,7 +27,7 @@
     setTimeout(() => { G.state = next; G.target = null; if (!next.finished) A.trails.begin(next.run); A.save(); A.updateHUD(); }, A.reducedMotion ? 0 : 650);
     setTimeout(() => {
       $('transition').classList.remove('on'); G.transitioning = false;
-      if (next.finished) return A.showEnding();
+      if (next.finished) return A.showEnding(true); // first arrival: the full sequence
       const echo = next.run === 2 ? ' Something of your last run is still walking the room.' : '';
       const turn = next.run === S.turnRun ? ' The lights are different tonight; the residents have gathered at the desk.' : '';
       const learned = S.learnedWords(before, before.run).map(w => `“${w}”`), words = learned.length ? ` Learned last run: ${learned.join(', ')}.` : '';
